@@ -19,6 +19,7 @@ Table of Contents
 	-   [Brokers](#brokers)
 	-   [Topics](#topics)
 	-   [Consumer Groups](#consumer-groups)
+-   [Grafana Dashboard](#Grafana Dashboard)
 -   [Contribute](#contribute)
 
 Compatibility
@@ -202,3 +203,8 @@ rocketmq_group_get_latency_by_storetime{cluster="MQCluster",broker="broker-a",to
 rocketmq_group_get_latency_by_storetime{cluster="MQCluster",broker="broker-a",topic="DEV_TID_topic_tfq",group="DEV_CID_consumer_cfq",} 3232.0
 rocketmq_group_get_latency_by_storetime{cluster="MQCluster",broker="broker-b",topic="DEV_TID_tfq",group="DEV_CID_cfq",} 0.0
 ```
+
+Grafana Dashboard
+-------
+Grafana Dashboard ID: 10405, name: RocketMQ Exporter Overview.
+For details of the dashboard please see [RocketMQ Exporter Overview](https://grafana.com/dashboards/10405).
