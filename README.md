@@ -19,7 +19,7 @@ Table of Contents
 	-   [Brokers](#brokers)
 	-   [Topics](#topics)
 	-   [Consumer Groups](#consumer-groups)
--   [Grafana Dashboard](#Grafana Dashboard)
+-   [Grafana Dashboard](#Grafana-Dashboard)
 -   [Contribute](#contribute)
 
 Compatibility
