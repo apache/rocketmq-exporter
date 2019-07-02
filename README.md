@@ -93,12 +93,12 @@ Documents about exposed Prometheus metrics.
 ```txt
 # HELP rocketmq_broker_tps BrokerPutNums
 # TYPE rocketmq_broker_tps gauge
-rocketmq_broker_tps{cluster="MQCluster",broker="broker-a",} 7.93
-rocketmq_broker_tps{cluster="MQCluster",broker="broker-b",} 7.91
+rocketmq_broker_tps{cluster="MQCluster",broker="broker-a",} 7.0
+rocketmq_broker_tps{cluster="MQCluster",broker="broker-b",} 7.0
 # HELP rocketmq_broker_qps BrokerGetNums
 # TYPE rocketmq_broker_qps gauge
-rocketmq_broker_qps{cluster="MQCluster",broker="broker-a",} 8.2
-rocketmq_broker_qps{cluster="MQCluster",broker="broker-b",} 8.15
+rocketmq_broker_qps{cluster="MQCluster",broker="broker-a",} 8.0
+rocketmq_broker_qps{cluster="MQCluster",broker="broker-b",} 8.0
 ```
 
 ### Topics
@@ -116,12 +116,12 @@ rocketmq_broker_qps{cluster="MQCluster",broker="broker-b",} 8.15
 ```txt
 # HELP rocketmq_producer_tps TopicPutNums
 # TYPE rocketmq_producer_tps gauge
-rocketmq_producer_tps{cluster="MQCluster",broker="broker-a",topic="DEV_TID_topic_tfq",} 7.93
-rocketmq_producer_tps{cluster="MQCluster",broker="broker-b",topic="DEV_TID_topic_tfq",} 7.91
+rocketmq_producer_tps{cluster="MQCluster",broker="broker-a",topic="DEV_TID_topic_tfq",} 7.0
+rocketmq_producer_tps{cluster="MQCluster",broker="broker-b",topic="DEV_TID_topic_tfq",} 7.0
 # HELP rocketmq_producer_message_size TopicPutMessageSize
 # TYPE rocketmq_producer_message_size gauge
-rocketmq_producer_message_size{cluster="MQCluster",broker="broker-a",topic="DEV_TID_topic_tfq",} 1642.2
-rocketmq_producer_message_size{cluster="MQCluster",broker="broker-b",topic="DEV_TID_topic_tfq",} 1638.75
+rocketmq_producer_message_size{cluster="MQCluster",broker="broker-a",topic="DEV_TID_topic_tfq",} 1642.0
+rocketmq_producer_message_size{cluster="MQCluster",broker="broker-b",topic="DEV_TID_topic_tfq",} 1638.0
 # HELP rocketmq_producer_offset TopicOffset
 # TYPE rocketmq_producer_offset counter
 rocketmq_producer_offset{cluster="MQCluster",broker="broker-a",topic="TBW102",} 0.0
@@ -166,12 +166,12 @@ rocketmq_producer_offset{cluster="MQCluster",broker="broker-a",topic="DEV_TID_20
 ```txt
 # HELP rocketmq_consumer_tps GroupGetNums
 # TYPE rocketmq_consumer_tps gauge
-rocketmq_consumer_tps{cluster="MQCluster",broker="broker-b",topic="DEV_TID_topic_tfq",group="DEV_CID_consumer_cfq",} 7.91
-rocketmq_consumer_tps{cluster="MQCluster",broker="broker-a",topic="DEV_TID_topic_tfq",group="DEV_CID_consumer_cfq",} 7.93
+rocketmq_consumer_tps{cluster="MQCluster",broker="broker-b",topic="DEV_TID_topic_tfq",group="DEV_CID_consumer_cfq",} 7.0
+rocketmq_consumer_tps{cluster="MQCluster",broker="broker-a",topic="DEV_TID_topic_tfq",group="DEV_CID_consumer_cfq",} 7.0
 # HELP rocketmq_consumer_message_size GroupGetMessageSize
 # TYPE rocketmq_consumer_message_size gauge
-rocketmq_consumer_message_size{cluster="MQCluster",broker="broker-b",topic="DEV_TID_topic_tfq",group="DEV_CID_consumer_cfq",} 1638.75
-rocketmq_consumer_message_size{cluster="MQCluster",broker="broker-a",topic="DEV_TID_topic_tfq",group="DEV_CID_consumer_cfq",} 1642.2
+rocketmq_consumer_message_size{cluster="MQCluster",broker="broker-b",topic="DEV_TID_topic_tfq",group="DEV_CID_consumer_cfq",} 1638.0
+rocketmq_consumer_message_size{cluster="MQCluster",broker="broker-a",topic="DEV_TID_topic_tfq",group="DEV_CID_consumer_cfq",} 1642.0
 # HELP rocketmq_consumer_offset GroupOffset
 # TYPE rocketmq_consumer_offset counter
 rocketmq_consumer_offset{cluster="MQCluster",broker="broker-b",topic="DEV_TID_topic_tfq",group="DEV_CID_consumer_cfq",} 1462030.0
