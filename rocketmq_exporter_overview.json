@@ -259,7 +259,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "rocketmq_consumer_get_size",
+          "expr": "rocketmq_consumer_message_size",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A"
@@ -269,7 +269,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "rocketmq_consumer_get_size",
+      "title": "rocketmq_consumer_message_size",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -514,7 +514,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "rocketmq_producer_put_size",
+          "expr": "rocketmq_producer_message_size",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A"
@@ -524,7 +524,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "rocketmq_producer_put_size",
+      "title": "rocketmq_producer_message_size",
       "tooltip": {
         "shared": true,
         "sort": 0,

@@ -85,16 +85,16 @@ Documents about exposed Prometheus metrics.
 
 | Name         | Exposed information                                  |
 | ------------ | ---------------------------------------------------- |
-| `rocketmq_broker_tps` | total put message numbers per second for this broker |
-| `rocketmq_broker_qps` | total get message numbers per second for this broker |
+| `rocketmq_broker_tps` | Broker produces the number of messages per second |
+| `rocketmq_broker_qps` | Broker consumes messages per second |
 
 **Metrics output example**
 
 ```txt
 # HELP rocketmq_broker_tps BrokerPutNums
 # TYPE rocketmq_broker_tps gauge
-rocketmq_broker_tps{cluster="MQCluster",broker="broker-a",} 7.933333333333334
-rocketmq_broker_tps{cluster="MQCluster",broker="broker-b",} 7.916666666666667
+rocketmq_broker_tps{cluster="MQCluster",broker="broker-a",} 7.93
+rocketmq_broker_tps{cluster="MQCluster",broker="broker-b",} 7.91
 # HELP rocketmq_broker_qps BrokerGetNums
 # TYPE rocketmq_broker_qps gauge
 rocketmq_broker_qps{cluster="MQCluster",broker="broker-a",} 8.2
@@ -107,21 +107,21 @@ rocketmq_broker_qps{cluster="MQCluster",broker="broker-b",} 8.15
 
 | Name                | Exposed information                                |
 | ------------------- | -------------------------------------------------- |
-| `rocketmq_producer_tps`      | sending messages number per second  for this topic |
-| `rocketmq_producer_put_size` | sending messages size per second  for this topic   |
-| `rocketmq_producer_offset`   | Current Offset of a Broker for this topic          |
+| `rocketmq_producer_tps`      | The number of messages produced per second per topic |
+| `rocketmq_producer_message_size` | The size of a message produced per second by a topic (in bytes) |
+| `rocketmq_producer_offset`   | The progress of a topic's production message |
 
 **Metrics output example**
 
 ```txt
 # HELP rocketmq_producer_tps TopicPutNums
 # TYPE rocketmq_producer_tps gauge
-rocketmq_producer_tps{cluster="MQCluster",broker="broker-a",topic="DEV_TID_topic_tfq",} 7.933333333333334
-rocketmq_producer_tps{cluster="MQCluster",broker="broker-b",topic="DEV_TID_topic_tfq",} 7.916666666666667
-# HELP rocketmq_producer_put_size TopicPutSize
-# TYPE rocketmq_producer_put_size gauge
-rocketmq_producer_put_size{cluster="MQCluster",broker="broker-a",topic="DEV_TID_topic_tfq",} 1642.2
-rocketmq_producer_put_size{cluster="MQCluster",broker="broker-b",topic="DEV_TID_topic_tfq",} 1638.75
+rocketmq_producer_tps{cluster="MQCluster",broker="broker-a",topic="DEV_TID_topic_tfq",} 7.93
+rocketmq_producer_tps{cluster="MQCluster",broker="broker-b",topic="DEV_TID_topic_tfq",} 7.91
+# HELP rocketmq_producer_message_size TopicPutMessageSize
+# TYPE rocketmq_producer_message_size gauge
+rocketmq_producer_message_size{cluster="MQCluster",broker="broker-a",topic="DEV_TID_topic_tfq",} 1642.2
+rocketmq_producer_message_size{cluster="MQCluster",broker="broker-b",topic="DEV_TID_topic_tfq",} 1638.75
 # HELP rocketmq_producer_offset TopicOffset
 # TYPE rocketmq_producer_offset counter
 rocketmq_producer_offset{cluster="MQCluster",broker="broker-a",topic="TBW102",} 0.0
@@ -153,25 +153,25 @@ rocketmq_producer_offset{cluster="MQCluster",broker="broker-a",topic="DEV_TID_20
 
 **Metrics details**
 
-| Name                              | Exposed information                                          |
-| --------------------------------- | ------------------------------------------------------------ |
-| `rocketmq_consumer_tps`                    | consumer message numbers per second for this Topic           |
-| `rocketmq_consumer_get_size`               | consumer message size per second for this Topic              |
-| `rocketmq_consumer_offset`                 | consumer offset for this topic                               |
-| `rocketmq_group_get_latency`               | consumer latency on some topic for one queue                 |
-| `rocketmq_group_get_latency_by_storetime ` | consumer latency between message consume time and message store time on some topic |
+| Name                                       | Exposed information                                          |
+| ------------------------------------------ | ------------------------------------------------------------ |
+| `rocketmq_consumer_tps`                    | The number of messages consumed per second by a consumer group |
+| `rocketmq_consumer_message_size`           | The size of the message consumed by the consumer group per second (in bytes) |
+| `rocketmq_consumer_offset`                 | Progress of consumption message for a consumer group         |
+| `rocketmq_group_get_latency`               | Consumer latency on some topic for one queue                 |
+| `rocketmq_group_get_latency_by_storetime ` | Consumption delay time of a consumer group                   |
 
 **Metrics output example**
 
 ```txt
 # HELP rocketmq_consumer_tps GroupGetNums
 # TYPE rocketmq_consumer_tps gauge
-rocketmq_consumer_tps{cluster="MQCluster",broker="broker-b",topic="DEV_TID_topic_tfq",group="DEV_CID_consumer_cfq",} 7.916666666666667
-rocketmq_consumer_tps{cluster="MQCluster",broker="broker-a",topic="DEV_TID_topic_tfq",group="DEV_CID_consumer_cfq",} 7.933333333333334
-# HELP rocketmq_consumer_get_size GroupGetSize
-# TYPE rocketmq_consumer_get_size gauge
-rocketmq_consumer_get_size{cluster="MQCluster",broker="broker-b",topic="DEV_TID_topic_tfq",group="DEV_CID_consumer_cfq",} 1638.75
-rocketmq_consumer_get_size{cluster="MQCluster",broker="broker-a",topic="DEV_TID_topic_tfq",group="DEV_CID_consumer_cfq",} 1642.2
+rocketmq_consumer_tps{cluster="MQCluster",broker="broker-b",topic="DEV_TID_topic_tfq",group="DEV_CID_consumer_cfq",} 7.91
+rocketmq_consumer_tps{cluster="MQCluster",broker="broker-a",topic="DEV_TID_topic_tfq",group="DEV_CID_consumer_cfq",} 7.93
+# HELP rocketmq_consumer_message_size GroupGetMessageSize
+# TYPE rocketmq_consumer_message_size gauge
+rocketmq_consumer_message_size{cluster="MQCluster",broker="broker-b",topic="DEV_TID_topic_tfq",group="DEV_CID_consumer_cfq",} 1638.75
+rocketmq_consumer_message_size{cluster="MQCluster",broker="broker-a",topic="DEV_TID_topic_tfq",group="DEV_CID_consumer_cfq",} 1642.2
 # HELP rocketmq_consumer_offset GroupOffset
 # TYPE rocketmq_consumer_offset counter
 rocketmq_consumer_offset{cluster="MQCluster",broker="broker-b",topic="DEV_TID_topic_tfq",group="DEV_CID_consumer_cfq",} 1462030.0
@@ -183,17 +183,17 @@ rocketmq_consumer_offset{cluster="MQCluster",broker="broker-b",topic="DEV_TID_tf
 rocketmq_group_get_latency{cluster="MQCluster",broker="broker-b",topic="DEV_TID_topic_tfq",group="DEV_CID_consumer_cfq",queueid="0",} 0.05
 rocketmq_group_get_latency{cluster="MQCluster",broker="broker-b",topic="DEV_TID_topic_tfq",group="DEV_CID_consumer_cfq",queueid="1",} 0.0
 rocketmq_group_get_latency{cluster="MQCluster",broker="broker-a",topic="DEV_TID_topic_tfq",group="DEV_CID_consumer_cfq",queueid="7",} 0.05
-rocketmq_group_get_latency{cluster="MQCluster",broker="broker-b",topic="DEV_TID_topic_tfq",group="DEV_CID_consumer_cfq",queueid="6",} 0.016666666666666666
+rocketmq_group_get_latency{cluster="MQCluster",broker="broker-b",topic="DEV_TID_topic_tfq",group="DEV_CID_consumer_cfq",queueid="6",} 0.01
 rocketmq_group_get_latency{cluster="MQCluster",broker="broker-a",topic="DEV_TID_topic_tfq",group="DEV_CID_consumer_cfq",queueid="3",} 0.0
-rocketmq_group_get_latency{cluster="MQCluster",broker="broker-b",topic="DEV_TID_topic_tfq",group="DEV_CID_consumer_cfq",queueid="7",} 0.03333333333333333
+rocketmq_group_get_latency{cluster="MQCluster",broker="broker-b",topic="DEV_TID_topic_tfq",group="DEV_CID_consumer_cfq",queueid="7",} 0.03
 rocketmq_group_get_latency{cluster="MQCluster",broker="broker-a",topic="DEV_TID_topic_tfq",group="DEV_CID_consumer_cfq",queueid="4",} 0.0
-rocketmq_group_get_latency{cluster="MQCluster",broker="broker-a",topic="DEV_TID_topic_tfq",group="DEV_CID_consumer_cfq",queueid="5",} 0.03333333333333333
-rocketmq_group_get_latency{cluster="MQCluster",broker="broker-a",topic="DEV_TID_topic_tfq",group="DEV_CID_consumer_cfq",queueid="6",} 0.016666666666666666
+rocketmq_group_get_latency{cluster="MQCluster",broker="broker-a",topic="DEV_TID_topic_tfq",group="DEV_CID_consumer_cfq",queueid="5",} 0.03
+rocketmq_group_get_latency{cluster="MQCluster",broker="broker-a",topic="DEV_TID_topic_tfq",group="DEV_CID_consumer_cfq",queueid="6",} 0.01
 rocketmq_group_get_latency{cluster="MQCluster",broker="broker-b",topic="DEV_TID_topic_tfq",group="DEV_CID_consumer_cfq",queueid="2",} 0.0
 rocketmq_group_get_latency{cluster="MQCluster",broker="broker-b",topic="DEV_TID_topic_tfq",group="DEV_CID_consumer_cfq",queueid="3",} 0.0
 rocketmq_group_get_latency{cluster="MQCluster",broker="broker-a",topic="DEV_TID_topic_tfq",group="DEV_CID_consumer_cfq",queueid="0",} 0.0
 rocketmq_group_get_latency{cluster="MQCluster",broker="broker-b",topic="DEV_TID_topic_tfq",group="DEV_CID_consumer_cfq",queueid="4",} 0.0
-rocketmq_group_get_latency{cluster="MQCluster",broker="broker-a",topic="DEV_TID_topic_tfq",group="DEV_CID_consumer_cfq",queueid="1",} 0.03333333333333333
+rocketmq_group_get_latency{cluster="MQCluster",broker="broker-a",topic="DEV_TID_topic_tfq",group="DEV_CID_consumer_cfq",queueid="1",} 0.03
 rocketmq_group_get_latency{cluster="MQCluster",broker="broker-b",topic="DEV_TID_topic_tfq",group="DEV_CID_consumer_cfq",queueid="5",} 0.0
 rocketmq_group_get_latency{cluster="MQCluster",broker="broker-a",topic="DEV_TID_topic_tfq",group="DEV_CID_consumer_cfq",queueid="2",} 0.0
 # HELP rocketmq_group_get_latency_by_storetime GroupGetLatencyByStoreTime
