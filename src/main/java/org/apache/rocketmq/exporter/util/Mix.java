@@ -19,6 +19,9 @@ package org.apache.rocketmq.exporter.util;
 
 public class Mix {
     public static double getFixedDouble(double value) {
+        if (value >= 1) {
+            return Math.round(value);
+        }
         return Math.round(value * 100) / 100.0;
     }
 }
