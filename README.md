@@ -206,5 +206,5 @@ rocketmq_group_get_latency_by_storetime{cluster="MQCluster",broker="broker-b",to
 
 Grafana Dashboard
 -------
-Grafana Dashboard ID: 10405, name: RocketMQ Exporter Overview.
-For details of the dashboard please see [RocketMQ Exporter Overview](https://grafana.com/dashboards/10405).
+Grafana Dashboard ID: 10476, name: RocketMQ Exporter Overview.
+For details of the dashboard please see [RocketMQ Exporter Overview](https://grafana.com/dashboards/10476).
