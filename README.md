@@ -153,13 +153,14 @@ rocketmq_producer_offset{cluster="MQCluster",broker="broker-a",topic="DEV_TID_20
 
 **Metrics details**
 
-| Name                                       | Exposed information                                          |
-| ------------------------------------------ | ------------------------------------------------------------ |
-| `rocketmq_consumer_tps`                    | The number of messages consumed per second by a consumer group |
-| `rocketmq_consumer_message_size`           | The size of the message consumed by the consumer group per second (in bytes) |
-| `rocketmq_consumer_offset`                 | Progress of consumption message for a consumer group         |
-| `rocketmq_group_get_latency`               | Consumer latency on some topic for one queue                 |
-| `rocketmq_group_get_latency_by_storetime ` | Consumption delay time of a consumer group                   |
+| Name                                                         | Exposed information                                          |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| `rocketmq_consumer_tps`                                      | The number of messages consumed per second by a consumer group |
+| `rocketmq_consumer_message_size`                             | The size of the message consumed by the consumer group per second (in bytes) |
+| `rocketmq_consumer_offset`                                   | Progress of consumption message for a consumer group         |
+| `rocketmq_group_get_latency`                                 | Consumer latency on some topic for one queue                 |
+| `rocketmq_group_get_latency_by_storetime `                   | Consumption delay time of a consumer group                   |
+| 消息堆积量（需要通过proSQL聚合）（rocketmq_producer_offset-rocketmq_consumer_offset） | Message accumulation (sum(rocketmq_producer_offset) by (topic) - on(topic)  group_right  sum(rocketmq_consumer_offset) by (group,topic)) |
 
 **Metrics output example**
 
@@ -206,5 +207,5 @@ rocketmq_group_get_latency_by_storetime{cluster="MQCluster",broker="broker-b",to
 
 Grafana Dashboard
 -------
-Grafana Dashboard ID: 10476, name: RocketMQ Exporter Overview.
-For details of the dashboard please see [RocketMQ Exporter Overview](https://grafana.com/dashboards/10476).
+Grafana Dashboard ID: 10477, name: RocketMQ Exporter Overview.
+For details of the dashboard please see [RocketMQ Exporter Overview](https://grafana.com/dashboards/10477).
