@@ -35,6 +35,7 @@ import org.apache.rocketmq.exporter.aspect.admin.annotation.MultiMQAdminCmdMetho
 import org.apache.rocketmq.exporter.config.RMQConfigure;
 import org.apache.rocketmq.exporter.service.RMQMetricsService;
 import org.apache.rocketmq.exporter.service.client.MQAdminExtImpl;
+import org.apache.rocketmq.exporter.util.Mix;
 import org.apache.rocketmq.store.stats.BrokerStatsManager;
 import org.apache.rocketmq.tools.admin.MQAdminExt;
 import org.slf4j.Logger;
@@ -158,14 +159,14 @@ public class MetricsCollectTask {
                             BrokerStatsData bsd = null;
                             try {
                                 bsd = mqAdminExt.viewBrokerStatsData(masterAddr, BrokerStatsManager.TOPIC_PUT_NUMS, topic);
-                                metricsService.getCollector().AddTopicPutNumsMetric(bd.getCluster(), bd.getBrokerName(), topic, bsd.getStatsMinute().getTps());
+                                metricsService.getCollector().AddTopicPutNumsMetric(bd.getCluster(), bd.getBrokerName(), topic, Mix.getFixedDouble(bsd.getStatsMinute().getTps()));
                             }
                             catch (Exception e) {
                                 log.info("error is " + e.getMessage());
                             }
                             try {
                                 bsd = mqAdminExt.viewBrokerStatsData(masterAddr, BrokerStatsManager.TOPIC_PUT_SIZE, topic);
-                                metricsService.getCollector().AddTopicPutSizeMetric(bd.getCluster(), bd.getBrokerName(), topic, bsd.getStatsMinute().getTps());
+                                metricsService.getCollector().AddTopicPutSizeMetric(bd.getCluster(), bd.getBrokerName(), topic, Mix.getFixedDouble(bsd.getStatsMinute().getTps()));
                             }
                             catch (Exception e) {
                                 log.info("error is " + e.getMessage());
@@ -185,20 +186,20 @@ public class MetricsCollectTask {
                                     BrokerStatsData bsd = null;
                                     try {
                                         bsd = mqAdminExt.viewBrokerStatsData(masterAddr, BrokerStatsManager.GROUP_GET_NUMS, statsKey);
-                                        metricsService.getCollector().AddGroupGetNumsMetric(bd.getCluster(), bd.getBrokerName(), topic, group, bsd.getStatsMinute().getTps());
+                                        metricsService.getCollector().AddGroupGetNumsMetric(bd.getCluster(), bd.getBrokerName(), topic, group, Mix.getFixedDouble(bsd.getStatsMinute().getTps()));
                                     } catch (Exception e) {
                                         log.info("error is " + e.getMessage());
                                     }
                                     try {
                                         bsd = mqAdminExt.viewBrokerStatsData(masterAddr, BrokerStatsManager.GROUP_GET_SIZE, statsKey);
-                                        metricsService.getCollector().AddGroupGetSizeMetric(bd.getCluster(), bd.getBrokerName(), topic, group, bsd.getStatsMinute().getTps());
+                                        metricsService.getCollector().AddGroupGetSizeMetric(bd.getCluster(), bd.getBrokerName(), topic, group, Mix.getFixedDouble(bsd.getStatsMinute().getTps()));
                                     } catch (Exception e) {
                                         log.info("error is " + e.getMessage());
                                     }
                                     try {
 
                                         bsd = mqAdminExt.viewBrokerStatsData(masterAddr, BrokerStatsManager.SNDBCK_PUT_NUMS, statsKey);
-                                        metricsService.getCollector().AddsendBackNumsMetric(bd.getCluster(), bd.getBrokerName(), topic, group, bsd.getStatsMinute().getTps());
+                                        metricsService.getCollector().AddsendBackNumsMetric(bd.getCluster(), bd.getBrokerName(), topic, group, Mix.getFixedDouble(bsd.getStatsMinute().getTps()));
                                     } catch (Exception e) {
                                         log.info("error is " + e.getMessage());
                                     }
@@ -238,14 +239,14 @@ public class MetricsCollectTask {
                         BrokerStatsData bsd = null;
                         try {
                             bsd = mqAdminExt.viewBrokerStatsData(masterAddr, BrokerStatsManager.BROKER_PUT_NUMS,clusterEntry.getValue().getCluster());
-                            metricsService.getCollector().AddBrokerPutNumsMetric(clusterEntry.getValue().getCluster(), clusterEntry.getValue().getBrokerName(), bsd.getStatsMinute().getTps());
+                            metricsService.getCollector().AddBrokerPutNumsMetric(clusterEntry.getValue().getCluster(), clusterEntry.getValue().getBrokerName(), Mix.getFixedDouble(bsd.getStatsMinute().getTps()));
                         }
                         catch (Exception e) {
                             log.info("error is " + e.getMessage());
                         }
                         try {
                             bsd = mqAdminExt.viewBrokerStatsData(masterAddr, BrokerStatsManager.BROKER_GET_NUMS, clusterEntry.getValue().getCluster());
-                            metricsService.getCollector().AddBrokerGetNumsMetric(clusterEntry.getValue().getCluster(), clusterEntry.getValue().getBrokerName(), bsd.getStatsMinute().getTps());
+                            metricsService.getCollector().AddBrokerGetNumsMetric(clusterEntry.getValue().getCluster(), clusterEntry.getValue().getBrokerName(), Mix.getFixedDouble(bsd.getStatsMinute().getTps()));
                         }
                         catch (Exception e) {
                             log.info("error is " + e.getMessage());
@@ -273,7 +274,7 @@ public class MetricsCollectTask {
             statsKey = String.format("%d@%s@%s", queueId, topic, group);
             try {
                 bsd = mqAdminExt.viewBrokerStatsData(masterAddr, BrokerStatsManager.GROUP_GET_LATENCY, statsKey);
-                metricsService.getCollector().AddGroupGetLatencyMetric(bd.getCluster(), bd.getBrokerName(), topic, group, String.format("%d", queueId), bsd.getStatsMinute().getTps());
+                metricsService.getCollector().AddGroupGetLatencyMetric(bd.getCluster(), bd.getBrokerName(), topic, group, String.format("%d", queueId), Mix.getFixedDouble(bsd.getStatsMinute().getTps()));
             } catch (Exception e) {
                 log.info("error is " + e.getMessage());
             }
