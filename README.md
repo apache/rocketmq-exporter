@@ -52,13 +52,13 @@ Run
 ### Run Binary
 
 ```shell
-java -jar rocketmq-exporter-0.0.1-SNAPSHOT.jar [--rocketmq.config.namesrvAddr="127.0.0.1:9876" ...]
+java -jar rocketmq-exporter-0.0.1-SNAPSHOT.jar
 ```
 
 ### Run Docker Image
 
 ```
-docker container run -itd --rm  -p 5557:5557  breezecoolyang/rocketmq-exporter [--rocketmq.config.namesrvAddr="127.0.0.1:9876" ...]
+docker container run -itd --rm  -p 5557:5557  docker.io/rocketmq-exporter
 ```
 
 Flags
