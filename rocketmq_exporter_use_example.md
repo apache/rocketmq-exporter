@@ -36,7 +36,7 @@ cd prometheus-2.7.0-rc.1.linux-amd64/
 ./prometheus --config.file=prometheus.yml --web.listen-address=:5555
 ```
 
-The default listening port number of Prometheus is 9090. In order not  conflicts with other processes on the system, we reset the listening port number to 5555 in the startup parameters. Then go to website http://<server IP address>:5555 through  browser and users can verify whether the Prometheus has been successfully installed. Since the RocketMQ-Exporter process has been started, the data of RocketMQ-Exporter can be retrieved by Prometheus at this time. At this time, users only need to change the Prometheus configuration file to set the collection target to the url address exposed by the RocketMQ Exporter. After changing the configuration file, restart the service. The content of prometheus.yml will be like as follows:
+The default listening port number of Prometheus is 9090. In order not  conflict with other processes on the system, we reset the listening port number to 5555 in the startup parameters. Then go to website http:// sever ip:5555 through  browser and users can verify whether the Prometheus has been successfully installed. Since the RocketMQ-Exporter process has been started, the data of RocketMQ-Exporter can be retrieved by Prometheus at this time. At this time, users only need to change the Prometheus configuration file to set the collection target to the URL address exposed by the RocketMQ Exporter. After changing the configuration file, restart the service. The content of prometheus.yml will be like as follows:
 
 ```
 # my global config
@@ -80,7 +80,7 @@ Similarly, in order not to conflict with the ports of other processes, users can
 ./bin/grafana-server web
 ```
 
-Then, by accessing http://<server IP address>:55555 through the browser, users can verify whether the Grafana has been successfully installed. The system default username and password are admin/admin. The first time users log in to the system, users will be asked to change the password. In addition, users need to set Grafana's data source to Prometheus. If user have started up Prometheus like above, now the data source address will be  http://<server IP address>:5555. For the convenience of users, RocketMQ's dashboard configuration file has been uploaded to Grafana's official website  https://grafana.com/dashboards/10477/revisions. Users only need to download the configuration file and creating the RocketMQ dashboard by importing the configuration file into the Grafana.
+Then, by accessing http:// server ip:55555 through the browser, users can verify whether the Grafana has been successfully installed. The system default username and password are admin/admin. The first time users log in to the system, users will be asked to change the password. In addition, users need to set Grafana's data source to Prometheus. If user have started up Prometheus like above, now the data source address will be  http:// server ip:5555. For the convenience of users, RocketMQ's dashboard configuration file has been uploaded to Grafana's official website  https://grafana.com/dashboards/10477/revisions. Users only need to download the configuration file and creating the RocketMQ dashboard by importing the configuration file into the Grafana.
 
 ## 6 Configure alarms in Prometheus
 
