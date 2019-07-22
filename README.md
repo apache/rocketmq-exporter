@@ -29,7 +29,7 @@ Support [Apache RocketMQ](https://rocketmq.apache.org) version 4.3.2 (and later)
 Configuration
 ---
 
-This image is configurable using different properties, See ``application.properties`` for a configuration example.
+This image is configurable using different properties, see ``application.properties`` for a configuration example.
 
 | name                           | Default            | Description                                        |
 | -----------------------------------|--------------------|----------------------------------------------------|
@@ -208,4 +208,4 @@ For details of the dashboard please see [RocketMQ Exporter Overview](https://gra
 
 Quick Start
 -------------
-This [guide]((./rocketmq_exporter_quickstart.md)) will teach you how to build and run rocketmq exporter from scratch.
+This [guide](./rocketmq_exporter_quickstart.md) will teach you how to build and run rocketmq exporter with Prometheus and Grafana Integration from scratch.

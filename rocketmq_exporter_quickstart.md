@@ -7,7 +7,7 @@ To use RocketMQ Exporter, first make sure the RocketMQ is downloaded and started
 
 
 ## Install Prometheus
-Firstly go to Prometheus official download address: https://prometheus.io/download/ to download the Prometheus installation package, currently using linux installation as an example, the selected installation package is Prometheus-2.7.0-rc.1.linux-amd64.tar.gz, the Prometheus process can be started after the following steps.
+Download [Prometheus installation package](https://prometheus.io/download/) and install it.
 
 ```
 tar -xzf prometheus-2.7.0-rc.1.linux-amd64.tar.gz
@@ -18,7 +18,7 @@ cd prometheus-2.7.0-rc.1.linux-amd64/
 The default listening port number of Prometheus is 9090. In order not  conflict with other processes on the system, we reset the listening port number to 5555 in the startup parameters. Then go to website http:// sever ip:5555 through  browser and users can verify whether the Prometheus has been successfully installed. Since the RocketMQ-Exporter process has been started, the data of RocketMQ-Exporter can be retrieved by Prometheus at this time. At this time, users only need to change the Prometheus configuration file to set the collection target to the URL address exposed by the RocketMQ Exporter. After changing the configuration file, restart the service. The content of prometheus.yml will be like as follows:
 
 ```
-# my global config
+# Global config
 global:
    scrape_interval:     15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
    evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
@@ -46,7 +46,7 @@ global:
 
 ## Create Grafana dashboard for RocketMQ
 
-Prometheus' own metric display platform is not as good as Grafana. In order to  better show RocketMQ's metrics, Grafana can be used to show the metrics that Prometheus gets. Firstly go to the official website https://grafana.com/grafana/download to download installation file. Here is a  an example for binary file installation.
+Prometheus' own metric display platform is not as good as Grafana. In order to  better show RocketMQ's metrics, Grafana can be used to show the metrics that Prometheus gets. Download and install it as the following.
 
 ```
 wget https://dl.grafana.com/oss/release/grafana-6.2.5.linux-amd64.tar.gz 
