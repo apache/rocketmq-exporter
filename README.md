@@ -20,7 +20,7 @@ Table of Contents
 	-   [Topics](#topics)
 	-   [Consumer Groups](#consumer-groups)
 -   [Grafana Dashboard](#Grafana-Dashboard)
--   [Use Example](#Use-Example)
+-   [Quick Start](#Use-Example)
 
 Compatibility
 -------------
@@ -210,6 +210,6 @@ Grafana Dashboard
 Grafana Dashboard ID: 10477, name: RocketMQ Exporter Overview.
 For details of the dashboard please see [RocketMQ Exporter Overview](https://grafana.com/dashboards/10477).
 
-Use Example
+Quick Start
 -------------
 For details of the use example please refer to [use example](./rocketmq_exporter_use_example.md)
