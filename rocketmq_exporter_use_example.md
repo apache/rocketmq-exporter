@@ -36,9 +36,36 @@ cd prometheus-2.7.0-rc.1.linux-amd64/
 ./prometheus --config.file=prometheus.yml --web.listen-address=:5555
 ```
 
-The default listening port number of Prometheus is 9090. In order not  conflicts with other processes on the system, we reset the listening port number to 5555 in the startup parameters. Then go to website http://<server IP address>:5555 through  browser and users can verify whether the Prometheus has been successfully installed. Since the RocketMQ-Exporter process has been started, the data of RocketMQ-Exporter can be retrieved by Prometheus at this time. At this time, users only need to change the Prometheus configuration file to set the collection target to the url exposed by the RocketMQ Exporter. After changing the configuration file, restart the service.
+The default listening port number of Prometheus is 9090. In order not  conflicts with other processes on the system, we reset the listening port number to 5555 in the startup parameters. Then go to website http://<server IP address>:5555 through  browser and users can verify whether the Prometheus has been successfully installed. Since the RocketMQ-Exporter process has been started, the data of RocketMQ-Exporter can be retrieved by Prometheus at this time. At this time, users only need to change the Prometheus configuration file to set the collection target to the url address exposed by the RocketMQ Exporter. After changing the configuration file, restart the service. The content of prometheus.yml will be like as follows:
 
-## 5 Creating Grafana dashboard for RocketMQ ##
+```
+# my global config
+global:
+   scrape_interval:     15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
+   evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
+   # scrape_timeout is set to the global default (10s).
+ 
+ 
+ # Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
+ rule_files:
+   # - "first_rules.yml"
+   # - "second_rules.yml"
+   
+
+ scrape_configs:
+   - job_name: 'prometheus'
+     static_configs:
+     - targets: ['localhost:5555']
+   
+   
+   - job_name: 'exporter'
+     static_configs:
+     - targets: ['localhost:5557']
+```
+
+
+
+## 5 Create Grafana dashboard for RocketMQ ##
 
 Prometheus' own metric display platform is not as good as Grafana. In order to  better show RocketMQ's metrics, Grafana can be used to show the metrics that Prometheus gets. Firstly go to the official website https://grafana.com/grafana/download to download installation file. Here is a  an example for binary file installation.
 
@@ -53,5 +80,40 @@ Similarly, in order not to conflict with the ports of other processes, users can
 ./bin/grafana-server web
 ```
 
-Then, by accessing http://<server IP address>:55555 through the browser, users can verify whether the Grafana has been successfully installed. The system default username and password are admin/admin. The first time users log in to the system, users will be asked to change the password. In addition, users need to set Grafana's data source to Prometheus. For the convenience of users, RocketMQ's dashboard configuration file has been uploaded to Grafana's official website  https://grafana.com/dashboards/10477/revisions. Users only need to download the configuration file and creating the RocketMQ dashboard by importing the configuration file into the Grafana.
+Then, by accessing http://<server IP address>:55555 through the browser, users can verify whether the Grafana has been successfully installed. The system default username and password are admin/admin. The first time users log in to the system, users will be asked to change the password. In addition, users need to set Grafana's data source to Prometheus. If user have start up Prometheus like above, now the data source address will be  http://<server IP address>:5555. For the convenience of users, RocketMQ's dashboard configuration file has been uploaded to Grafana's official website  https://grafana.com/dashboards/10477/revisions. Users only need to download the configuration file and creating the RocketMQ dashboard by importing the configuration file into the Grafana.
+
+## 6 Configure alarms in Prometheus
+
+If users want to configure alarms,there are two things users should do. 
+Firstly, modify the Prometheus configuration file prometheus.yml and add the following configuration: 
+
+```
+rule_files:
+  - /etc/prometheus/rules/*.rules
+```
+
+Secondly, create an alert file in the directory /etc/prometheus/rules/. The content will be like as follows. For more details, please refer to the file [example.rules](./example.rules)
+
+```
+groups:
+- name: GaleraAlerts
+  rules:
+  - alert: RocketMQClusterProduceHigh
+    expr: sum(rocketmq_producer_tps) by (cluster) >= 10
+    for: 3m
+    labels:
+      severity: warning
+    annotations:
+      description: '{{$labels.cluster}} Sending tps too high.'
+      summary: cluster send tps too high
+  - alert: RocketMQClusterProduceLow
+    expr: sum(rocketmq_producer_tps) by (cluster) < 1
+    for: 3m
+    labels:
+      severity: warning
+    annotations:
+      description: '{{$labels.cluster}} Sending tps too low.'
+      summary: cluster send tps too low
+```
+
 
