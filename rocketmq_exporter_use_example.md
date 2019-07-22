@@ -92,7 +92,7 @@ rule_files:
   - /etc/prometheus/rules/*.rules
 ```
 
-Secondly, create an alert file in the directory /etc/prometheus/rules/. The content will be like as follows. For more details, please refer to the file [example.rules](./example.rules)
+Secondly, create an alert file in the directory /etc/prometheus/rules/. The content of rules file will be like as follows. For more details, please refer to the file [example.rules](./example.rules)
 
 ```
 groups:
