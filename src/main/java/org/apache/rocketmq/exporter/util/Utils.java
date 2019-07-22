@@ -17,11 +17,11 @@
 
 package org.apache.rocketmq.exporter.util;
 
-public class Mix {
+import java.text.DecimalFormat;
+
+public class Utils {
     public static double getFixedDouble(double value) {
-        if (value >= 1) {
-            return Math.round(value);
-        }
-        return Math.round(value * 100) / 100.0;
+        DecimalFormat df = new DecimalFormat("#.##");
+        return new Double(df.format(value));
     }
 }

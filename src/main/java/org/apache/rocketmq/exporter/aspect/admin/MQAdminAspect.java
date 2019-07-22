@@ -49,7 +49,7 @@ public class MQAdminAspect {
     @Around(value = "mQAdminMethodPointCut() || multiMQAdminMethodPointCut()")
     public Object aroundMQAdminMethod(ProceedingJoinPoint joinPoint) throws Throwable {
         long start = System.currentTimeMillis();
-        Object obj = null;
+        Object obj;
         try {
             MethodSignature signature = (MethodSignature)joinPoint.getSignature();
             Method method = signature.getMethod();

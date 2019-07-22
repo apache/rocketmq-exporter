@@ -24,6 +24,6 @@ import java.io.StringWriter;
 
 
 public interface RMQMetricsService  {
-    public RMQMetricsCollector getCollector();
-    public void Metrics(StringWriter writer) throws IOException;
+    RMQMetricsCollector getCollector();
+    void Metrics(StringWriter writer) throws IOException;
 }

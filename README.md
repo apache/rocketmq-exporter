@@ -53,13 +53,13 @@ Run
 ### Run Binary
 
 ```shell
-java -jar rocketmq-exporter-0.0.1-SNAPSHOT.jar [--rocketmq.config.namesrvAddr="127.0.0.1:9876" ...]
+java -jar rocketmq-exporter-0.0.1-SNAPSHOT.jar
 ```
 
 ### Run Docker Image
 
 ```
-docker container run -itd --rm  -p 5557:5557  breezecoolyang/rocketmq-exporter [--rocketmq.config.namesrvAddr="127.0.0.1:9876" ...]
+docker container run -itd --rm  -p 5557:5557  docker.io/rocketmq-exporter
 ```
 
 Flags
@@ -160,7 +160,7 @@ rocketmq_producer_offset{cluster="MQCluster",broker="broker-a",topic="DEV_TID_20
 | `rocketmq_consumer_offset`                                   | Progress of consumption message for a consumer group         |
 | `rocketmq_group_get_latency`                                 | Consumer latency on some topic for one queue                 |
 | `rocketmq_group_get_latency_by_storetime `                   | Consumption delay time of a consumer group                   |
-| 消息堆积量（需要通过proSQL聚合）（rocketmq_producer_offset-rocketmq_consumer_offset） | Message accumulation (sum(rocketmq_producer_offset) by (topic) - on(topic)  group_right  sum(rocketmq_consumer_offset) by (group,topic)) |
+| `rocketmq_message_accumulation`| How far Consumer offset lag behind |
 
 **Metrics output example**
 
