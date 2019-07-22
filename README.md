@@ -1,7 +1,7 @@
-RocketMQ_exporter
+RocketMQ Exporter
 ==============
 
-RocketMQ exporter for Prometheus.
+Apache RocketMQ Exporter for Prometheus.
 
 Table of Contents
 -----------------
