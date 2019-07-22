@@ -1,33 +1,12 @@
 # RocketMQ Exporter Quick Start #
 
-## 1 Start up NameServer and Broker ##
-In order to use the RocketMQ Exporter, firstly make sure that the RocketMQ service is properly downloaded and started. Users can refer to the quick start of the RocketMQ master station for operation. Make sure the NameServer and Broker have started correctly.
+## Start up NameServer and Broker
+To use RocketMQ Exporter, first make sure the RocketMQ is downloaded and started correctly. Users can refer to [quick start](http://rocketmq.apache.org/docs/quick-start/) ensure that the service starts properly.
 
-## 2 Compile RocketMQ-Exporter ##
-Users currently need to download the git source code and then compile it
+## Build and Run RocketMQ Exporter
 
-```
-git clone https://github.com/apache/rocketmq-exporter
-cd rocketmq-exporter
-mvn clean install
-```
 
-## 3 Configuration and startup ##
-RocketMQ-Exporter has the following running options
-
-operations | default value | meaning 
----|---|---
-rocketmq.config.namesrvAddr | 127.0.0.1:9876 | MQ cluster nameSrv address 
-rocketmq.config.webTelemetryPath | /metrics | metric collection path 
-server.port | 5557 | HTTP service exposed port 
-
-The above running options can be changed either in the configuration file after downloading the code or via the command line. The compiled jar package is called rocketmq-exporter-0.0.1-SNAPSHOT.jar, which can be run as follows.
-
-```
-java -jar rocketmq-exporter-0.0.1-SNAPSHOT.jar [--rocketmq.config.namesrvAddr="127.0.0.1:9876" ...]
-```
-
-## 4 Install Prometheus ##
+## Install Prometheus
 Firstly go to Prometheus official download address: https://prometheus.io/download/ to download the Prometheus installation package, currently using linux installation as an example, the selected installation package is Prometheus-2.7.0-rc.1.linux-amd64.tar.gz, the Prometheus process can be started after the following steps.
 
 ```
@@ -65,7 +44,7 @@ global:
 
 
 
-## 5 Create Grafana dashboard for RocketMQ ##
+## Create Grafana dashboard for RocketMQ
 
 Prometheus' own metric display platform is not as good as Grafana. In order to  better show RocketMQ's metrics, Grafana can be used to show the metrics that Prometheus gets. Firstly go to the official website https://grafana.com/grafana/download to download installation file. Here is a  an example for binary file installation.
 
@@ -82,7 +61,7 @@ Similarly, in order not to conflict with the ports of other processes, users can
 
 Then, by accessing http:// server ip:55555 through the browser, users can verify whether the Grafana has been successfully installed. The system default username and password are admin/admin. The first time users log in to the system, users will be asked to change the password. In addition, users need to set Grafana's data source to Prometheus. If user have started up Prometheus like above, now the data source address will be  http:// server ip:5555. For the convenience of users, RocketMQ's dashboard configuration file has been uploaded to Grafana's official website  https://grafana.com/dashboards/10477/revisions. Users only need to download the configuration file and creating the RocketMQ dashboard by importing the configuration file into the Grafana.
 
-## 6 Configure alarms in Prometheus
+## Configure alarms in Prometheus
 
 If users want to configure alarms,there are two things users should do. 
 Firstly, modify the Prometheus configuration file prometheus.yml and add the following configuration: 

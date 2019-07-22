@@ -6,33 +6,40 @@ Apache RocketMQ Exporter for Prometheus.
 Table of Contents
 -----------------
 -	[Compatibility](#compatibility)
--   [Dependency](#dependency)
--   [Download](#download)
--   [Compile](#compile)
+-   [Configuration](#configuration)
+-   [Build](#build)
 	-   [Build Binary](#build-binary)
 	-   [Build Docker Image](#build-docker-image)
 -   [Run](#run)
 	-   [Run Binary](#run-binary)
 	-   [Run Docker Image](#run-docker-image)
--   [Flags](#flags)
 -   [Metrics](#metrics)
 	-   [Brokers](#brokers)
 	-   [Topics](#topics)
 	-   [Consumer Groups](#consumer-groups)
--   [Grafana Dashboard](#Grafana-Dashboard)
--   [Quick Start](#Use-Example)
+-   [Grafana Dashboard](#grafana-dashboard)
+-   [Quick Start](#quick-start)
 
 Compatibility
 -------------
 
 Support [Apache RocketMQ](https://rocketmq.apache.org) version 4.3.2 (and later).
 
-Dependency
-----------
 
--	[Prometheus](https://prometheus.io)
+Configuration
+---
 
-Compile
+This image is configurable using different properties, See ``application.properties`` for a configuration example.
+
+| name                           | Default            | Description                                        |
+| -----------------------------------|--------------------|----------------------------------------------------|
+| `rocketmq.config.namesrvAddr`      |  127.0.0.1:9876 |name server address  for  broker cluster            |
+| `rocketmq.config.webTelemetryPath` | /metrics           |Path under which to expose metrics                  |
+| `server.port`                      | 5557               |Address to listen on for web interface and telemetry|
+| `rocketmq.config.rocketmqVersion`  | V4_3_2             |rocketmq broker version                             |
+
+
+Build
 -------
 
 ### Build Binary
@@ -62,17 +69,6 @@ java -jar rocketmq-exporter-0.0.1-SNAPSHOT.jar
 docker container run -itd --rm  -p 5557:5557  docker.io/rocketmq-exporter
 ```
 
-Flags
----
-
-This image is configurable using different flags
-
-|Flag name                           | Default            | Description                                        |
-| -----------------------------------|--------------------|----------------------------------------------------|
-| `rocketmq.config.namesrvAddr`      |  127.0.0.1:9876 |name server address  for  broker cluster            |
-| `rocketmq.config.webTelemetryPath` | /metrics           |Path under which to expose metrics                  |
-| `server.port`                      | 5557               |Address to listen on for web interface and telemetry|
-| `rocketmq.config.rocketmqVersion`  | V4_3_2             |rocketmq broker version                             |
 
 Metrics
 -------
@@ -212,4 +208,4 @@ For details of the dashboard please see [RocketMQ Exporter Overview](https://gra
 
 Quick Start
 -------------
-For details of the use example please refer to [use example](./rocketmq_exporter_use_example.md)
+This [guide]((./rocketmq_exporter_quickstart.md)) will teach you how to build and run rocketmq exporter from scratch.
