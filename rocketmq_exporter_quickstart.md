@@ -1,4 +1,4 @@
-# RocketMQ Exporter Quick Start #
+# Quick Start #
 
 ## Start up NameServer and Broker
 To use RocketMQ Exporter, first make sure the RocketMQ is downloaded and started correctly. Users can refer to [quick start](http://rocketmq.apache.org/docs/quick-start/) ensure that the service starts properly.
@@ -15,7 +15,7 @@ cd prometheus-2.7.0-rc.1.linux-amd64/
 ./prometheus --config.file=prometheus.yml --web.listen-address=:5555
 ```
 
-The default listening port number of Prometheus is 9090. In order not  conflict with other processes on the system, we reset the listening port number to 5555 in the startup parameters. Then go to website http:// sever ip:5555 through  browser and users can verify whether the Prometheus has been successfully installed. Since the RocketMQ-Exporter process has been started, the data of RocketMQ-Exporter can be retrieved by Prometheus at this time. At this time, users only need to change the Prometheus configuration file to set the collection target to the URL address exposed by the RocketMQ Exporter. After changing the configuration file, restart the service. The content of prometheus.yml will be like as follows:
+The content of prometheus.yml is as follows.
 
 ```
 # Global config
@@ -44,27 +44,28 @@ global:
 
 
 
-## Create Grafana dashboard for RocketMQ
+## Integration with Grafana Dashboard
 
-Prometheus' own metric display platform is not as good as Grafana. In order to  better show RocketMQ's metrics, Grafana can be used to show the metrics that Prometheus gets. Download and install it as the following.
+Download Grafana installation package and install it.
+
 
 ```
 wget https://dl.grafana.com/oss/release/grafana-6.2.5.linux-amd64.tar.gz 
 tar -zxvf grafana-6.2.5.linux-amd64.tar.gz
 cd grafana-5.4.3/
 ```
-Similarly, in order not to conflict with the ports of other processes, users can modify the listening port in the defaults.ini file in the conf directory. Currently, the listening port of the Grafana is changed to 55555, and then use the following command to start up.
+The user can modify the listener port in the default.ini file in the conf directory. Currently, the Grafana listener port changes to 55555 and starts with the following command.
 
 ```
 ./bin/grafana-server web
 ```
 
-Then, by accessing http:// server ip:55555 through the browser, users can verify whether the Grafana has been successfully installed. The system default username and password are admin/admin. The first time users log in to the system, users will be asked to change the password. In addition, users need to set Grafana's data source to Prometheus. If user have started up Prometheus like above, now the data source address will be  http:// server ip:5555. For the convenience of users, RocketMQ's dashboard configuration file has been uploaded to Grafana's official website  https://grafana.com/dashboards/10477/revisions. Users only need to download the configuration file and creating the RocketMQ dashboard by importing the configuration file into the Grafana.
+The user can verify that Grafana has been successfully installed by visiting http:// server IP :55555 in a browser. The default system username and password is admin/admin. The first time the user logs into the system, the system will ask the user to change the password. In addition, the user needs to set the data source of Grafana as Prometheus. If Prometheus was launched by the user as above, the data source address will now be http:// server IP :5555. For the convenience of users, RocketMQ dashboard configuration file has been uploaded to the Grafana's official website https://grafana.com/dashboards/10477/revisions. The user simply downloads the configuration file and imports the Grafana.
 
 ## Configure alarms in Prometheus
 
-If users want to configure alarms,there are two things users should do. 
-Firstly, modify the Prometheus configuration file prometheus.yml and add the following configuration: 
+The user wants to configure monitoring alerts, there are two things the user should do.
+First, modify the Prometheus configuration file. And add the following configuration.
 
 ```
 rule_files:
