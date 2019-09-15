@@ -16,33 +16,13 @@
  */
 package org.apache.rocketmq.exporter.model.metrics;
 
-public class BrokerMetric {
+import java.util.Arrays;
+import java.util.List;
 
-    private  String   clusterName;
-    private  String   brokerName;
-
-
-    public void setClusterName(String cluster) {
-
-        clusterName = cluster;
-    }
-    public  String getClusterName() {
-
-        return clusterName;
-    }
-    void setBrokerName(String broker) {
-
-        brokerName = broker;
-    }
-
-    public String getBrokerName() {
-
-        return brokerName;
-    }
+public class BrokerMetric extends BaseMetric {
 
     public BrokerMetric(String cluster, String broker) {
-        clusterName = cluster;
-        brokerName  =   broker;
+        super(cluster, broker);
     }
 
     @Override
@@ -52,19 +32,23 @@ public class BrokerMetric {
         }
         BrokerMetric other = (BrokerMetric) obj;
 
-        return  other.clusterName.equals(clusterName) && other.brokerName.equals(brokerName);
+        return other.getClusterName().equals(getClusterName()) && other.getBrokerName().equals(getBrokerName());
     }
 
     @Override
     public int hashCode() {
         int hash = 1;
-        hash = 37 * hash + clusterName.hashCode();
-        hash = 37 * hash + brokerName.hashCode();
+        hash = 37 * hash + getClusterName().hashCode();
+        hash = 37 * hash + getBrokerName().hashCode();
         return hash;
     }
 
     @Override
     public String toString() {
-        return "ClusterName: " + clusterName + " BrokerName: " + brokerName;
+        return "ClusterName: " + getClusterName() + " BrokerName: " + getBrokerName();
+    }
+
+    public List<String> getLabels(){
+        return Arrays.asList(getClusterName(),getBrokerName());
     }
 }

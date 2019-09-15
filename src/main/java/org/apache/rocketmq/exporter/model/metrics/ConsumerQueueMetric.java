@@ -16,32 +16,23 @@
  */
 package org.apache.rocketmq.exporter.model.metrics;
 
-public class ConsumerQueueMetric {
+import java.util.Arrays;
+import java.util.List;
 
-    private  String   clusterName;
-    private  String   brokerName;
-    private  String   topicName;
-    private  String   consumerGroupName;
-    private  String   queueId;
+public class ConsumerQueueMetric extends BaseMetric {
 
-    public void setClusterName(String cluster) {
-        clusterName = cluster;
-    }
-    public  String getClusterName() {
-        return clusterName;
-    }
-    void setBrokerName(String broker) {
-        brokerName = broker;
-    }
-    public String getBrokerName() {
-        return brokerName;
-    }
+    private String topicName;
+    private String consumerGroupName;
+    private String queueId;
+
     public void setTopicName(String topic) {
         topicName = topic;
     }
-    public String  getTopicName() {
+
+    public String getTopicName() {
         return topicName;
     }
+
     public String getConsumerGroupName() {
         return consumerGroupName;
     }
@@ -49,18 +40,20 @@ public class ConsumerQueueMetric {
     public void setConsumerGroupName(String consumerGroupName) {
         this.consumerGroupName = consumerGroupName;
     }
+
     public String getQueueId() {
         return queueId;
     }
+
     public void setQueueId(String queueId) {
         this.queueId = queueId;
     }
-    public ConsumerQueueMetric(String cluster, String broker, String topic, String consumerGroup,String queue) {
-        clusterName = cluster;
-        brokerName  =   broker;
-        topicName   =   topic;
-        consumerGroupName   =   consumerGroup;
-        queueId             =   queue;
+
+    public ConsumerQueueMetric(String cluster, String broker, String topic, String consumerGroup, String queue) {
+        super(cluster, broker);
+        topicName = topic;
+        consumerGroupName = consumerGroup;
+        queueId = queue;
     }
 
     @Override
@@ -70,16 +63,16 @@ public class ConsumerQueueMetric {
         }
         ConsumerQueueMetric other = (ConsumerQueueMetric) obj;
 
-        return  other.clusterName.equals(clusterName) && other.brokerName.equals(brokerName)
-                && other.topicName.equals(topicName)  && other.consumerGroupName.equals(consumerGroupName)
+        return other.getClusterName().equals(getClusterName()) && other.getBrokerName().equals(getBrokerName())
+                && other.topicName.equals(topicName) && other.consumerGroupName.equals(consumerGroupName)
                 && other.queueId.equals(queueId);
     }
 
     @Override
     public int hashCode() {
         int hash = 1;
-        hash = 37 * hash + clusterName.hashCode();
-        hash = 37 * hash + brokerName.hashCode();
+        hash = 37 * hash + getClusterName().hashCode();
+        hash = 37 * hash + getBrokerName().hashCode();
         hash = 37 * hash + topicName.hashCode();
         hash = 37 * hash + consumerGroupName.hashCode();
         hash = 37 * hash + queueId.hashCode();
@@ -88,6 +81,10 @@ public class ConsumerQueueMetric {
 
     @Override
     public String toString() {
-        return "ClusterName: " + clusterName + " BrokerName: " + brokerName + " topicName: " + topicName + " ConsumeGroupName: " + consumerGroupName  +  "queueId: " + queueId;
+        return "ClusterName: " + getClusterName() + " BrokerName: " + getBrokerName() + " topicName: " + topicName + " ConsumeGroupName: " + consumerGroupName + "queueId: " + queueId;
+    }
+
+    public List<String> getLabels(){
+        return Arrays.asList(getClusterName(),getBrokerName(),getTopicName(),getConsumerGroupName(),getQueueId());
     }
 }

@@ -16,33 +16,22 @@
  */
 package org.apache.rocketmq.exporter.model.metrics;
 
-public class ConsumerMetric {
+import java.util.Arrays;
+import java.util.List;
 
-    private  String   clusterName;
-    private  String   brokerName;
-    private  String   topicName;
-    private  String   consumerGroupName;
+public class ConsumerMetric extends BaseMetric {
 
-    public void setClusterName(String cluster) {
-        clusterName = cluster;
-    }
-    public  String getClusterName() {
-        return clusterName;
-    }
-    void setBrokerName(String broker) {
-        brokerName = broker;
-    }
-
-    public String getBrokerName() {
-        return brokerName;
-    }
+    private String topicName;
+    private String consumerGroupName;
 
     public void setTopicName(String topic) {
         topicName = topic;
     }
+
     public String getTopicName() {
         return topicName;
     }
+
     public String getConsumerGroupName() {
         return consumerGroupName;
     }
@@ -51,11 +40,10 @@ public class ConsumerMetric {
         this.consumerGroupName = consumerGroupName;
     }
 
-    public ConsumerMetric(String cluster, String broker, String topic,String consumerGroup) {
-        clusterName = cluster;
-        brokerName  =   broker;
-        topicName   =   topic;
-        consumerGroupName   =   consumerGroup;
+    public ConsumerMetric(String cluster, String broker, String topic, String consumerGroup) {
+        super(cluster, broker);
+        topicName = topic;
+        consumerGroupName = consumerGroup;
     }
 
     @Override
@@ -65,15 +53,15 @@ public class ConsumerMetric {
         }
         ConsumerMetric other = (ConsumerMetric) obj;
 
-        return  other.clusterName.equals(clusterName) && other.brokerName.equals(brokerName)
-                && other.topicName.equals(topicName)  && other.consumerGroupName.equals(consumerGroupName);
+        return other.getClusterName().equals(getClusterName()) && other.getBrokerName().equals(getBrokerName())
+                && other.topicName.equals(topicName) && other.consumerGroupName.equals(consumerGroupName);
     }
 
     @Override
     public int hashCode() {
         int hash = 1;
-        hash = 37 * hash + clusterName.hashCode();
-        hash = 37 * hash + brokerName.hashCode();
+        hash = 37 * hash + getClusterName().hashCode();
+        hash = 37 * hash + getBrokerName().hashCode();
         hash = 37 * hash + topicName.hashCode();
         hash = 37 * hash + consumerGroupName.hashCode();
         return hash;
@@ -81,6 +69,10 @@ public class ConsumerMetric {
 
     @Override
     public String toString() {
-        return "ClusterName: " + clusterName + " BrokerName: " + brokerName + " topicName: " + topicName + " ConsumeGroupName: " + consumerGroupName;
+        return "ClusterName: " + getClusterName() + " BrokerName: " + getBrokerName() + " topicName: " + topicName + " ConsumeGroupName: " + consumerGroupName;
+    }
+
+    public List<String> getLabels(){
+        return Arrays.asList(getClusterName(),getBrokerName(),getTopicName(),getConsumerGroupName());
     }
 }
