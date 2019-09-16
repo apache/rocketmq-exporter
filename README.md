@@ -14,7 +14,7 @@ Table of Contents
 	-   [Run Binary](#run-binary)
 	-   [Run Docker Image](#run-docker-image)
 -   [Metrics](#metrics)
-	-   [Brokers](#brokers)
+	-   [Broker](#broker)
 	-   [Topics](#topics)
 	-   [Consumer Groups](#consumer-groups)
 -   [Grafana Dashboard](#grafana-dashboard)
