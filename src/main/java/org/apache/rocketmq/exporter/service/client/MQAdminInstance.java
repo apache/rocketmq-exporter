@@ -16,104 +16,72 @@
  */
 package org.apache.rocketmq.exporter.service.client;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.rocketmq.client.consumer.DefaultMQPullConsumer;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.client.impl.MQClientAPIImpl;
 import org.apache.rocketmq.client.impl.factory.MQClientInstance;
 import org.apache.rocketmq.common.MixAll;
+import org.apache.rocketmq.exporter.config.RMQConfigure;
 import org.apache.rocketmq.remoting.RemotingClient;
 import org.apache.rocketmq.tools.admin.DefaultMQAdminExt;
 import org.apache.rocketmq.tools.admin.DefaultMQAdminExtImpl;
-import org.apache.rocketmq.tools.admin.MQAdminExt;
 import org.joor.Reflect;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Service;
 
 import static org.apache.rocketmq.common.MixAll.TOOLS_CONSUMER_GROUP;
 
-
+@Service
 public class MQAdminInstance {
+    private final static Logger log = LoggerFactory.getLogger(MQAdminInstance.class);
+    @Autowired
+    private RMQConfigure configure;
 
-    private static final ThreadLocal<DefaultMQAdminExt> MQ_ADMIN_EXT_THREAD_LOCAL = new ThreadLocal<DefaultMQAdminExt>();
-
-    private static final ThreadLocal<DefaultMQPullConsumer> MQ_PULL_CONSUMER_THREAD_LOCAL = new ThreadLocal<DefaultMQPullConsumer>();
-
-    private static final ThreadLocal<Integer> INIT_COUNTER = new ThreadLocal<Integer>();
-
-    public static MQAdminExt threadLocalMQAdminExt() {
-        DefaultMQAdminExt defaultMQAdminExt = MQ_ADMIN_EXT_THREAD_LOCAL.get();
-        if (defaultMQAdminExt == null) {
-            throw new IllegalStateException("defaultMQAdminExt should be init before you get this");
+    @Bean(destroyMethod = "shutdown", name = "defaultMQAdminExt")
+    private DefaultMQAdminExt buildDefaultMQAdminExt() {
+        DefaultMQAdminExt defaultMQAdminExt = new DefaultMQAdminExt(5000L);
+        defaultMQAdminExt.setInstanceName("admin-" + System.currentTimeMillis());
+        try {
+            defaultMQAdminExt.start();
+        } catch (MQClientException ex) {
+            log.error(String.format("init default admin error, namesrv=%s", System.getProperty(MixAll.NAMESRV_ADDR_PROPERTY)), ex);
         }
         return defaultMQAdminExt;
     }
 
-
-    public static DefaultMQPullConsumer threadLocalMQPullConsumer() {
-        DefaultMQPullConsumer pullConsumer = MQ_PULL_CONSUMER_THREAD_LOCAL.get();
-        if (pullConsumer == null) {
-            throw new IllegalStateException("pullConsumer should be init before you get this");
+    @Bean(destroyMethod = "shutdown")
+    private DefaultMQPullConsumer buildPullConsumer() throws Exception {
+        String namesrvAddress = configure.getNamesrvAddr();
+        if (StringUtils.isBlank(namesrvAddress)) {
+            log.error("init default pull consumer error, namesrv is null");
+            throw new Exception("init default pull consumer error, namesrv is null", null);
+        }
+        DefaultMQPullConsumer pullConsumer = new DefaultMQPullConsumer(TOOLS_CONSUMER_GROUP, null);
+        pullConsumer.setInstanceName("consumer-" + System.currentTimeMillis());
+        pullConsumer.setNamesrvAddr(namesrvAddress);
+        try {
+            pullConsumer.start();
+            pullConsumer.getDefaultMQPullConsumerImpl().getPullAPIWrapper().setConnectBrokerByUser(true);
+        } catch (MQClientException ex) {
+            log.error(String.format("init default pull consumer error, namesrv=%s", System.getProperty(MixAll.NAMESRV_ADDR_PROPERTY)), ex);
         }
         return pullConsumer;
     }
 
-
-    public static RemotingClient threadLocalRemotingClient() {
-        MQClientInstance mqClientInstance = threadLocalMqClientInstance();
-        MQClientAPIImpl mQClientAPIImpl = Reflect.on(mqClientInstance).get("mQClientAPIImpl");
-        return Reflect.on(mQClientAPIImpl).get("remotingClient");
-    }
-
-    public static MQClientInstance threadLocalMqClientInstance() {
-        DefaultMQAdminExtImpl defaultMQAdminExtImpl = Reflect.on(MQAdminInstance.threadLocalMQAdminExt()).get("defaultMQAdminExtImpl");
+    @Bean(destroyMethod = "shutdown")
+    private MQClientInstance buildInstance(@Qualifier("defaultMQAdminExt") DefaultMQAdminExt defaultMQAdminExt) {
+        DefaultMQAdminExtImpl defaultMQAdminExtImpl = Reflect.on(defaultMQAdminExt).get("defaultMQAdminExtImpl");
         return Reflect.on(defaultMQAdminExtImpl).get("mqClientInstance");
     }
 
-    public static void initMQAdminInstance(long timeoutMillis) throws MQClientException {
-        Integer nowCount = INIT_COUNTER.get();
-        if (nowCount == null) {
-            DefaultMQAdminExt defaultMQAdminExt;
-            if (timeoutMillis > 0) {
-                defaultMQAdminExt = new DefaultMQAdminExt(timeoutMillis);
-            }
-            else {
-                defaultMQAdminExt = new DefaultMQAdminExt();
-            }
-            defaultMQAdminExt.setInstanceName("admin-" + Long.toString(System.currentTimeMillis()));
-            defaultMQAdminExt.start();
-            MQ_ADMIN_EXT_THREAD_LOCAL.set(defaultMQAdminExt);
-
-
-            DefaultMQPullConsumer   pullConsumer;
-            pullConsumer    =   new DefaultMQPullConsumer(TOOLS_CONSUMER_GROUP,null);
-            pullConsumer.setInstanceName("consumer-" + Long.toString(System.currentTimeMillis()));
-            pullConsumer.setNamesrvAddr(System.getProperty(MixAll.NAMESRV_ADDR_PROPERTY, System.getenv(MixAll.NAMESRV_ADDR_ENV)));
-            pullConsumer.start();
-            pullConsumer.getDefaultMQPullConsumerImpl().getPullAPIWrapper().setConnectBrokerByUser(true);
-
-            MQ_PULL_CONSUMER_THREAD_LOCAL.set(pullConsumer);
-            INIT_COUNTER.set(1);
-        }
-        else {
-            INIT_COUNTER.set(nowCount + 1);
-        }
-
-    }
-
-    public static void destroyMQAdminInstance() {
-        Integer nowCount = INIT_COUNTER.get() - 1;
-        if (nowCount > 0) {
-            INIT_COUNTER.set(nowCount);
-            return;
-        }
-        MQAdminExt mqAdminExt = MQ_ADMIN_EXT_THREAD_LOCAL.get();
-        if (mqAdminExt != null) {
-            DefaultMQPullConsumer consumer = MQ_PULL_CONSUMER_THREAD_LOCAL.get();
-            if (consumer != null) {
-                consumer.shutdown();
-                MQ_PULL_CONSUMER_THREAD_LOCAL.remove();
-            }
-            mqAdminExt.shutdown();
-            MQ_ADMIN_EXT_THREAD_LOCAL.remove();
-            INIT_COUNTER.remove();
-        }
+    @Bean
+    private RemotingClient client(MQClientInstance instance) {
+        MQClientAPIImpl mQClientAPIImpl = Reflect.on(instance).get("mQClientAPIImpl");
+        return Reflect.on(mQClientAPIImpl).get("remotingClient");
     }
 }

@@ -19,24 +19,16 @@ package org.apache.rocketmq.exporter.service.impl;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.exporter.common.TextFormat;
 import org.apache.rocketmq.exporter.collector.RMQMetricsCollector;
-import org.apache.rocketmq.exporter.service.AbstractCommonService;
 import org.apache.rocketmq.exporter.service.RMQMetricsService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.StringWriter;
 
 @Service
-public class RMQMetricsServiceImpl extends AbstractCommonService implements RMQMetricsService {
-
-    private Logger logger = LoggerFactory.getLogger(RMQMetricsServiceImpl.class);
-
-    private  CollectorRegistry registry = new CollectorRegistry();
-
+public class RMQMetricsServiceImpl implements RMQMetricsService {
+    private CollectorRegistry registry = new CollectorRegistry();
     private final RMQMetricsCollector rmqMetricsCollector;
-
 
     public RMQMetricsCollector getCollector() {
         return rmqMetricsCollector;
@@ -46,8 +38,8 @@ public class RMQMetricsServiceImpl extends AbstractCommonService implements RMQM
         rmqMetricsCollector = new RMQMetricsCollector();
         rmqMetricsCollector.register(registry);
     }
-    public void Metrics(StringWriter writer) throws IOException {
+
+    public void metrics(StringWriter writer) throws IOException {
         TextFormat.write004(writer, registry.metricFamilySamples());
-        logger.info(writer.toString());
     }
 }
