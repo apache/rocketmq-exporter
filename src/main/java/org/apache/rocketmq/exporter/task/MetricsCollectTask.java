@@ -219,13 +219,14 @@ public class MetricsCollectTask {
                     MessageQueue q = consumeStatusEntry.getKey();
                     OffsetWrapper offset = consumeStatusEntry.getValue();
 
-                    //topic + consumer group 生产offset
+                    //topic + consumer group
                     totalBrokerOffset += totalBrokerOffset + offset.getBrokerOffset();
-                    //topic + consumer group 消费offset
+                    //topic + consumer group
                     totalConsumerOffset += offset.getConsumerOffset();
                 }
                 metricsService.getCollector().addGroupBrokerTotalOffsetMetric(topic, group, totalBrokerOffset);
                 metricsService.getCollector().addGroupConsumerTotalOffsetMetric(topic, group, totalBrokerOffset);
+
             }
         }
         log.info("consumer offset collection task finished...." + (System.currentTimeMillis() - start));
@@ -276,7 +277,7 @@ public class MetricsCollectTask {
                 if (!StringUtils.isBlank(masterAddr)) {
                     BrokerStatsData bsd = null;
                     try {
-                        //topic发了多少条消息
+                        //how many messages has sent for the topic
                         bsd = mqAdminExt.viewBrokerStatsData(masterAddr, BrokerStatsManager.TOPIC_PUT_NUMS, topic);
                         String brokerIP = clusterInfo.getBrokerAddrTable().get(bd.getBrokerName()).getBrokerAddrs().get(MixAll.MASTER_ID);
                         metricsService.getCollector().addTopicPutNumsMetric(
@@ -297,7 +298,7 @@ public class MetricsCollectTask {
                         log.error(String.format("TOPIC_PUT_NUMS-error, topic=%s, master broker=%s", topic, masterAddr), ex1);
                     }
                     try {
-                        //topic总共发了多少字节
+                        //how many bytes has sent for the topic
                         bsd = mqAdminExt.viewBrokerStatsData(masterAddr, BrokerStatsManager.TOPIC_PUT_SIZE, topic);
                         String brokerIP = clusterInfo.getBrokerAddrTable().get(bd.getBrokerName()).getBrokerAddrs().get(MixAll.MASTER_ID);
                         metricsService.getCollector().addTopicPutSizeMetric(
@@ -338,7 +339,7 @@ public class MetricsCollectTask {
                         String statsKey = String.format("%s@%s", topic, group);
                         BrokerStatsData bsd = null;
                         try {
-                            //消费者消费了多少条消息
+                            //how many messages the consumer has get for the topic
                             bsd = mqAdminExt.viewBrokerStatsData(masterAddr, BrokerStatsManager.GROUP_GET_NUMS, statsKey);
                             metricsService.getCollector().addGroupGetNumsMetric(
                                     topic,
@@ -354,7 +355,7 @@ public class MetricsCollectTask {
                             log.error(String.format("GROUP_GET_NUMS-error, topic=%s, group=%s,master broker=%s", topic, group, masterAddr), ex);
                         }
                         try {
-                            //消费者消费了多少字节
+                            //how many bytes the consumer has get for the topic
                             bsd = mqAdminExt.viewBrokerStatsData(masterAddr, BrokerStatsManager.GROUP_GET_SIZE, statsKey);
                             metricsService.getCollector().addGroupGetSizeMetric(
                                     topic,
@@ -370,7 +371,7 @@ public class MetricsCollectTask {
                             log.error(String.format("GROUP_GET_SIZE-error, topic=%s, group=%s, master broker=%s", topic, group, masterAddr), ex);
                         }
                         try {
-                            //消费者重新消费topic的次数
+                            ////how many re-send times the consumer did for the topic
                             bsd = mqAdminExt.viewBrokerStatsData(masterAddr, BrokerStatsManager.SNDBCK_PUT_NUMS, statsKey);
                             metricsService.getCollector().addSendBackNumsMetric(
                                     topic,

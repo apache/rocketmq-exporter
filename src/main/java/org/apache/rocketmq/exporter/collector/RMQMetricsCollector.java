@@ -52,7 +52,7 @@ public class RMQMetricsCollector extends Collector {
     private ConcurrentHashMap<ConsumerTopicDiffMetric, Long> consumerDiff = new ConcurrentHashMap<>();
     //retry diff for consumer group
     private ConcurrentHashMap<ConsumerTopicDiffMetric, Long> consumerRetryDiff = new ConcurrentHashMap<>();
-    //死信堆积 todo 检查是否存在这个数据 应该不存在
+    //dlq diff for consumer group
     private ConcurrentHashMap<ConsumerTopicDiffMetric, Long> consumerDLQDiff = new ConcurrentHashMap<>();
     //consumer count
     private ConcurrentHashMap<ConsumerCountMetric, Integer> consumerCounts = new ConcurrentHashMap<>();
