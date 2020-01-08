@@ -1,7 +1,9 @@
-RocketMQ Exporter
-==============
+# Apache RocketMQ Exporter for Prometheus.
+[![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
+[![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/apache/rocketmq-exporter.svg)](http://isitmaintained.com/project/apache/rocketmq-exporter "Average time to resolve an issue")
+[![Percentage of issues still open](http://isitmaintained.com/badge/open/apache/rocketmq-exporter.svg)](http://isitmaintained.com/project/apache/rocketmq-exporter "Percentage of issues still open")
+![Twitter Follow](https://img.shields.io/twitter/follow/ApacheRocketMQ?style=social)
 
-Apache RocketMQ Exporter for Prometheus.
 
 Table of Contents
 -----------------
