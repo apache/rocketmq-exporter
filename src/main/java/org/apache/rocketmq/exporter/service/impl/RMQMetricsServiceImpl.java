@@ -16,14 +16,18 @@
  */
 package org.apache.rocketmq.exporter.service.impl;
 
+import io.prometheus.client.Collector;
 import io.prometheus.client.CollectorRegistry;
-import io.prometheus.client.exporter.common.TextFormat;
 import org.apache.rocketmq.exporter.collector.RMQMetricsCollector;
 import org.apache.rocketmq.exporter.service.RMQMetricsService;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.io.Writer;
+import java.util.Enumeration;
+import java.util.Iterator;
+
 
 @Service
 public class RMQMetricsServiceImpl implements RMQMetricsService {
@@ -40,6 +44,72 @@ public class RMQMetricsServiceImpl implements RMQMetricsService {
     }
 
     public void metrics(StringWriter writer) throws IOException {
-        TextFormat.write004(writer, registry.metricFamilySamples());
+        this.writeEscapedHelp(writer, registry.metricFamilySamples());
     }
+
+    public void writeEscapedHelp(Writer writer, Enumeration<Collector.MetricFamilySamples> mfs) throws IOException {
+        while (mfs.hasMoreElements()) {
+            Collector.MetricFamilySamples metricFamilySamples = mfs.nextElement();
+            for (Iterator var3 = metricFamilySamples.samples.iterator(); var3.hasNext(); writer.write(10)) {
+                Collector.MetricFamilySamples.Sample sample = (Collector.MetricFamilySamples.Sample) var3.next();
+                writer.write(sample.name);
+                if (sample.labelNames.size() > 0) {
+                    writer.write(123);
+
+                    for (int i = 0; i < sample.labelNames.size(); ++i) {
+                        writer.write((String) sample.labelNames.get(i));
+                        writer.write("=\"");
+                        writeEscapedLabelValue(writer, (String) sample.labelValues.get(i));
+                        writer.write("\",");
+                    }
+
+                    writer.write(125);
+                }
+
+                writer.write(32);
+                writer.write(Collector.doubleToGoString(sample.value));
+                if (sample.timestampMs != null) {
+                    writer.write(32);
+                    writer.write(sample.timestampMs.toString());
+                }
+            }
+        }
+
+    }
+
+    private static void writeEscapedLabelValue(Writer writer, String s) throws IOException {
+        for (int i = 0; i < s.length(); ++i) {
+            char c = s.charAt(i);
+            switch (c) {
+                case '\n':
+                    writer.append("\\n");
+                    break;
+                case '"':
+                    writer.append("\\\"");
+                    break;
+                case '\\':
+                    writer.append("\\\\");
+                    break;
+                default:
+                    writer.append(c);
+            }
+        }
+
+    }
+
+    private static String typeString(Collector.Type t) {
+        switch (t) {
+            case GAUGE:
+                return "gauge";
+            case COUNTER:
+                return "counter";
+            case SUMMARY:
+                return "summary";
+            case HISTOGRAM:
+                return "histogram";
+            default:
+                return "untyped";
+        }
+    }
+
 }

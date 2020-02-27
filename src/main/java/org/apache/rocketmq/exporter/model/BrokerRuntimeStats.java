@@ -8,61 +8,29 @@ import java.util.List;
 import java.util.Map;
 
 public class BrokerRuntimeStats {
-    //今天生产的消息总量
     private long msgPutTotalTodayNow;
-    //今天消费的消息总量
     private long msgGetTotalTodayNow;
-
-    //今天早上生产消息总量
     private long msgPutTotalTodayMorning;
-    //今天早上消费消息总量
     private long msgGetTotalTodayMorning;
-
-    //昨天早上生产的消息总量
     private long msgPutTotalYesterdayMorning;
-    //昨天早上消费的消息总量
     private long msgGetTotalYesterdayMorning;
-
-    //延迟消息位点
     private List<ScheduleMessageOffsetTable> scheduleMessageOffsetTables = new ArrayList<>();
-
-    //发送线程最大等待时间
     private long sendThreadPoolQueueHeadWaitTimeMills;
-    //拉取消息线程最大等待时间
     private long queryThreadPoolQueueHeadWaitTimeMills;
-    //拉取线程最大等待时间
     private long pullThreadPoolQueueHeadWaitTimeMills;
-
-    //查询线程任务个数
     private long queryThreadPoolQueueSize;
-    //拉取线程任务个数
     private long pullThreadPoolQueueSize;
-    //发送线程等待队列长度
     private long sendThreadPoolQueueCapacity;
-    //拉取线程等待队列长度
     private long pullThreadPoolQueueCapacity;
-
-    //刷pagecache时间统计
     private Map<String, Integer> putMessageDistributeTimeMap = new HashMap<>();
-    //还有多少字节的数据没有刷盘
     private double remainHowManyDataToFlush;
-
-    //commitlog 最小位点
     private long commitLogMinOffset;
-    //commitlog 最大位点
     private long commitLogMaxOffset;
-
-    //broker运行时间描述
     private String runtime;
-    //broker 启动时间
     private long bootTimestamp;
-    //broker 磁盘总量
     private double commitLogDirCapacityTotal;
-    //broker 磁盘剩余
     private double commitLogDirCapacityFree;
-    //broker 版本号
     private int brokerVersion;
-    //
     private long dispatchMaxBuffer;
 
     private PutTps putTps = new PutTps();
@@ -74,7 +42,6 @@ public class BrokerRuntimeStats {
     private double consumeQueueDiskRatio;
     private double commitLogDiskRatio;
 
-    //page cache锁定时间
     private long pageCacheLockTimeMills;
 
     private long getMessageEntireTimeMax;
@@ -89,9 +56,7 @@ public class BrokerRuntimeStats {
 
     private long remainTransientStoreBufferNumbs;
     private long queryThreadPoolQueueCapacity;
-    //发送消息平均体积大小
     private double putMessageAverageSize;
-    //全部发送消息数
     private long putMessageSizeTotal;
     private long dispatchBehindBytes;
 

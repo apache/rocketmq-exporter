@@ -15,11 +15,17 @@ rocketmq:
   config:
     webTelemetryPath: /metrics
     rocketmqVersion: 4_2_0
-    namesrvAddr: 127.0.0.1:9876 #
+    namesrvAddr: 127.0.0.1:9876
     enableCollect: true
 
+threadpool:
+  collect-client-metric-executor:
+    core-pool-size: 10
+    maximum-pool-size: 10
+    keep-alive-time: 3000
+    queueSize: 5000
 task:
-  count: 5
+  count: 5 # num of scheduled-tasks
   collectTopicOffset:
     cron: 15 0/1 * * * ?
   collectConsumerOffset:

@@ -1,30 +1,30 @@
 package org.apache.rocketmq.exporter.model.metrics;
 
 public class ConsumerCountMetric {
-    private String caddr;
-    private String localaddr;
+    private String caddrs;
+    private String localaddrs;
     private String group;
 
-    public ConsumerCountMetric(String group, String caddr, String localaddr) {
+    public ConsumerCountMetric(String group, String caddrs, String localaddrs) {
+        this.caddrs = caddrs;
+        this.localaddrs = localaddrs;
         this.group = group;
-        this.caddr = caddr;
-        this.localaddr = localaddr;
     }
 
-    public String getCaddr() {
-        return caddr;
+    public String getCaddrs() {
+        return caddrs;
     }
 
-    public void setCaddr(String caddr) {
-        this.caddr = caddr;
+    public void setCaddrs(String caddrs) {
+        this.caddrs = caddrs;
     }
 
-    public String getLocaladdr() {
-        return localaddr;
+    public String getLocaladdrs() {
+        return localaddrs;
     }
 
-    public void setLocaladdr(String localaddr) {
-        this.localaddr = localaddr;
+    public void setLocaladdrs(String localaddrs) {
+        this.localaddrs = localaddrs;
     }
 
     public String getGroup() {
@@ -53,6 +53,6 @@ public class ConsumerCountMetric {
 
     @Override
     public String toString() {
-        return "group: " + group + " caddr: " + caddr + " localaddr: " + localaddr;
+        return "group: " + group + " caddr: " + caddrs + " localaddr: " + localaddrs;
     }
 }

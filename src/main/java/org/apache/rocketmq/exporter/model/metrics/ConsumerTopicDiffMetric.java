@@ -1,15 +1,17 @@
 package org.apache.rocketmq.exporter.model.metrics;
 
 public class ConsumerTopicDiffMetric {
-    public ConsumerTopicDiffMetric(String group, String topic, String countOfOnlineConsumers) {
+    public ConsumerTopicDiffMetric(String group, String topic, String countOfOnlineConsumers, String msgModel) {
         this.group = group;
         this.topic = topic;
         this.countOfOnlineConsumers = countOfOnlineConsumers;
+        this.msgModel = msgModel;
     }
 
     private String group;
     private String topic;
     private String countOfOnlineConsumers;
+    private String msgModel;//0：broadcast， 1：cluster
 
     public String getGroup() {
         return group;
@@ -33,6 +35,14 @@ public class ConsumerTopicDiffMetric {
 
     public void setCountOfOnlineConsumers(String countOfOnlineConsumers) {
         this.countOfOnlineConsumers = countOfOnlineConsumers;
+    }
+
+    public String getMsgModel() {
+        return msgModel;
+    }
+
+    public void setMsgModel(String msgModel) {
+        this.msgModel = msgModel;
     }
 
     @Override

@@ -28,6 +28,14 @@ import org.apache.rocketmq.exporter.model.metrics.DLQTopicOffsetMetric;
 import org.apache.rocketmq.exporter.model.metrics.ProducerMetric;
 import org.apache.rocketmq.exporter.model.metrics.TopicPutNumMetric;
 import org.apache.rocketmq.exporter.model.metrics.brokerruntime.BrokerRuntimeMetric;
+import org.apache.rocketmq.exporter.model.metrics.clientrunime.ConsumerRuntimeConsumeFailedMsgsMetric;
+import org.apache.rocketmq.exporter.model.metrics.clientrunime.ConsumerRuntimeConsumeFailedTPSMetric;
+import org.apache.rocketmq.exporter.model.metrics.clientrunime.ConsumerRuntimeConsumeOKTPSMetric;
+import org.apache.rocketmq.exporter.model.metrics.clientrunime.ConsumerRuntimeConsumeRTMetric;
+import org.apache.rocketmq.exporter.model.metrics.clientrunime.ConsumerRuntimePullRTMetric;
+import org.apache.rocketmq.exporter.model.metrics.clientrunime.ConsumerRuntimePullTPSMetric;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -57,6 +65,19 @@ public class RMQMetricsCollector extends Collector {
     //consumer count
     private ConcurrentHashMap<ConsumerCountMetric, Integer> consumerCounts = new ConcurrentHashMap<>();
 
+     //count of consume fail
+     private ConcurrentHashMap<ConsumerRuntimeConsumeFailedMsgsMetric, Long> consumerClientFailedMsgCounts = new ConcurrentHashMap<>();
+     //TPS of consume fail 
+     private ConcurrentHashMap<ConsumerRuntimeConsumeFailedTPSMetric, Double> consumerClientFailedTPS = new ConcurrentHashMap<>();
+     //TPS of consume success
+     private ConcurrentHashMap<ConsumerRuntimeConsumeOKTPSMetric, Double> consumerClientOKTPS = new ConcurrentHashMap<>();
+     //rt of consume
+     private ConcurrentHashMap<ConsumerRuntimeConsumeRTMetric, Double> consumerClientRT = new ConcurrentHashMap<>();
+     //pull RT
+     private ConcurrentHashMap<ConsumerRuntimePullRTMetric, Double> consumerClientPullRT = new ConcurrentHashMap<>();
+     //pull tps
+     private ConcurrentHashMap<ConsumerRuntimePullTPSMetric, Double> consumerClientPullTPS = new ConcurrentHashMap<>();
+ 
     //broker offset for consumer-topic
     private ConcurrentHashMap<ConsumerMetric, Long> groupBrokerTotalOffset = new ConcurrentHashMap<>();
     //consumer offset for consumer-topic
@@ -139,27 +160,28 @@ public class RMQMetricsCollector extends Collector {
     private ConcurrentHashMap<BrokerRuntimeMetric, Long> brokerRuntimePullThreadPoolQueueHeadWaitTimeMills = new ConcurrentHashMap<>();
     private ConcurrentHashMap<BrokerRuntimeMetric, Long> brokerRuntimeQueryThreadPoolQueueHeadWaitTimeMills = new ConcurrentHashMap<>();
     private ConcurrentHashMap<BrokerRuntimeMetric, Long> brokerRuntimeSendThreadPoolQueueHeadWaitTimeMills = new ConcurrentHashMap<>();
-
     private ConcurrentHashMap<BrokerRuntimeMetric, Double> brokerRuntimeCommitLogDirCapacityFree = new ConcurrentHashMap<>();
     private ConcurrentHashMap<BrokerRuntimeMetric, Double> brokerRuntimeCommitLogDirCapacityTotal = new ConcurrentHashMap<>();
 
     private ConcurrentHashMap<BrokerRuntimeMetric, Long> brokerRuntimeCommitLogMaxOffset = new ConcurrentHashMap<>();
     private ConcurrentHashMap<BrokerRuntimeMetric, Long> brokerRuntimeCommitLogMinOffset = new ConcurrentHashMap<>();
     private ConcurrentHashMap<BrokerRuntimeMetric, Double> brokerRuntimeRemainHowManyDataToFlush = new ConcurrentHashMap<>();
+    private final static Logger log = LoggerFactory.getLogger(RMQMetricsCollector.class);
 
-    private static List<String> GROUP_DIFF_LABEL_NAMES = Arrays.asList("group", "topic", "countOfOnlineConsumers");
+    private static List<String> GROUP_DIFF_LABEL_NAMES = Arrays.asList("group", "topic", "countOfOnlineConsumers", "msgModel");
 
     private static <T extends Number> void loadGroupDiffMetric(GaugeMetricFamily family, Map.Entry<ConsumerTopicDiffMetric, T> entry) {
         family.addMetric(
                 Arrays.asList(
                         entry.getKey().getGroup(),
                         entry.getKey().getTopic(),
-                        entry.getKey().getCountOfOnlineConsumers()
-                ),
+                        entry.getKey().getCountOfOnlineConsumers(),
+                        entry.getKey().getMsgModel()                
+                        ),
                 entry.getValue().doubleValue());
     }
 
-    private static List<String> GROUP_COUNT_LABEL_NAMES = Arrays.asList("group", "caddr", "localaddr");
+    private static List<String> GROUP_COUNT_LABEL_NAMES = Arrays.asList("caddr", "localaddr", "group");
 
     private void collectConsumerMetric(List<MetricFamilySamples> mfs) {
         GaugeMetricFamily groupGetLatencyByConsumerDiff = new GaugeMetricFamily("rocketmq_group_diff", "GroupDiff", GROUP_DIFF_LABEL_NAMES);
@@ -184,9 +206,9 @@ public class RMQMetricsCollector extends Collector {
         for (Map.Entry<ConsumerCountMetric, Integer> entry : consumerCounts.entrySet()) {
             consumerCountsF.addMetric(
                     Arrays.asList(
-                            entry.getKey().getGroup(),
-                            entry.getKey().getCaddr(),
-                            entry.getKey().getLocaladdr()
+                        entry.getKey().getCaddrs(),
+                        entry.getKey().getLocaladdrs(),
+                        entry.getKey().getGroup()
                     ),
                     entry.getValue().doubleValue());
         }
@@ -255,11 +277,65 @@ public class RMQMetricsCollector extends Collector {
 
         collectGroupNums(mfs);
 
+        collectClientGroupMetric(mfs);
+
         collectBrokerNums(mfs);
 
         collectBrokerRuntimeStats(mfs);
 
         return mfs;
+    }
+
+    private static List<String> GROUP_CLIENT_METRIC_LABEL_NAMES = Arrays.asList(
+            "clientAddr", "clientId", "group", "topic"
+    );
+
+    private void collectClientGroupMetric(List<MetricFamilySamples> mfs) {
+        GaugeMetricFamily consumerClientFailedMsgCountsF = new GaugeMetricFamily("rocketmq_client_consume_fail_msg_count", "consumerClientFailedMsgCounts", GROUP_CLIENT_METRIC_LABEL_NAMES);
+        for (Map.Entry<ConsumerRuntimeConsumeFailedMsgsMetric, Long> entry : consumerClientFailedMsgCounts.entrySet()) {
+            loadClientRuntimeStatsMetric(consumerClientFailedMsgCountsF, entry);
+        }
+        mfs.add(consumerClientFailedMsgCountsF);
+
+        GaugeMetricFamily consumerClientFailedTPSF = new GaugeMetricFamily("rocketmq_client_consume_fail_msg_tps", "consumerClientFailedTPS", GROUP_CLIENT_METRIC_LABEL_NAMES);
+        for (Map.Entry<ConsumerRuntimeConsumeFailedTPSMetric, Double> entry : consumerClientFailedTPS.entrySet()) {
+            loadClientRuntimeStatsMetric(consumerClientFailedTPSF, entry);
+        }
+        mfs.add(consumerClientFailedTPSF);
+
+        GaugeMetricFamily consumerClientOKTPSF = new GaugeMetricFamily("rocketmq_client_consume_ok_msg_tps", "consumerClientOKTPS", GROUP_CLIENT_METRIC_LABEL_NAMES);
+        for (Map.Entry<ConsumerRuntimeConsumeOKTPSMetric, Double> entry : consumerClientOKTPS.entrySet()) {
+            loadClientRuntimeStatsMetric(consumerClientOKTPSF, entry);
+        }
+        mfs.add(consumerClientOKTPSF);
+
+        GaugeMetricFamily consumerClientRTF = new GaugeMetricFamily("rocketmq_client_consume_rt", "consumerClientRT", GROUP_CLIENT_METRIC_LABEL_NAMES);
+        for (Map.Entry<ConsumerRuntimeConsumeRTMetric, Double> entry : consumerClientRT.entrySet()) {
+            loadClientRuntimeStatsMetric(consumerClientRTF, entry);
+        }
+        mfs.add(consumerClientRTF);
+
+        GaugeMetricFamily consumerClientPullRTF = new GaugeMetricFamily("rocketmq_client_consumer_pull_rt", "consumerClientPullRT", GROUP_CLIENT_METRIC_LABEL_NAMES);
+        for (Map.Entry<ConsumerRuntimePullRTMetric, Double> entry : consumerClientPullRT.entrySet()) {
+            loadClientRuntimeStatsMetric(consumerClientPullRTF, entry);
+        }
+        mfs.add(consumerClientPullRTF);
+
+        GaugeMetricFamily consumerClientPullTPSF = new GaugeMetricFamily("rocketmq_client_consumer_pull_tps", "consumerClientPullTPS", GROUP_CLIENT_METRIC_LABEL_NAMES);
+        for (Map.Entry<ConsumerRuntimePullTPSMetric, Double> entry : consumerClientPullTPS.entrySet()) {
+            loadClientRuntimeStatsMetric(consumerClientPullTPSF, entry);
+        }
+        mfs.add(consumerClientPullTPSF);
+    }
+
+
+    private <T2 extends Number, T1 extends ConsumerRuntimeConsumeFailedMsgsMetric> void loadClientRuntimeStatsMetric(GaugeMetricFamily family, Map.Entry<T1, T2> entry) {
+        family.addMetric(Arrays.asList(
+                entry.getKey().getCaddrs(),
+                entry.getKey().getLocaladdrs(),
+                entry.getKey().getGroup(),
+                entry.getKey().getTopic()
+        ), entry.getValue().doubleValue());
     }
 
     private static List<String> GROUP_PULL_LATENCY_LABEL_NAMES = Arrays.asList(
@@ -407,7 +483,7 @@ public class RMQMetricsCollector extends Collector {
         mfs.add(groupBrokerTotalOffsetF);
 
         GaugeMetricFamily groupConsumeTotalOffsetF = new GaugeMetricFamily("rocketmq_group_consume_total_offset", "GroupConsumeTotalOffset", GROUP_NUMS_LABEL_NAMES);
-        for (Map.Entry<ConsumerMetric, Long> entry : groupBrokerTotalOffset.entrySet()) {
+        for (Map.Entry<ConsumerMetric, Long> entry : groupConsumeTotalOffset.entrySet()) {
             loadGroupNumsMetric(groupConsumeTotalOffsetF, entry);
         }
         mfs.add(groupConsumeTotalOffsetF);
@@ -462,17 +538,17 @@ public class RMQMetricsCollector extends Collector {
         }
     }
 
-    public void addGroupCountMetric(String group, String caddr, String localaddr, int count) {
-        this.consumerCounts.put(new ConsumerCountMetric(group, caddr, localaddr), count);
+    public void addGroupCountMetric(String group, String caddrs, String localaddrs, int count) {
+        this.consumerCounts.put(new ConsumerCountMetric(group, caddrs, localaddrs), count);
     }
 
-    public void addGroupDiffMetric(String countOfOnlineConsumers, String group, String topic, long value) {
+    public void addGroupDiffMetric(String countOfOnlineConsumers, String group, String topic, String msgModel, long value) {
         if (topic.startsWith(MixAll.RETRY_GROUP_TOPIC_PREFIX)) {
-            this.consumerRetryDiff.put(new ConsumerTopicDiffMetric(group, topic, countOfOnlineConsumers), value);
+            this.consumerRetryDiff.put(new ConsumerTopicDiffMetric(group, topic, countOfOnlineConsumers, msgModel), value);
         } else if (topic.startsWith(MixAll.DLQ_GROUP_TOPIC_PREFIX)) {
-            this.consumerDLQDiff.put(new ConsumerTopicDiffMetric(group, topic, countOfOnlineConsumers), value);
+            this.consumerDLQDiff.put(new ConsumerTopicDiffMetric(group, topic, countOfOnlineConsumers, msgModel), value);
         } else {
-            this.consumerDiff.put(new ConsumerTopicDiffMetric(group, topic, countOfOnlineConsumers), value);
+            this.consumerDiff.put(new ConsumerTopicDiffMetric(group, topic, countOfOnlineConsumers, msgModel), value);
         }
     }
 
@@ -505,6 +581,31 @@ public class RMQMetricsCollector extends Collector {
     public void addGroupGetSizeMetric(String topic, String group, double value) {
         groupGetSize.put(new ConsumerMetric(topic, group), value);
     }
+
+    public void addConsumerClientFailedMsgCountsMetric(String group, String topic, String clientAddr, String clientId, long value) {
+        consumerClientFailedMsgCounts.put(new ConsumerRuntimeConsumeFailedMsgsMetric(group, topic, clientAddr, clientId), value);
+    }
+
+    public void addConsumerClientFailedTPSMetric(String group, String topic, String clientAddr, String clientId, double value) {
+        consumerClientFailedTPS.put(new ConsumerRuntimeConsumeFailedTPSMetric(group, topic, clientAddr, clientId), value);
+    }
+
+    public void addConsumerClientOKTPSMetric(String group, String topic, String clientAddr, String clientId, double value) {
+        consumerClientOKTPS.put(new ConsumerRuntimeConsumeOKTPSMetric(group, topic, clientAddr, clientId), value);
+    }
+
+    public void addConsumeRTMetricMetric(String group, String topic, String clientAddr, String clientId, double value) {
+        consumerClientRT.put(new ConsumerRuntimeConsumeRTMetric(group, topic, clientAddr, clientId), value);
+    }
+
+    public void addPullRTMetric(String group, String topic, String clientAddr, String clientId, double value) {
+        consumerClientPullRT.put(new ConsumerRuntimePullRTMetric(group, topic, clientAddr, clientId), value);
+    }
+
+    public void addPullTPSMetric(String group, String topic, String clientAddr, String clientId, double value) {
+        consumerClientPullTPS.put(new ConsumerRuntimePullTPSMetric(group, topic, clientAddr, clientId), value);
+    }
+
 
     public void addSendBackNumsMetric(String topic, String group, double value) {
         sendBackNums.put(new ConsumerMetric(topic, group), value);

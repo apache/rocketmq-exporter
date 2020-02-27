@@ -29,14 +29,18 @@ import org.apache.rocketmq.common.message.MessageQueue;
 import org.apache.rocketmq.common.protocol.ResponseCode;
 import org.apache.rocketmq.common.protocol.body.BrokerStatsData;
 import org.apache.rocketmq.common.protocol.body.ClusterInfo;
+import org.apache.rocketmq.common.protocol.body.Connection;
 import org.apache.rocketmq.common.protocol.body.ConsumerConnection;
 import org.apache.rocketmq.common.protocol.body.GroupList;
 import org.apache.rocketmq.common.protocol.body.KVTable;
 import org.apache.rocketmq.common.protocol.body.TopicList;
+import org.apache.rocketmq.common.protocol.heartbeat.MessageModel;
 import org.apache.rocketmq.common.protocol.route.BrokerData;
 import org.apache.rocketmq.common.protocol.route.TopicRouteData;
+import org.apache.rocketmq.exporter.config.CollectClientMetricExecutorConfig;
 import org.apache.rocketmq.exporter.config.RMQConfigure;
 import org.apache.rocketmq.exporter.model.BrokerRuntimeStats;
+import org.apache.rocketmq.exporter.model.common.TwoTuple;
 import org.apache.rocketmq.exporter.service.RMQMetricsService;
 import org.apache.rocketmq.exporter.util.Utils;
 import org.apache.rocketmq.remoting.exception.RemotingConnectException;
@@ -48,13 +52,24 @@ import org.apache.rocketmq.tools.admin.MQAdminExt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Component
 public class MetricsCollectTask {
@@ -64,8 +79,35 @@ public class MetricsCollectTask {
     @Resource
     private RMQConfigure rmqConfigure;
     @Resource
+    @Qualifier("collectClientMetricExecutor")
+    private ExecutorService collectClientMetricExecutor;
+    @Resource
     private RMQMetricsService metricsService;
     private final static Logger log = LoggerFactory.getLogger(MetricsCollectTask.class);
+
+    private BlockingQueue<Runnable> collectClientTaskBlockQueue;
+
+    @Bean(name = "collectClientMetricExecutor")
+    private ExecutorService collectClientMetricExecutor(CollectClientMetricExecutorConfig collectClientMetricExecutorConfig) {
+        collectClientTaskBlockQueue = new LinkedBlockingDeque<Runnable>(collectClientMetricExecutorConfig.getQueueSize());
+        ExecutorService executorService = new ClientMetricCollectorFixedThreadPoolExecutor(
+                collectClientMetricExecutorConfig.getCorePoolSize(),
+                collectClientMetricExecutorConfig.getMaximumPoolSize(),
+                collectClientMetricExecutorConfig.getKeepAliveTime(),
+                TimeUnit.MILLISECONDS,
+                this.collectClientTaskBlockQueue,
+                new ThreadFactory() {
+                    private final AtomicLong threadIndex = new AtomicLong(0);
+
+                    @Override
+                    public Thread newThread(Runnable r) {
+                        return new Thread(r, "collectClientMetricThread_" + this.threadIndex.incrementAndGet());
+                    }
+                },
+                new ThreadPoolExecutor.DiscardOldestPolicy()
+        );
+        return executorService;
+    }
 
     @PostConstruct
     public void init() throws InterruptedException, RemotingConnectException, RemotingTimeoutException, RemotingSendRequestException, MQBrokerException {
@@ -180,8 +222,10 @@ public class MetricsCollectTask {
                 int countOfOnlineConsumers = 0;
 
                 double consumeTPS = 0F;
+                MessageModel messageModel = MessageModel.CLUSTERING;
                 try {
                     onlineConsumers = mqAdminExt.examineConsumerConnectionInfo(group);
+                    messageModel = onlineConsumers.getMessageModel();
                 } catch (InterruptedException | RemotingException ex) {
                     log.error(String.format("get topic's(%s) online consumers(%s) exception", topic, group), ex);
                 } catch (MQClientException ex) {
@@ -194,6 +238,25 @@ public class MetricsCollectTask {
                     countOfOnlineConsumers = 0;
                 } else {
                     countOfOnlineConsumers = onlineConsumers.getConnectionSet().size();
+                }
+                {
+                    String cAddrs = "", localAddrs = "";
+                    if (countOfOnlineConsumers > 0) {
+                        TwoTuple<String, String> addresses = buildClientAddresses(onlineConsumers.getConnectionSet());
+                        cAddrs = addresses.getFirst();
+                        localAddrs = addresses.getSecond();
+                    }
+                    metricsService.getCollector().addGroupCountMetric(group, cAddrs, localAddrs, countOfOnlineConsumers);
+                }
+                if (countOfOnlineConsumers > 0) {
+                    collectClientMetricExecutor.submit(new ClientMetricTaskRunnable(
+                            group,
+                            onlineConsumers,
+                            false,
+                            this.mqAdminExt,
+                            log,
+                            this.metricsService
+                    ));
                 }
                 try {
                     consumeStats = mqAdminExt.examineConsumeStats(group, topic);
@@ -211,7 +274,13 @@ public class MetricsCollectTask {
                 {
                     diff = consumeStats.computeTotalDiff();
                     consumeTPS = consumeStats.getConsumeTps();
-                    metricsService.getCollector().addGroupDiffMetric(String.valueOf(countOfOnlineConsumers), group, topic, diff);
+                    metricsService.getCollector().addGroupDiffMetric(
+                            String.valueOf(countOfOnlineConsumers),
+                            group,
+                            topic,
+                            String.valueOf(messageModel.ordinal()),
+                            diff
+                    );
                     metricsService.getCollector().addGroupConsumeTPSMetric(topic, group, consumeTPS);
                 }
                 Set<Map.Entry<MessageQueue, OffsetWrapper>> consumeStatusEntries = consumeStats.getOffsetTable().entrySet();
@@ -487,6 +556,22 @@ public class MetricsCollectTask {
         }
 
         log.info("broker runtime stats collection task finished...." + (System.currentTimeMillis() - start));
+    }
+
+    private static TwoTuple<String, String> buildClientAddresses(HashSet<Connection> connectionSet) {
+        if (connectionSet == null || connectionSet.isEmpty()) {
+            return new TwoTuple<>("", "");
+        }
+        List<String> clientAddresses = new ArrayList<>();
+        List<String> clientIdAddresses = new ArrayList<>();
+
+        for (Connection connection : connectionSet) {
+            clientAddresses.add(connection.getClientAddr());//tcp连接地址
+            clientIdAddresses.add(connection.getClientId());//本地ip组成的id
+        }
+        String str1 = String.join(",", clientAddresses);
+        String str2 = String.join(",", clientIdAddresses);
+        return new TwoTuple<>(str1, str2);
     }
 
     private void handleTopicNotExistException(int responseCode, Exception ex, String topic, String group) {
