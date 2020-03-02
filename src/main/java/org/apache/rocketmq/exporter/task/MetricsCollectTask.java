@@ -19,6 +19,7 @@ package org.apache.rocketmq.exporter.task;
 import com.google.common.base.Throwables;
 import org.apache.rocketmq.client.consumer.PullResult;
 import org.apache.rocketmq.client.consumer.PullStatus;
+import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.common.MixAll;
 import org.apache.rocketmq.common.admin.ConsumeStats;
 import org.apache.rocketmq.common.admin.OffsetWrapper;
@@ -118,6 +119,10 @@ public class MetricsCollectTask {
                                 } else {
                                     consumeOffsetMap.put(q.getBrokerName(), offset.getConsumerOffset());
                                 }
+                            }
+                        } catch (MQClientException ex) {
+                            if(ex.getResponseCode() == 17) {
+                                metricsService.getCollector().DelGroupOffsetMetric(clusterName, topic, group);
                             }
                         } catch (Exception e) {
                             log.info("ignore this consumer", e.getMessage());

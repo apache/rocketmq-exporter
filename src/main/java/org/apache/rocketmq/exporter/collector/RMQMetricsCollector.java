@@ -19,6 +19,7 @@ package org.apache.rocketmq.exporter.collector;
 import io.prometheus.client.Collector;
 import io.prometheus.client.CounterMetricFamily;
 import io.prometheus.client.GaugeMetricFamily;
+import java.util.Iterator;
 import org.apache.rocketmq.exporter.model.metrics.BrokerMetric;
 import org.apache.rocketmq.exporter.model.metrics.ConsumerMetric;
 import org.apache.rocketmq.exporter.model.metrics.ConsumerQueueMetric;
@@ -172,6 +173,15 @@ public class RMQMetricsCollector extends Collector {
         groupOffset.put(new ConsumerMetric(clusterName,brokerName,topic,group),value);
     }
 
+    public void DelGroupOffsetMetric(String clusterName, String topic, String group) {
+        Iterator<Map.Entry<ConsumerMetric, Double>> it = groupOffset.entrySet().iterator();
+        while(it.hasNext()) {
+            ConsumerMetric m = it.next().getKey();
+            if (m.getClusterName() == clusterName && m.getTopicName() == topic && m.getConsumerGroupName() == group) {
+                it.remove();
+            }
+        }
+    }
 
     public void AddsendBackNumsMetric(String clusterName, String brokerName, String topic, String group,  double value)
     {
