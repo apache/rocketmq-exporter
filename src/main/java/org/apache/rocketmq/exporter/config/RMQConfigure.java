@@ -23,8 +23,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-
-
 import static org.apache.rocketmq.client.ClientConfig.SEND_MESSAGE_WITH_VIP_CHANNEL_PROPERTY;
 
 @Configuration
@@ -69,9 +67,11 @@ public class RMQConfigure {
             logger.info("setIsVIPChannel isVIPChannel={}", isVIPChannel);
         }
     }
+
     public boolean isEnableCollect() {
         return enableCollect;
     }
+
     public void setEnableCollect(boolean enableCollect) {
         this.enableCollect = enableCollect;
     }

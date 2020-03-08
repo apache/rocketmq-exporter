@@ -18,8 +18,6 @@ package org.apache.rocketmq.exporter.controller;
 
 
 import org.apache.rocketmq.exporter.service.RMQMetricsService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -33,19 +31,14 @@ import java.io.StringWriter;
 @RestController
 @EnableAutoConfiguration
 public class RMQMetricsController {
-
-    private final static Logger log = LoggerFactory.getLogger(RMQMetricsController.class);
-
     @Resource
     RMQMetricsService metricsService;
 
     @RequestMapping(value = "${rocketmq.config.webTelemetryPath}")
     @ResponseBody
     private void metrics(HttpServletResponse response) throws IOException {
-
         StringWriter writer = new StringWriter();
-        metricsService.Metrics(writer);
-
+        metricsService.metrics(writer);
         response.setHeader("Content-Type", "text/plain; version=0.0.4; charset=utf-8");
         response.getOutputStream().print(writer.toString());
     }

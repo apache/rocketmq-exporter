@@ -16,34 +16,50 @@
  */
 package org.apache.rocketmq.exporter.model.metrics;
 
+//每个topic最大位点
 public class ProducerMetric {
+    private String clusterName;
+    private String brokerNames;
+    private String topicName;
+    private long lastUpdateTimestamp;
 
-    private  String   clusterName;
-    private  String   brokerName;
-    private  String   topicName;
-
-    public void setClusterName(String cluster) {
-        clusterName = cluster;
-    }
-    public  String getClusterName() {
+    public String getClusterName() {
         return clusterName;
     }
-    void setBrokerName(String broker) {
-        brokerName = broker;
+
+    public void setClusterName(String clusterName) {
+        this.clusterName = clusterName;
     }
-    public String getBrokerName() {
-        return brokerName;
+
+    public String getBrokerNames() {
+        return brokerNames;
     }
-    public void setTopicName(String topic) {
-        topicName = topic;
+
+    public void setBrokerNames(String brokerNames) {
+        this.brokerNames = brokerNames;
     }
-    public String  getTopicName() {
+
+    public String getTopicName() {
         return topicName;
     }
-    public ProducerMetric(String cluster,String broker,String topic) {
-        clusterName = cluster;
-        brokerName  =   broker;
-        topicName   =   topic;
+
+    public void setTopicName(String topicName) {
+        this.topicName = topicName;
+    }
+
+    public long getLastUpdateTimestamp() {
+        return lastUpdateTimestamp;
+    }
+
+    public void setLastUpdateTimestamp(long lastUpdateTimestamp) {
+        this.lastUpdateTimestamp = lastUpdateTimestamp;
+    }
+
+    public ProducerMetric(String clusterName, String brokerNames, String topicName, long lastUpdateTimestamp) {
+        this.clusterName = clusterName;
+        this.brokerNames = brokerNames;
+        this.topicName = topicName;
+        this.lastUpdateTimestamp = lastUpdateTimestamp;
     }
 
     @Override
@@ -53,21 +69,20 @@ public class ProducerMetric {
         }
         ProducerMetric other = (ProducerMetric) obj;
 
-        return  other.clusterName.equals(clusterName) && other.brokerName.equals(brokerName)
-                && other.topicName.equals(topicName);
+        return other.clusterName.equals(clusterName) &&
+                other.topicName.equals(topicName);
     }
 
     @Override
     public int hashCode() {
         int hash = 1;
         hash = 37 * hash + clusterName.hashCode();
-        hash = 37 * hash + brokerName.hashCode();
         hash = 37 * hash + topicName.hashCode();
         return hash;
     }
 
     @Override
     public String toString() {
-        return "ClusterName: " + clusterName + " BrokerName: " + brokerName + " topicName: " + topicName;
+        return "ClusterName: " + clusterName + " BrokerNames: " + brokerNames + " topicName: " + topicName;
     }
 }

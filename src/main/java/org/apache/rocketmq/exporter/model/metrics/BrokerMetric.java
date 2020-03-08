@@ -17,32 +17,38 @@
 package org.apache.rocketmq.exporter.model.metrics;
 
 public class BrokerMetric {
+    private String clusterName;
+    private String brokerIP;
+    private String brokerHost;
 
-    private  String   clusterName;
-    private  String   brokerName;
-
-
-    public void setClusterName(String cluster) {
-
-        clusterName = cluster;
+    public BrokerMetric(String clusterName, String brokerIP, String brokerHost) {
+        this.clusterName = clusterName;
+        this.brokerIP = brokerIP;
+        this.brokerHost = brokerHost;
     }
-    public  String getClusterName() {
 
+    public String getClusterName() {
         return clusterName;
     }
-    void setBrokerName(String broker) {
 
-        brokerName = broker;
+    public void setClusterName(String clusterName) {
+        this.clusterName = clusterName;
     }
 
-    public String getBrokerName() {
-
-        return brokerName;
+    public String getBrokerIP() {
+        return brokerIP;
     }
 
-    public BrokerMetric(String cluster, String broker) {
-        clusterName = cluster;
-        brokerName  =   broker;
+    public void setBrokerIP(String brokerIP) {
+        this.brokerIP = brokerIP;
+    }
+
+    public String getBrokerHost() {
+        return brokerHost;
+    }
+
+    public void setBrokerHost(String brokerHost) {
+        this.brokerHost = brokerHost;
     }
 
     @Override
@@ -52,19 +58,20 @@ public class BrokerMetric {
         }
         BrokerMetric other = (BrokerMetric) obj;
 
-        return  other.clusterName.equals(clusterName) && other.brokerName.equals(brokerName);
+        return other.clusterName.equals(clusterName) &&
+                other.brokerIP.equals(brokerIP);
     }
 
     @Override
     public int hashCode() {
         int hash = 1;
         hash = 37 * hash + clusterName.hashCode();
-        hash = 37 * hash + brokerName.hashCode();
+        hash = 37 * hash + brokerIP.hashCode();
         return hash;
     }
 
     @Override
     public String toString() {
-        return "ClusterName: " + clusterName + " BrokerName: " + brokerName;
+        return "ClusterName: " + clusterName + " brokerIP: " + brokerIP + " brokerHost: " + brokerHost;
     }
 }
