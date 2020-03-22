@@ -119,7 +119,7 @@ public class MetricsCollectTask {
             infoOut.append(String.format("cluster name= %s, broker name = %s%n", clusterName, clusterInfo.getClusterAddrTable().get(clusterName)));
         }
         for (String brokerName : clusterInfo.getBrokerAddrTable().keySet()) {
-            infoOut.append(String.format("broker name = %s，master broker address= %s%n", brokerName, clusterInfo.getBrokerAddrTable().get(brokerName).getBrokerAddrs().get(MixAll.MASTER_ID)));
+            infoOut.append(String.format("broker name = %s, master broker address= %s%n", brokerName, clusterInfo.getBrokerAddrTable().get(brokerName).getBrokerAddrs().get(MixAll.MASTER_ID)));
         }
         log.info(infoOut.toString());
         log.info(String.format("MetricsCollectTask init finished....cost:%d", System.currentTimeMillis() - start));
@@ -566,8 +566,8 @@ public class MetricsCollectTask {
         List<String> clientIdAddresses = new ArrayList<>();
 
         for (Connection connection : connectionSet) {
-            clientAddresses.add(connection.getClientAddr());//tcp连接地址
-            clientIdAddresses.add(connection.getClientId());//本地ip组成的id
+            clientAddresses.add(connection.getClientAddr());//tcp connect address
+            clientIdAddresses.add(connection.getClientId());//local ip
         }
         String str1 = String.join(",", clientAddresses);
         String str2 = String.join(",", clientIdAddresses);

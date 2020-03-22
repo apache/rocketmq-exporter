@@ -65,19 +65,19 @@ public class RMQMetricsCollector extends Collector {
     //consumer count
     private ConcurrentHashMap<ConsumerCountMetric, Integer> consumerCounts = new ConcurrentHashMap<>();
 
-     //count of consume fail
-     private ConcurrentHashMap<ConsumerRuntimeConsumeFailedMsgsMetric, Long> consumerClientFailedMsgCounts = new ConcurrentHashMap<>();
-     //TPS of consume fail 
-     private ConcurrentHashMap<ConsumerRuntimeConsumeFailedTPSMetric, Double> consumerClientFailedTPS = new ConcurrentHashMap<>();
-     //TPS of consume success
-     private ConcurrentHashMap<ConsumerRuntimeConsumeOKTPSMetric, Double> consumerClientOKTPS = new ConcurrentHashMap<>();
-     //rt of consume
-     private ConcurrentHashMap<ConsumerRuntimeConsumeRTMetric, Double> consumerClientRT = new ConcurrentHashMap<>();
-     //pull RT
-     private ConcurrentHashMap<ConsumerRuntimePullRTMetric, Double> consumerClientPullRT = new ConcurrentHashMap<>();
-     //pull tps
-     private ConcurrentHashMap<ConsumerRuntimePullTPSMetric, Double> consumerClientPullTPS = new ConcurrentHashMap<>();
- 
+    //count of consume fail
+    private ConcurrentHashMap<ConsumerRuntimeConsumeFailedMsgsMetric, Long> consumerClientFailedMsgCounts = new ConcurrentHashMap<>();
+    //TPS of consume fail
+    private ConcurrentHashMap<ConsumerRuntimeConsumeFailedTPSMetric, Double> consumerClientFailedTPS = new ConcurrentHashMap<>();
+    //TPS of consume success
+    private ConcurrentHashMap<ConsumerRuntimeConsumeOKTPSMetric, Double> consumerClientOKTPS = new ConcurrentHashMap<>();
+    //rt of consume
+    private ConcurrentHashMap<ConsumerRuntimeConsumeRTMetric, Double> consumerClientRT = new ConcurrentHashMap<>();
+    //pull RT
+    private ConcurrentHashMap<ConsumerRuntimePullRTMetric, Double> consumerClientPullRT = new ConcurrentHashMap<>();
+    //pull tps
+    private ConcurrentHashMap<ConsumerRuntimePullTPSMetric, Double> consumerClientPullTPS = new ConcurrentHashMap<>();
+
     //broker offset for consumer-topic
     private ConcurrentHashMap<ConsumerMetric, Long> groupBrokerTotalOffset = new ConcurrentHashMap<>();
     //consumer offset for consumer-topic
@@ -168,7 +168,7 @@ public class RMQMetricsCollector extends Collector {
     private ConcurrentHashMap<BrokerRuntimeMetric, Double> brokerRuntimeRemainHowManyDataToFlush = new ConcurrentHashMap<>();
     private final static Logger log = LoggerFactory.getLogger(RMQMetricsCollector.class);
 
-    private static List<String> GROUP_DIFF_LABEL_NAMES = Arrays.asList("group", "topic", "countOfOnlineConsumers", "msgModel");
+    private static final List<String> GROUP_DIFF_LABEL_NAMES = Arrays.asList("group", "topic", "countOfOnlineConsumers", "msgModel");
 
     private static <T extends Number> void loadGroupDiffMetric(GaugeMetricFamily family, Map.Entry<ConsumerTopicDiffMetric, T> entry) {
         family.addMetric(
@@ -181,7 +181,7 @@ public class RMQMetricsCollector extends Collector {
                 entry.getValue().doubleValue());
     }
 
-    private static List<String> GROUP_COUNT_LABEL_NAMES = Arrays.asList("caddr", "localaddr", "group");
+    private static final List<String> GROUP_COUNT_LABEL_NAMES = Arrays.asList("caddr", "localaddr", "group");
 
     private void collectConsumerMetric(List<MetricFamilySamples> mfs) {
         GaugeMetricFamily groupGetLatencyByConsumerDiff = new GaugeMetricFamily("rocketmq_group_diff", "GroupDiff", GROUP_DIFF_LABEL_NAMES);
@@ -217,11 +217,11 @@ public class RMQMetricsCollector extends Collector {
     }
 
 
-    private static List<String> TOPIC_OFFSET_LABEL_NAMES = Arrays.asList(
+    private static final List<String> TOPIC_OFFSET_LABEL_NAMES = Arrays.asList(
             "cluster", "brokerNames", "topic", "lastUpdateTimestamp"
     );
 
-    private static List<String> DLQ_TOPIC_OFFSET_LABEL_NAMES = Arrays.asList(
+    private static final List<String> DLQ_TOPIC_OFFSET_LABEL_NAMES = Arrays.asList(
             "cluster", "brokerNames", "group", "lastUpdateTimestamp"
     );
 
@@ -286,7 +286,7 @@ public class RMQMetricsCollector extends Collector {
         return mfs;
     }
 
-    private static List<String> GROUP_CLIENT_METRIC_LABEL_NAMES = Arrays.asList(
+    private static final List<String> GROUP_CLIENT_METRIC_LABEL_NAMES = Arrays.asList(
             "clientAddr", "clientId", "group", "topic"
     );
 
@@ -338,14 +338,14 @@ public class RMQMetricsCollector extends Collector {
         ), entry.getValue().doubleValue());
     }
 
-    private static List<String> GROUP_PULL_LATENCY_LABEL_NAMES = Arrays.asList(
+    private static final List<String> GROUP_PULL_LATENCY_LABEL_NAMES = Arrays.asList(
             "cluster", "broker", "topic", "group", "queueid"
     );
-    private static List<String> GROUP_LATENCY_BY_STORETIME_LABEL_NAMES = Arrays.asList(
+    private static final List<String> GROUP_LATENCY_BY_STORETIME_LABEL_NAMES = Arrays.asList(
             "topic", "group"
     );
 
-    private static List<String> BROKER_NUMS_LABEL_NAMES = Arrays.asList("cluster", "brokerIP", "brokerHost");
+    private static final List<String> BROKER_NUMS_LABEL_NAMES = Arrays.asList("cluster", "brokerIP", "brokerHost");
 
     private static void loadBrokerNums(GaugeMetricFamily family, Map.Entry<BrokerMetric, Double> entry) {
         family.addMetric(Arrays.asList(
@@ -371,7 +371,7 @@ public class RMQMetricsCollector extends Collector {
     }
 
 
-    private static List<String> GROUP_NUMS_LABEL_NAMES = Arrays.asList(
+    private static final List<String> GROUP_NUMS_LABEL_NAMES = Arrays.asList(
             "topic", "group"
     );
 
@@ -515,7 +515,7 @@ public class RMQMetricsCollector extends Collector {
         mfs.add(topicPutSizeGauge);
     }
 
-    private static List<String> TOPIC_NUMS_LABEL_NAMES = Arrays.asList("cluster", "brokers", "topic");
+    private static final List<String> TOPIC_NUMS_LABEL_NAMES = Arrays.asList("cluster", "brokers", "topic");
 
     private void loadTopicNumsMetric(GaugeMetricFamily family, Map.Entry<TopicPutNumMetric, Double> entry) {
         family.addMetric(
@@ -999,7 +999,7 @@ public class RMQMetricsCollector extends Collector {
         ), entry.getValue().doubleValue());
     }
 
-    private static List<String> BROKER_RUNTIME_METRIC_LABEL_NAMES = Arrays.asList("cluster", "brokerIP", "brokerHost", "des", "boottime", "broker_version");
+    private static final List<String> BROKER_RUNTIME_METRIC_LABEL_NAMES = Arrays.asList("cluster", "brokerIP", "brokerHost", "des", "boottime", "broker_version");
 
     private void collectBrokerRuntimeStats(List<MetricFamilySamples> mfs) {
         collectBrokerRuntimeStatsPutMessageDistributeTime(mfs);

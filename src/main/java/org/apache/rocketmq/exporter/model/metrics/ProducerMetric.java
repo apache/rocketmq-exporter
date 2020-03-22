@@ -16,7 +16,7 @@
  */
 package org.apache.rocketmq.exporter.model.metrics;
 
-//每个topic最大位点
+//max offset of topic
 public class ProducerMetric {
     private String clusterName;
     private String brokerNames;
