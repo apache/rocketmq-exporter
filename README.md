@@ -1,38 +1,47 @@
-RocketMQ Exporter
-==============
+# Apache RocketMQ Exporter for Prometheus.
+[![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
+[![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/apache/rocketmq-exporter.svg)](http://isitmaintained.com/project/apache/rocketmq-exporter "Average time to resolve an issue")
+[![Percentage of issues still open](http://isitmaintained.com/badge/open/apache/rocketmq-exporter.svg)](http://isitmaintained.com/project/apache/rocketmq-exporter "Percentage of issues still open")
+![Twitter Follow](https://img.shields.io/twitter/follow/ApacheRocketMQ?style=social)
 
-Apache RocketMQ Exporter for Prometheus.
 
 Table of Contents
 -----------------
 -	[Compatibility](#compatibility)
--   [Dependency](#dependency)
--   [Download](#download)
--   [Compile](#compile)
+-   [Configuration](#configuration)
+-   [Build](#build)
 	-   [Build Binary](#build-binary)
 	-   [Build Docker Image](#build-docker-image)
 -   [Run](#run)
 	-   [Run Binary](#run-binary)
 	-   [Run Docker Image](#run-docker-image)
--   [Flags](#flags)
 -   [Metrics](#metrics)
-	-   [Brokers](#brokers)
+	-   [Broker](#broker)
 	-   [Topics](#topics)
 	-   [Consumer Groups](#consumer-groups)
--   [Grafana Dashboard](#Grafana-Dashboard)
--   [Use Example](#Use-Example)
+-   [Grafana Dashboard](#grafana-dashboard)
+-   [Quick Start](#quick-start)
 
 Compatibility
 -------------
 
 Support [Apache RocketMQ](https://rocketmq.apache.org) version 4.3.2 (and later).
 
-Dependency
-----------
 
--	[Prometheus](https://prometheus.io)
+Configuration
+---
 
-Compile
+This image is configurable using different properties, see ``application.properties`` for a configuration example.
+
+| name                           | Default            | Description                                        |
+| -----------------------------------|--------------------|----------------------------------------------------|
+| `rocketmq.config.namesrvAddr`      |  127.0.0.1:9876 |name server address  for  broker cluster            |
+| `rocketmq.config.webTelemetryPath` | /metrics           |Path under which to expose metrics                  |
+| `server.port`                      | 5557               |Address to listen on for web interface and telemetry|
+| `rocketmq.config.rocketmqVersion`  | V4_3_2             |rocketmq broker version                             |
+
+
+Build
 -------
 
 ### Build Binary
@@ -62,17 +71,6 @@ java -jar rocketmq-exporter-0.0.1-SNAPSHOT.jar
 docker container run -itd --rm  -p 5557:5557  docker.io/rocketmq-exporter
 ```
 
-Flags
----
-
-This image is configurable using different flags
-
-|Flag name                           | Default            | Description                                        |
-| -----------------------------------|--------------------|----------------------------------------------------|
-| `rocketmq.config.namesrvAddr`      |  127.0.0.1:9876 |name server address  for  broker cluster            |
-| `rocketmq.config.webTelemetryPath` | /metrics           |Path under which to expose metrics                  |
-| `server.port`                      | 5557               |Address to listen on for web interface and telemetry|
-| `rocketmq.config.rocketmqVersion`  | V4_3_2             |rocketmq broker version                             |
 
 Metrics
 -------
@@ -210,6 +208,6 @@ Grafana Dashboard
 Grafana Dashboard ID: 10477, name: RocketMQ Exporter Overview.
 For details of the dashboard please see [RocketMQ Exporter Overview](https://grafana.com/dashboards/10477).
 
-Use Example
+Quick Start
 -------------
-For details of the use example please refer to [use example](./rocketmq_exporter_use_example.md)
+This [guide](./rocketmq_exporter_quickstart.md) will teach you how to build and run rocketmq exporter with Prometheus and Grafana Integration from scratch.

@@ -17,45 +17,28 @@
 package org.apache.rocketmq.exporter.model.metrics;
 
 public class ConsumerMetric {
+    private String topicName;
+    private String consumerGroupName;
 
-    private  String   clusterName;
-    private  String   brokerName;
-    private  String   topicName;
-    private  String   consumerGroupName;
-
-    public void setClusterName(String cluster) {
-        clusterName = cluster;
-    }
-    public  String getClusterName() {
-        return clusterName;
-    }
-    void setBrokerName(String broker) {
-        brokerName = broker;
+    public ConsumerMetric(String topicName, String consumerGroupName) {
+        this.topicName = topicName;
+        this.consumerGroupName = consumerGroupName;
     }
 
-    public String getBrokerName() {
-        return brokerName;
-    }
-
-    public void setTopicName(String topic) {
-        topicName = topic;
-    }
     public String getTopicName() {
         return topicName;
     }
+
+    public void setTopicName(String topicName) {
+        this.topicName = topicName;
+    }
+
     public String getConsumerGroupName() {
         return consumerGroupName;
     }
 
     public void setConsumerGroupName(String consumerGroupName) {
         this.consumerGroupName = consumerGroupName;
-    }
-
-    public ConsumerMetric(String cluster, String broker, String topic,String consumerGroup) {
-        clusterName = cluster;
-        brokerName  =   broker;
-        topicName   =   topic;
-        consumerGroupName   =   consumerGroup;
     }
 
     @Override
@@ -65,15 +48,13 @@ public class ConsumerMetric {
         }
         ConsumerMetric other = (ConsumerMetric) obj;
 
-        return  other.clusterName.equals(clusterName) && other.brokerName.equals(brokerName)
-                && other.topicName.equals(topicName)  && other.consumerGroupName.equals(consumerGroupName);
+        return other.topicName.equals(topicName) &&
+                other.consumerGroupName.equals(consumerGroupName);
     }
 
     @Override
     public int hashCode() {
         int hash = 1;
-        hash = 37 * hash + clusterName.hashCode();
-        hash = 37 * hash + brokerName.hashCode();
         hash = 37 * hash + topicName.hashCode();
         hash = 37 * hash + consumerGroupName.hashCode();
         return hash;
@@ -81,6 +62,6 @@ public class ConsumerMetric {
 
     @Override
     public String toString() {
-        return "ClusterName: " + clusterName + " BrokerName: " + brokerName + " topicName: " + topicName + " ConsumeGroupName: " + consumerGroupName;
+        return "topicName: " + topicName + " ConsumeGroupName: " + consumerGroupName;
     }
 }
