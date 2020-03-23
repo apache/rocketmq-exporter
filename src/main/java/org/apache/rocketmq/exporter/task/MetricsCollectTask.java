@@ -60,6 +60,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -146,6 +147,24 @@ public class MetricsCollectTask {
                     JSON.toJSONString(mqAdminExt.getNameServerAddressList())));
             return;
         }
+
+        String clusterName = null;
+        try {
+            ClusterInfo clusterInfo = mqAdminExt.examineBrokerClusterInfo();
+            Set<Map.Entry<String, BrokerData>> clusterEntries = clusterInfo.getBrokerAddrTable().entrySet();
+            for (Map.Entry<String, BrokerData> clusterEntry : clusterEntries) {
+                clusterName = clusterEntry.getValue().getCluster();
+                if (clusterName != null) {
+                    break;
+                }
+            }
+        } catch (Exception ex) {
+            log.error(String.format("collectTopicOffset-exception for getting cluster info, namesrv addr is %s",
+                    JSON.toJSONString(mqAdminExt.getNameServerAddressList())), ex);
+            return;
+        }
+
+
         for (String topic : topicSet) {
             TopicStatsTable topicStats = null;
             try {
@@ -158,21 +177,32 @@ public class MetricsCollectTask {
             }
 
             Set<Map.Entry<MessageQueue, TopicOffset>> topicStatusEntries = topicStats.getOffsetTable().entrySet();
-
-            double totalMaxOffset = 0L;
-            long lastUpdateTimestamp = 0L;
-            StringBuilder sb = new StringBuilder();
+            HashMap<String, Long> brokerOffsetMap = new HashMap<>();
+            HashMap<String, Long> brokerUpdateTimestamp = new HashMap<>();
 
             for (Map.Entry<MessageQueue, TopicOffset> topicStatusEntry : topicStatusEntries) {
                 MessageQueue q = topicStatusEntry.getKey();
                 TopicOffset offset = topicStatusEntry.getValue();
-                totalMaxOffset += offset.getMaxOffset();
-                if (offset.getLastUpdateTimestamp() > lastUpdateTimestamp) {
-                    lastUpdateTimestamp = offset.getLastUpdateTimestamp();
+
+                if (brokerOffsetMap.containsKey(q.getBrokerName())) {
+                    brokerOffsetMap.put(q.getBrokerName(), brokerOffsetMap.get(q.getBrokerName()) + offset.getMaxOffset());
+                } else {
+                    brokerOffsetMap.put(q.getBrokerName(), offset.getMaxOffset());
                 }
-                sb.append(q.getBrokerName()).append(" ");
+
+                if (brokerUpdateTimestamp.containsKey(q.getBrokerName())) {
+                    if (offset.getLastUpdateTimestamp() > brokerUpdateTimestamp.get(q.getBrokerName())) {
+                        brokerUpdateTimestamp.put(q.getBrokerName(), offset.getLastUpdateTimestamp());
+                    }
+                } else {
+                    brokerUpdateTimestamp.put(q.getBrokerName(), offset.getLastUpdateTimestamp());
+                }
             }
-            metricsService.getCollector().addTopicOffsetMetric("", sb.toString(), topic, lastUpdateTimestamp, totalMaxOffset);
+            Set<Map.Entry<String, Long>> brokerOffsetEntries = brokerOffsetMap.entrySet();
+            for (Map.Entry<String, Long> brokerOffsetEntry : brokerOffsetEntries) {
+                metricsService.getCollector().addTopicOffsetMetric(clusterName, brokerOffsetEntry.getKey(), topic,
+                        brokerUpdateTimestamp.get(brokerOffsetEntry.getKey()), brokerOffsetEntry.getValue());
+            }
         }
         log.info("topic offset collection task finished...." + (System.currentTimeMillis() - start));
     }
@@ -289,7 +319,7 @@ public class MetricsCollectTask {
                     OffsetWrapper offset = consumeStatusEntry.getValue();
 
                     //topic + consumer group
-                    totalBrokerOffset += totalBrokerOffset + offset.getBrokerOffset();
+                    totalBrokerOffset += offset.getBrokerOffset();
                     //topic + consumer group
                     totalConsumerOffset += offset.getConsumerOffset();
                 }

@@ -790,7 +790,7 @@ public class RMQMetricsCollector extends Collector {
                 stats.getBrokerVersion()), stats.getDispatchBehindBytes());
     }
 
-    private void addAllKindOfTps(String brokerAddress, String clusterName, String brokerHost, BrokerRuntimeStats stats) {
+    private void addAllKindOfTps(String clusterName, String brokerAddress, String brokerHost, BrokerRuntimeStats stats) {
         brokerRuntimePutTps10.put(new BrokerRuntimeMetric(
                 clusterName,
                 brokerAddress, brokerHost,
