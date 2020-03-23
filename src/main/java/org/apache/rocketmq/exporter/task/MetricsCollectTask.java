@@ -425,13 +425,13 @@ public class MetricsCollectTask {
                 groupList = mqAdminExt.queryTopicConsumeByWho(topic);
             } catch (Exception ex) {
                 log.error(String.format("collectBrokerStatsTopic-fetch consumers for topic(%s) error, ignore this topic", topic), ex);
-                return;
+                continue;
             }
             if (groupList.getGroupList() == null || groupList.getGroupList().isEmpty()) {
                 log.warn(String.format("collectBrokerStatsTopic-topic's consumer is empty, %s", topic));
-                return;
+                continue;
             }
-            for (String group : groupList.getGroupList())
+            for (String group : groupList.getGroupList()) {
                 for (BrokerData bd : topicRouteData.getBrokerDatas()) {
                     String masterAddr = bd.getBrokerAddrs().get(MixAll.MASTER_ID);
                     if (masterAddr != null) {
@@ -487,6 +487,7 @@ public class MetricsCollectTask {
                         }
                     }
                 }
+            }
         }
         log.info("broker topic stats collection task finished...." + (System.currentTimeMillis() - start));
     }
