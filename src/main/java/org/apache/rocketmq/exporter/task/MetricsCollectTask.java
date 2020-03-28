@@ -146,6 +146,14 @@ public class MetricsCollectTask {
                     JSON.toJSONString(mqAdminExt.getNameServerAddressList())));
             return;
         }
+        ClusterInfo clusterInfo = null;
+        try {
+            clusterInfo = mqAdminExt.examineBrokerClusterInfo();
+        } catch (Exception ex) {
+            log.error(String.format("collectBrokerRuntimeStats-get cluster info from namesrv error. address is %s", JSON.toJSONString(mqAdminExt.getNameServerAddressList())), ex);
+            return;
+        }
+        String clusterName = clusterInfo.getClusterAddrTable().keySet().iterator().next();
         for (String topic : topicSet) {
             TopicStatsTable topicStats = null;
             try {
@@ -161,7 +169,6 @@ public class MetricsCollectTask {
 
             double totalMaxOffset = 0L;
             long lastUpdateTimestamp = 0L;
-            StringBuilder sb = new StringBuilder();
 
             for (Map.Entry<MessageQueue, TopicOffset> topicStatusEntry : topicStatusEntries) {
                 MessageQueue q = topicStatusEntry.getKey();
@@ -170,9 +177,8 @@ public class MetricsCollectTask {
                 if (offset.getLastUpdateTimestamp() > lastUpdateTimestamp) {
                     lastUpdateTimestamp = offset.getLastUpdateTimestamp();
                 }
-                sb.append(q.getBrokerName()).append(" ");
             }
-            metricsService.getCollector().addTopicOffsetMetric("", sb.toString(), topic, lastUpdateTimestamp, totalMaxOffset);
+            metricsService.getCollector().addTopicOffsetMetric(clusterName, topic, lastUpdateTimestamp, totalMaxOffset);
         }
         log.info("topic offset collection task finished...." + (System.currentTimeMillis() - start));
     }

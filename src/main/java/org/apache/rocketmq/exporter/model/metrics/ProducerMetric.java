@@ -19,7 +19,6 @@ package org.apache.rocketmq.exporter.model.metrics;
 //每个topic最大位点
 public class ProducerMetric {
     private String clusterName;
-    private String brokerNames;
     private String topicName;
     private long lastUpdateTimestamp;
 
@@ -29,14 +28,6 @@ public class ProducerMetric {
 
     public void setClusterName(String clusterName) {
         this.clusterName = clusterName;
-    }
-
-    public String getBrokerNames() {
-        return brokerNames;
-    }
-
-    public void setBrokerNames(String brokerNames) {
-        this.brokerNames = brokerNames;
     }
 
     public String getTopicName() {
@@ -55,9 +46,8 @@ public class ProducerMetric {
         this.lastUpdateTimestamp = lastUpdateTimestamp;
     }
 
-    public ProducerMetric(String clusterName, String brokerNames, String topicName, long lastUpdateTimestamp) {
+    public ProducerMetric(String clusterName, String topicName, long lastUpdateTimestamp) {
         this.clusterName = clusterName;
-        this.brokerNames = brokerNames;
         this.topicName = topicName;
         this.lastUpdateTimestamp = lastUpdateTimestamp;
     }
@@ -83,6 +73,6 @@ public class ProducerMetric {
 
     @Override
     public String toString() {
-        return "ClusterName: " + clusterName + " BrokerNames: " + brokerNames + " topicName: " + topicName;
+        return "ClusterName: " + clusterName  + " topicName: " + topicName;
     }
 }

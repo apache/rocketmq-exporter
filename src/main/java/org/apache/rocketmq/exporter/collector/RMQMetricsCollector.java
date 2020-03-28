@@ -218,18 +218,17 @@ public class RMQMetricsCollector extends Collector {
 
 
     private static List<String> TOPIC_OFFSET_LABEL_NAMES = Arrays.asList(
-            "cluster", "brokerNames", "topic", "lastUpdateTimestamp"
+            "cluster", "topic", "lastUpdateTimestamp"
     );
 
     private static List<String> DLQ_TOPIC_OFFSET_LABEL_NAMES = Arrays.asList(
-            "cluster", "brokerNames", "group", "lastUpdateTimestamp"
+            "cluster", "group", "lastUpdateTimestamp"
     );
 
     private void loadTopicOffsetMetric(GaugeMetricFamily family, Map.Entry<ProducerMetric, Double> entry) {
         family.addMetric(
                 Arrays.asList(
                         entry.getKey().getClusterName(),
-                        entry.getKey().getBrokerNames(),
                         entry.getKey().getTopicName(),
                         String.valueOf(entry.getKey().getLastUpdateTimestamp())
                 ),
@@ -254,7 +253,6 @@ public class RMQMetricsCollector extends Collector {
             topicDLQOffsetF.addMetric(
                     Arrays.asList(
                             entry.getKey().getClusterName(),
-                            entry.getKey().getBrokerNames(),
                             entry.getKey().getGroup(),
                             String.valueOf(entry.getKey().getLastUpdateTimestamp())
                     ),
@@ -528,13 +526,13 @@ public class RMQMetricsCollector extends Collector {
         );
     }
 
-    public void addTopicOffsetMetric(String clusterName, String brokerNames, String topic, long lastUpdateTimestamp, double value) {
+    public void addTopicOffsetMetric(String clusterName, String topic, long lastUpdateTimestamp, double value) {
         if (topic.startsWith(MixAll.RETRY_GROUP_TOPIC_PREFIX)) {
-            topicRetryOffset.put(new ProducerMetric(clusterName, brokerNames, topic, lastUpdateTimestamp), value);
+            topicRetryOffset.put(new ProducerMetric(clusterName,  topic, lastUpdateTimestamp), value);
         } else if (topic.startsWith(MixAll.DLQ_GROUP_TOPIC_PREFIX)) {
-            topicDLQOffset.put(new DLQTopicOffsetMetric(clusterName, brokerNames, topic.replace(MixAll.DLQ_GROUP_TOPIC_PREFIX, ""), lastUpdateTimestamp), value);
+            topicDLQOffset.put(new DLQTopicOffsetMetric(clusterName, topic.replace(MixAll.DLQ_GROUP_TOPIC_PREFIX, ""), lastUpdateTimestamp), value);
         } else {
-            topicOffset.put(new ProducerMetric(clusterName, brokerNames, topic, lastUpdateTimestamp), value);
+            topicOffset.put(new ProducerMetric(clusterName, topic, lastUpdateTimestamp), value);
         }
     }
 

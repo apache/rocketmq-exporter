@@ -2,13 +2,11 @@ package org.apache.rocketmq.exporter.model.metrics;
 
 public class DLQTopicOffsetMetric {
     private String clusterName;
-    private String brokerNames;
     private String group;
     private long lastUpdateTimestamp;
 
-    public DLQTopicOffsetMetric(String clusterName, String brokerNames, String group, long lastUpdateTimestamp) {
+    public DLQTopicOffsetMetric(String clusterName, String group, long lastUpdateTimestamp) {
         this.clusterName = clusterName;
-        this.brokerNames = brokerNames;
         this.group = group;
         this.lastUpdateTimestamp = lastUpdateTimestamp;
     }
@@ -19,14 +17,6 @@ public class DLQTopicOffsetMetric {
 
     public void setClusterName(String clusterName) {
         this.clusterName = clusterName;
-    }
-
-    public String getBrokerNames() {
-        return brokerNames;
-    }
-
-    public void setBrokerNames(String brokerNames) {
-        this.brokerNames = brokerNames;
     }
 
     public String getGroup() {
@@ -67,6 +57,6 @@ public class DLQTopicOffsetMetric {
 
     @Override
     public String toString() {
-        return "ClusterName: " + clusterName + " BrokerNames: " + brokerNames + " group: " + group;
+        return "ClusterName: " + clusterName + " group: " + group;
     }
 }
