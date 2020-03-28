@@ -119,7 +119,7 @@ public class MetricsCollectTask {
         StringBuilder infoOut = new StringBuilder();
         for (String clusterName : clusterInfo.getClusterAddrTable().keySet()) {
             infoOut.append(String.format("cluster name= %s, broker name = %s%n", clusterName, clusterInfo.getClusterAddrTable().get(clusterName)));
-            if (clusterName != null && MetricsCollectTask.clusterName != null) {
+            if (clusterName != null && MetricsCollectTask.clusterName == null) {
                 MetricsCollectTask.clusterName = clusterName;
             }
         }
