@@ -84,7 +84,7 @@ public class MetricsCollectTask {
     private ExecutorService collectClientMetricExecutor;
     @Resource
     private RMQMetricsService metricsService;
-    private String clusterName = null;
+    private static String clusterName = null;
     private final static Logger log = LoggerFactory.getLogger(MetricsCollectTask.class);
 
     private BlockingQueue<Runnable> collectClientTaskBlockQueue;
@@ -119,15 +119,15 @@ public class MetricsCollectTask {
         StringBuilder infoOut = new StringBuilder();
         for (String clusterName : clusterInfo.getClusterAddrTable().keySet()) {
             infoOut.append(String.format("cluster name= %s, broker name = %s%n", clusterName, clusterInfo.getClusterAddrTable().get(clusterName)));
-            if (clusterName != null && this.clusterName != null) {
-                this.clusterName = clusterName;
+            if (clusterName != null && MetricsCollectTask.clusterName != null) {
+                MetricsCollectTask.clusterName = clusterName;
             }
         }
         for (String brokerName : clusterInfo.getBrokerAddrTable().keySet()) {
             infoOut.append(String.format("broker name = %s, master broker address= %s%n", brokerName, clusterInfo.getBrokerAddrTable().get(brokerName).getBrokerAddrs().get(MixAll.MASTER_ID)));
         }
         log.info(infoOut.toString());
-        if (this.clusterName == null) {
+        if (clusterName == null) {
             log.error("get cluster info error" );
         }
         log.info(String.format("MetricsCollectTask init finished....cost:%d", System.currentTimeMillis() - start));
@@ -190,7 +190,7 @@ public class MetricsCollectTask {
             }
             Set<Map.Entry<String, Long>> brokerOffsetEntries = brokerOffsetMap.entrySet();
             for (Map.Entry<String, Long> brokerOffsetEntry : brokerOffsetEntries) {
-                metricsService.getCollector().addTopicOffsetMetric(this.clusterName, brokerOffsetEntry.getKey(), topic,
+                metricsService.getCollector().addTopicOffsetMetric(clusterName, brokerOffsetEntry.getKey(), topic,
                         brokerUpdateTimestampMap.get(brokerOffsetEntry.getKey()), brokerOffsetEntry.getValue());
             }
         }
@@ -316,7 +316,7 @@ public class MetricsCollectTask {
                         }
                     }
                     for (Map.Entry<String, Long> consumeOffsetEntry : consumeOffsetMap.entrySet()) {
-                        metricsService.getCollector().addGroupBrokerTotalOffsetMetric(this.clusterName,
+                        metricsService.getCollector().addGroupBrokerTotalOffsetMetric(clusterName,
                                 consumeOffsetEntry.getKey(), topic, group, consumeOffsetEntry.getValue());
                     }
                 } catch (Exception ex) {
