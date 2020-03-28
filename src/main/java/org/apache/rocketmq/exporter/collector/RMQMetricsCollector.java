@@ -372,11 +372,13 @@ public class RMQMetricsCollector extends Collector {
 
 
     private static final List<String> GROUP_NUMS_LABEL_NAMES = Arrays.asList(
-            "topic", "group"
+            "cluster", "brokerName", "topic", "group"
     );
 
     private static <T extends Number> void loadGroupNumsMetric(GaugeMetricFamily family, Map.Entry<ConsumerMetric, T> entry) {
         family.addMetric(Arrays.asList(
+                entry.getKey().getClusterName(),
+                entry.getKey().getBrokerName(),
                 entry.getKey().getTopicName(),
                 entry.getKey().getConsumerGroupName()),
                 entry.getValue().doubleValue()
@@ -464,7 +466,7 @@ public class RMQMetricsCollector extends Collector {
     }
 
     private void collectGroupNums(List<MetricFamilySamples> mfs) {
-        GaugeMetricFamily groupGetNumsGauge = new GaugeMetricFamily("rocketmq_group_get_nums", "GroupGetNums", GROUP_NUMS_LABEL_NAMES);
+        GaugeMetricFamily groupGetNumsGauge = new GaugeMetricFamily("rocketmq_consumer_tps", "GroupGetNums", GROUP_NUMS_LABEL_NAMES);
         for (Map.Entry<ConsumerMetric, Double> entry : groupGetNums.entrySet()) {
             loadGroupNumsMetric(groupGetNumsGauge, entry);
         }
@@ -476,7 +478,7 @@ public class RMQMetricsCollector extends Collector {
         }
         mfs.add(groupConsumeTPSF);
 
-        GaugeMetricFamily groupBrokerTotalOffsetF = new GaugeMetricFamily("rocketmq_group_broker_total_offset", "GroupBrokerTotalOffset", GROUP_NUMS_LABEL_NAMES);
+        GaugeMetricFamily groupBrokerTotalOffsetF = new GaugeMetricFamily("rocketmq_consumer_offset", "GroupBrokerTotalOffset", GROUP_NUMS_LABEL_NAMES);
         for (Map.Entry<ConsumerMetric, Long> entry : groupBrokerTotalOffset.entrySet()) {
             loadGroupNumsMetric(groupBrokerTotalOffsetF, entry);
         }
@@ -488,7 +490,7 @@ public class RMQMetricsCollector extends Collector {
         }
         mfs.add(groupConsumeTotalOffsetF);
 
-        GaugeMetricFamily groupGetSizeGauge = new GaugeMetricFamily("rocketmq_group_get_messagesize", "GroupGetMessageSize", GROUP_NUMS_LABEL_NAMES);
+        GaugeMetricFamily groupGetSizeGauge = new GaugeMetricFamily("rocketmq_consumer_message_size", "GroupGetMessageSize", GROUP_NUMS_LABEL_NAMES);
         for (Map.Entry<ConsumerMetric, Double> entry : groupGetSize.entrySet()) {
             loadGroupNumsMetric(groupGetSizeGauge, entry);
         }
@@ -560,8 +562,8 @@ public class RMQMetricsCollector extends Collector {
         topicPutSize.put(new TopicPutNumMetric(cluster, brokerName, brokerIP, topic), value);
     }
 
-    public void addGroupBrokerTotalOffsetMetric(String topic, String group, long value) {
-        //groupBrokerTotalOffset.put(new ConsumerMetric(topic, group), value);
+    public void addGroupBrokerTotalOffsetMetric(String clusterName, String brokerName,String topic, String group, long value) {
+        groupBrokerTotalOffset.put(new ConsumerMetric(clusterName, brokerName, topic, group), value);
     }
 
     public void addGroupConsumerTotalOffsetMetric(String topic, String group, long value) {
