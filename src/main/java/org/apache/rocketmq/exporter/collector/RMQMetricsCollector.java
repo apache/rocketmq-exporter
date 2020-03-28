@@ -218,11 +218,11 @@ public class RMQMetricsCollector extends Collector {
 
 
     private static final List<String> TOPIC_OFFSET_LABEL_NAMES = Arrays.asList(
-            "cluster", "brokerName", "topic", "lastUpdateTimestamp"
+            "cluster", "broker", "topic", "lastUpdateTimestamp"
     );
 
     private static final List<String> DLQ_TOPIC_OFFSET_LABEL_NAMES = Arrays.asList(
-            "cluster", "brokerName", "group", "lastUpdateTimestamp"
+            "cluster", "broker", "group", "lastUpdateTimestamp"
     );
 
     private void loadTopicOffsetMetric(GaugeMetricFamily family, Map.Entry<ProducerMetric, Double> entry) {
@@ -345,7 +345,7 @@ public class RMQMetricsCollector extends Collector {
             "topic", "group"
     );
 
-    private static final List<String> BROKER_NUMS_LABEL_NAMES = Arrays.asList("cluster", "brokerIP", "brokerHost");
+    private static final List<String> BROKER_NUMS_LABEL_NAMES = Arrays.asList("cluster", "brokerIP", "broker");
 
     private static void loadBrokerNums(GaugeMetricFamily family, Map.Entry<BrokerMetric, Double> entry) {
         family.addMetric(Arrays.asList(
@@ -372,7 +372,7 @@ public class RMQMetricsCollector extends Collector {
 
 
     private static final List<String> GROUP_NUMS_LABEL_NAMES = Arrays.asList(
-            "cluster", "brokerName", "topic", "group"
+            "cluster", "broker", "topic", "group"
     );
 
     private static <T extends Number> void loadGroupNumsMetric(GaugeMetricFamily family, Map.Entry<ConsumerMetric, T> entry) {
