@@ -90,6 +90,8 @@ public class RMQMetricsCollector extends Collector {
     private ConcurrentHashMap<ConsumerMetric, Double> groupGetSize = new ConcurrentHashMap<>();
     //re-consumed message count for consumer-topic
     private ConcurrentHashMap<ConsumerMetric, Double> sendBackNums = new ConcurrentHashMap<>();
+    // group latency time
+    private ConcurrentHashMap<ConsumerMetric, Long> groupLatencyByTime = new ConcurrentHashMap<>();
 
     //total put message count for one broker
     private ConcurrentHashMap<BrokerMetric, Double> brokerPutNums = new ConcurrentHashMap<>();
@@ -342,7 +344,7 @@ public class RMQMetricsCollector extends Collector {
             "cluster", "broker", "topic", "group", "queueid"
     );
     private static final List<String> GROUP_LATENCY_BY_STORETIME_LABEL_NAMES = Arrays.asList(
-            "topic", "group"
+            "cluster", "broker", "topic", "group"
     );
 
     private static final List<String> BROKER_NUMS_LABEL_NAMES = Arrays.asList("cluster", "brokerIP", "broker");
@@ -501,6 +503,14 @@ public class RMQMetricsCollector extends Collector {
             loadGroupNumsMetric(sendBackNumsGauge, entry);
         }
         mfs.add(sendBackNumsGauge);
+
+        GaugeMetricFamily groupLatencyByTimeF = new GaugeMetricFamily("rocketmq_group_get_latency_by_storetime",
+                "GroupGetLatencyByStoreTime", GROUP_LATENCY_BY_STORETIME_LABEL_NAMES);
+        for (Map.Entry<ConsumerMetric, Long> entry : groupLatencyByTime.entrySet()) {
+            loadGroupNumsMetric(groupLatencyByTimeF, entry);
+        }
+        mfs.add(groupLatencyByTimeF);
+
     }
 
     private void collectTopicNums(List<MetricFamilySamples> mfs) {
@@ -564,6 +574,10 @@ public class RMQMetricsCollector extends Collector {
 
     public void addGroupBrokerTotalOffsetMetric(String clusterName, String brokerName,String topic, String group, long value) {
         groupBrokerTotalOffset.put(new ConsumerMetric(clusterName, brokerName, topic, group), value);
+    }
+
+    public void addGroupGetLatencyByStoreTimeMetric(String clusterName, String brokerName, String topic, String group, long value) {
+        groupLatencyByTime.put(new ConsumerMetric(clusterName, brokerName, topic, group), value);
     }
 
     public void addGroupConsumerTotalOffsetMetric(String topic, String group, long value) {

@@ -18,6 +18,8 @@ package org.apache.rocketmq.exporter.task;
 
 import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.rocketmq.client.consumer.PullResult;
+import org.apache.rocketmq.client.consumer.PullStatus;
 import org.apache.rocketmq.client.exception.MQBrokerException;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.common.MixAll;
@@ -42,6 +44,7 @@ import org.apache.rocketmq.exporter.config.RMQConfigure;
 import org.apache.rocketmq.exporter.model.BrokerRuntimeStats;
 import org.apache.rocketmq.exporter.model.common.TwoTuple;
 import org.apache.rocketmq.exporter.service.RMQMetricsService;
+import org.apache.rocketmq.exporter.service.client.MQAdminExtImpl;
 import org.apache.rocketmq.exporter.util.Utils;
 import org.apache.rocketmq.remoting.exception.RemotingConnectException;
 import org.apache.rocketmq.remoting.exception.RemotingException;
@@ -303,7 +306,7 @@ public class MetricsCollectTask {
                     );
                     //metricsService.getCollector().addGroupConsumeTPSMetric(topic, group, consumeTPS);
                 }
-
+                // get consumer broker offset
                 try {
                     HashMap<String, Long> consumeOffsetMap = new HashMap<>();
                     for (Map.Entry<MessageQueue, OffsetWrapper> consumeStatusEntry : consumeStats.getOffsetTable().entrySet()) {
@@ -321,6 +324,40 @@ public class MetricsCollectTask {
                     }
                 } catch (Exception ex) {
                     log.warn("addGroupBrokerTotalOffsetMetric error", ex);
+                }
+
+                // get consumer latency
+                try {
+                    HashMap<String, Long> consumerLatencyMap = new HashMap<>();
+                    for (Map.Entry<MessageQueue, OffsetWrapper> consumeStatusEntry : consumeStats.getOffsetTable().entrySet()) {
+                        MessageQueue q = consumeStatusEntry.getKey();
+                        OffsetWrapper offset = consumeStatusEntry.getValue();
+                        PullResult consumePullResult = ((MQAdminExtImpl) mqAdminExt).queryMsgByOffset(q, offset.getConsumerOffset());
+                        long lagTime = 0;
+                        if (consumePullResult != null && consumePullResult.getPullStatus() == PullStatus.FOUND) {
+                            lagTime = System.currentTimeMillis() - consumePullResult.getMsgFoundList().get(0).getStoreTimestamp();
+                            if (offset.getBrokerOffset() == offset.getConsumerOffset()) {
+                                lagTime = 0;
+                            }
+                        } else if (consumePullResult.getPullStatus() == PullStatus.OFFSET_ILLEGAL) {
+                            PullResult pullResult = ((MQAdminExtImpl) mqAdminExt).queryMsgByOffset(q, consumePullResult.getMinOffset());
+                            if (pullResult != null && pullResult.getPullStatus() == PullStatus.FOUND) {
+                                lagTime = System.currentTimeMillis() - consumePullResult.getMsgFoundList().get(0).getStoreTimestamp();
+                            }
+                        }
+                        if (!consumerLatencyMap.containsKey(q.getBrokerName())) {
+                            consumerLatencyMap.put(q.getBrokerName(), lagTime);
+                        } else if (lagTime > consumerLatencyMap.get(q.getBrokerName())) {
+                            consumerLatencyMap.put(q.getBrokerName(), lagTime);
+                        }
+                    }
+                    for (Map.Entry<String, Long> consumeLatencyEntry : consumerLatencyMap.entrySet()) {
+                        metricsService.getCollector().addGroupGetLatencyByStoreTimeMetric(clusterName,
+                                consumeLatencyEntry.getKey(), topic, group, consumeLatencyEntry.getValue());
+                    }
+
+                } catch (Exception ex) {
+                    log.warn("addGroupGetLatencyByStoreTimeMetric error", ex);
                 }
             }
         }
