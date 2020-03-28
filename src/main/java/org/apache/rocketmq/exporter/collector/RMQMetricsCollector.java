@@ -218,18 +218,18 @@ public class RMQMetricsCollector extends Collector {
 
 
     private static final List<String> TOPIC_OFFSET_LABEL_NAMES = Arrays.asList(
-            "cluster", "brokerNames", "topic", "lastUpdateTimestamp"
+            "cluster", "brokerName", "topic", "lastUpdateTimestamp"
     );
 
     private static final List<String> DLQ_TOPIC_OFFSET_LABEL_NAMES = Arrays.asList(
-            "cluster", "brokerNames", "group", "lastUpdateTimestamp"
+            "cluster", "brokerName", "group", "lastUpdateTimestamp"
     );
 
     private void loadTopicOffsetMetric(GaugeMetricFamily family, Map.Entry<ProducerMetric, Double> entry) {
         family.addMetric(
                 Arrays.asList(
                         entry.getKey().getClusterName(),
-                        entry.getKey().getBrokerNames(),
+                        entry.getKey().getBrokerName(),
                         entry.getKey().getTopicName(),
                         String.valueOf(entry.getKey().getLastUpdateTimestamp())
                 ),
@@ -237,7 +237,7 @@ public class RMQMetricsCollector extends Collector {
     }
 
     private void collectTopicOffsetMetric(List<MetricFamilySamples> mfs) {
-        GaugeMetricFamily topicOffsetF = new GaugeMetricFamily("rocketmq_topic_offset", "TopicOffset", TOPIC_OFFSET_LABEL_NAMES);
+        GaugeMetricFamily topicOffsetF = new GaugeMetricFamily("rocketmq_producer_offset", "TopicOffset", TOPIC_OFFSET_LABEL_NAMES);
         for (Map.Entry<ProducerMetric, Double> entry : topicOffset.entrySet()) {
             loadTopicOffsetMetric(topicOffsetF, entry);
         }
@@ -254,7 +254,7 @@ public class RMQMetricsCollector extends Collector {
             topicDLQOffsetF.addMetric(
                     Arrays.asList(
                             entry.getKey().getClusterName(),
-                            entry.getKey().getBrokerNames(),
+                            entry.getKey().getBrokerName(),
                             entry.getKey().getGroup(),
                             String.valueOf(entry.getKey().getLastUpdateTimestamp())
                     ),
@@ -351,19 +351,19 @@ public class RMQMetricsCollector extends Collector {
         family.addMetric(Arrays.asList(
                 entry.getKey().getClusterName(),
                 entry.getKey().getBrokerIP(),
-                entry.getKey().getBrokerHost()),
+                entry.getKey().getBrokerName()),
                 entry.getValue()
         );
     }
 
     private void collectBrokerNums(List<MetricFamilySamples> mfs) {
-        GaugeMetricFamily brokerPutNumsGauge = new GaugeMetricFamily("rocketmq_broker_put_nums", "BrokerPutNums", BROKER_NUMS_LABEL_NAMES);
+        GaugeMetricFamily brokerPutNumsGauge = new GaugeMetricFamily("rocketmq_broker_tps", "BrokerPutNums", BROKER_NUMS_LABEL_NAMES);
         for (Map.Entry<BrokerMetric, Double> entry : brokerPutNums.entrySet()) {
             loadBrokerNums(brokerPutNumsGauge, entry);
         }
         mfs.add(brokerPutNumsGauge);
 
-        GaugeMetricFamily brokerGetNumsGauge = new GaugeMetricFamily("rocketmq_broker_get_nums", "BrokerGetNums", BROKER_NUMS_LABEL_NAMES);
+        GaugeMetricFamily brokerGetNumsGauge = new GaugeMetricFamily("rocketmq_broker_qps", "BrokerGetNums", BROKER_NUMS_LABEL_NAMES);
         for (Map.Entry<BrokerMetric, Double> entry : brokerGetNums.entrySet()) {
             loadBrokerNums(brokerGetNumsGauge, entry);
         }
@@ -502,39 +502,39 @@ public class RMQMetricsCollector extends Collector {
     }
 
     private void collectTopicNums(List<MetricFamilySamples> mfs) {
-        GaugeMetricFamily topicPutNumsGauge = new GaugeMetricFamily("rocketmq_topic_put_nums", "TopicPutNums", TOPIC_NUMS_LABEL_NAMES);
+        GaugeMetricFamily topicPutNumsGauge = new GaugeMetricFamily("rocketmq_producer_tps", "TopicPutNums", TOPIC_NUMS_LABEL_NAMES);
         for (Map.Entry<TopicPutNumMetric, Double> entry : topicPutNums.entrySet()) {
             loadTopicNumsMetric(topicPutNumsGauge, entry);
         }
         mfs.add(topicPutNumsGauge);
 
-        GaugeMetricFamily topicPutSizeGauge = new GaugeMetricFamily("rocketmq_topic_put_messagesize", "TopicPutMessageSize", TOPIC_NUMS_LABEL_NAMES);
+        GaugeMetricFamily topicPutSizeGauge = new GaugeMetricFamily("rocketmq_producer_message_size", "TopicPutMessageSize", TOPIC_NUMS_LABEL_NAMES);
         for (Map.Entry<TopicPutNumMetric, Double> entry : topicPutSize.entrySet()) {
             loadTopicNumsMetric(topicPutSizeGauge, entry);
         }
         mfs.add(topicPutSizeGauge);
     }
 
-    private static final List<String> TOPIC_NUMS_LABEL_NAMES = Arrays.asList("cluster", "brokers", "topic");
+    private static final List<String> TOPIC_NUMS_LABEL_NAMES = Arrays.asList("cluster", "broker", "topic");
 
     private void loadTopicNumsMetric(GaugeMetricFamily family, Map.Entry<TopicPutNumMetric, Double> entry) {
         family.addMetric(
                 Arrays.asList(
                         entry.getKey().getClusterName(),
-                        entry.getKey().getBrokerNames(),
+                        entry.getKey().getBrokerName(),
                         entry.getKey().getTopicName()
                 ),
                 entry.getValue()
         );
     }
 
-    public void addTopicOffsetMetric(String clusterName, String brokerNames, String topic, long lastUpdateTimestamp, double value) {
+    public void addTopicOffsetMetric(String clusterName, String brokerName, String topic, long lastUpdateTimestamp, double value) {
         if (topic.startsWith(MixAll.RETRY_GROUP_TOPIC_PREFIX)) {
-            topicRetryOffset.put(new ProducerMetric(clusterName, brokerNames, topic, lastUpdateTimestamp), value);
+            topicRetryOffset.put(new ProducerMetric(clusterName, brokerName, topic, lastUpdateTimestamp), value);
         } else if (topic.startsWith(MixAll.DLQ_GROUP_TOPIC_PREFIX)) {
-            topicDLQOffset.put(new DLQTopicOffsetMetric(clusterName, brokerNames, topic.replace(MixAll.DLQ_GROUP_TOPIC_PREFIX, ""), lastUpdateTimestamp), value);
+            topicDLQOffset.put(new DLQTopicOffsetMetric(clusterName, brokerName, topic.replace(MixAll.DLQ_GROUP_TOPIC_PREFIX, ""), lastUpdateTimestamp), value);
         } else {
-            topicOffset.put(new ProducerMetric(clusterName, brokerNames, topic, lastUpdateTimestamp), value);
+            topicOffset.put(new ProducerMetric(clusterName, brokerName, topic, lastUpdateTimestamp), value);
         }
     }
 
@@ -552,34 +552,36 @@ public class RMQMetricsCollector extends Collector {
         }
     }
 
-    public void addTopicPutNumsMetric(String cluster, String brokerNames, String brokerIP, String brokerHost,
-                                      String topic, double value) {
-        topicPutNums.put(new TopicPutNumMetric(cluster, brokerNames, brokerIP, brokerHost, topic), value);
+    public void addTopicPutNumsMetric(String cluster, String brokerName, String brokerIP, String topic, double value) {
+        topicPutNums.put(new TopicPutNumMetric(cluster, brokerName, brokerIP, topic), value);
     }
 
-    public void addTopicPutSizeMetric(String cluster, String brokerName, String brokerIP, String brokerHost,
-                                      String topic, double value) {
-        topicPutSize.put(new TopicPutNumMetric(cluster, brokerName, brokerIP, brokerHost, topic), value);
+    public void addTopicPutSizeMetric(String cluster, String brokerName, String brokerIP, String topic, double value) {
+        topicPutSize.put(new TopicPutNumMetric(cluster, brokerName, brokerIP, topic), value);
     }
 
     public void addGroupBrokerTotalOffsetMetric(String topic, String group, long value) {
-        groupBrokerTotalOffset.put(new ConsumerMetric(topic, group), value);
+        //groupBrokerTotalOffset.put(new ConsumerMetric(topic, group), value);
     }
 
     public void addGroupConsumerTotalOffsetMetric(String topic, String group, long value) {
-        groupConsumeTotalOffset.put(new ConsumerMetric(topic, group), value);
+        //groupConsumeTotalOffset.put(new ConsumerMetric(topic, group), value);
     }
 
-    public void addGroupConsumeTPSMetric(String topic, String group, double value) {
-        groupConsumeTPS.put(new ConsumerMetric(topic, group), value);
+    public void addGroupConsumeTPSMetric(String clusterName, String brokerName, String topic, String group, double value) {
+        groupConsumeTPS.put(new ConsumerMetric(clusterName, brokerName, topic, group), value);
     }
 
-    public void addGroupGetNumsMetric(String topic, String group, double value) {
-        groupGetNums.put(new ConsumerMetric(topic, group), value);
+    public void addGroupGetNumsMetric(String clusterName, String brokerName, String topic, String group, double value) {
+        groupGetNums.put(new ConsumerMetric(clusterName, brokerName, topic, group), value);
     }
 
-    public void addGroupGetSizeMetric(String topic, String group, double value) {
-        groupGetSize.put(new ConsumerMetric(topic, group), value);
+    public void addGroupGetSizeMetric(String clusterName, String brokerName, String topic, String group, double value) {
+        groupGetSize.put(new ConsumerMetric(clusterName, brokerName, topic, group), value);
+    }
+
+    public void addSendBackNumsMetric(String clusterName, String brokerName, String topic, String group, double value) {
+        sendBackNums.put(new ConsumerMetric(clusterName, brokerName, topic, group), value);
     }
 
     public void addConsumerClientFailedMsgCountsMetric(String group, String topic, String clientAddr, String clientId, long value) {
@@ -607,16 +609,12 @@ public class RMQMetricsCollector extends Collector {
     }
 
 
-    public void addSendBackNumsMetric(String topic, String group, double value) {
-        sendBackNums.put(new ConsumerMetric(topic, group), value);
+    public void addBrokerPutNumsMetric(String clusterName, String brokerIP, String brokerName, double value) {
+        brokerPutNums.put(new BrokerMetric(clusterName, brokerIP, brokerName), value);
     }
 
-    public void addBrokerPutNumsMetric(String clusterName, String brokerIP, String brokerHost, double value) {
-        brokerPutNums.put(new BrokerMetric(clusterName, brokerIP, brokerHost), value);
-    }
-
-    public void addBrokerGetNumsMetric(String clusterName, String brokerIP, String brokerHost, double value) {
-        brokerGetNums.put(new BrokerMetric(clusterName, brokerIP, brokerHost), value);
+    public void addBrokerGetNumsMetric(String clusterName, String brokerIP, String brokerName, double value) {
+        brokerGetNums.put(new BrokerMetric(clusterName, brokerIP, brokerName), value);
     }
 
     public void addBrokerRuntimeStatsMetric(BrokerRuntimeStats stats, String clusterName, String brokerAddress, String brokerHost) {

@@ -19,7 +19,7 @@ package org.apache.rocketmq.exporter.model.metrics;
 //max offset of topic
 public class ProducerMetric {
     private String clusterName;
-    private String brokerNames;
+    private String brokerName;
     private String topicName;
     private long lastUpdateTimestamp;
 
@@ -31,12 +31,12 @@ public class ProducerMetric {
         this.clusterName = clusterName;
     }
 
-    public String getBrokerNames() {
-        return brokerNames;
+    public String getBrokerName() {
+        return brokerName;
     }
 
-    public void setBrokerNames(String brokerNames) {
-        this.brokerNames = brokerNames;
+    public void setBrokerName(String brokerName) {
+        this.brokerName = brokerName;
     }
 
     public String getTopicName() {
@@ -55,9 +55,9 @@ public class ProducerMetric {
         this.lastUpdateTimestamp = lastUpdateTimestamp;
     }
 
-    public ProducerMetric(String clusterName, String brokerNames, String topicName, long lastUpdateTimestamp) {
+    public ProducerMetric(String clusterName, String brokerName, String topicName, long lastUpdateTimestamp) {
         this.clusterName = clusterName;
-        this.brokerNames = brokerNames;
+        this.brokerName = brokerName;
         this.topicName = topicName;
         this.lastUpdateTimestamp = lastUpdateTimestamp;
     }
@@ -69,7 +69,7 @@ public class ProducerMetric {
         }
         ProducerMetric other = (ProducerMetric) obj;
 
-        return other.clusterName.equals(clusterName) &&
+        return other.clusterName.equals(clusterName) && other.brokerName.equals(brokerName) &&
                 other.topicName.equals(topicName);
     }
 
@@ -77,12 +77,13 @@ public class ProducerMetric {
     public int hashCode() {
         int hash = 1;
         hash = 37 * hash + clusterName.hashCode();
+        hash = 37 * hash + brokerName.hashCode();
         hash = 37 * hash + topicName.hashCode();
         return hash;
     }
 
     @Override
     public String toString() {
-        return "ClusterName: " + clusterName + " BrokerNames: " + brokerNames + " topicName: " + topicName;
+        return "ClusterName: " + clusterName + " BrokerName: " + brokerName + " topicName: " + topicName;
     }
 }

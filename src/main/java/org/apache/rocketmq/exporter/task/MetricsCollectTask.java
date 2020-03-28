@@ -178,7 +178,7 @@ public class MetricsCollectTask {
 
             Set<Map.Entry<MessageQueue, TopicOffset>> topicStatusEntries = topicStats.getOffsetTable().entrySet();
             HashMap<String, Long> brokerOffsetMap = new HashMap<>();
-            HashMap<String, Long> brokerUpdateTimestamp = new HashMap<>();
+            HashMap<String, Long> brokerUpdateTimestampMap = new HashMap<>();
 
             for (Map.Entry<MessageQueue, TopicOffset> topicStatusEntry : topicStatusEntries) {
                 MessageQueue q = topicStatusEntry.getKey();
@@ -190,18 +190,18 @@ public class MetricsCollectTask {
                     brokerOffsetMap.put(q.getBrokerName(), offset.getMaxOffset());
                 }
 
-                if (brokerUpdateTimestamp.containsKey(q.getBrokerName())) {
-                    if (offset.getLastUpdateTimestamp() > brokerUpdateTimestamp.get(q.getBrokerName())) {
-                        brokerUpdateTimestamp.put(q.getBrokerName(), offset.getLastUpdateTimestamp());
+                if (brokerUpdateTimestampMap.containsKey(q.getBrokerName())) {
+                    if (offset.getLastUpdateTimestamp() > brokerUpdateTimestampMap.get(q.getBrokerName())) {
+                        brokerUpdateTimestampMap.put(q.getBrokerName(), offset.getLastUpdateTimestamp());
                     }
                 } else {
-                    brokerUpdateTimestamp.put(q.getBrokerName(), offset.getLastUpdateTimestamp());
+                    brokerUpdateTimestampMap.put(q.getBrokerName(), offset.getLastUpdateTimestamp());
                 }
             }
             Set<Map.Entry<String, Long>> brokerOffsetEntries = brokerOffsetMap.entrySet();
             for (Map.Entry<String, Long> brokerOffsetEntry : brokerOffsetEntries) {
                 metricsService.getCollector().addTopicOffsetMetric(clusterName, brokerOffsetEntry.getKey(), topic,
-                        brokerUpdateTimestamp.get(brokerOffsetEntry.getKey()), brokerOffsetEntry.getValue());
+                        brokerUpdateTimestampMap.get(brokerOffsetEntry.getKey()), brokerOffsetEntry.getValue());
             }
         }
         log.info("topic offset collection task finished...." + (System.currentTimeMillis() - start));
@@ -311,7 +311,7 @@ public class MetricsCollectTask {
                             String.valueOf(messageModel.ordinal()),
                             diff
                     );
-                    metricsService.getCollector().addGroupConsumeTPSMetric(topic, group, consumeTPS);
+                    //metricsService.getCollector().addGroupConsumeTPSMetric(topic, group, consumeTPS);
                 }
                 Set<Map.Entry<MessageQueue, OffsetWrapper>> consumeStatusEntries = consumeStats.getOffsetTable().entrySet();
                 for (Map.Entry<MessageQueue, OffsetWrapper> consumeStatusEntry : consumeStatusEntries) {
@@ -324,8 +324,7 @@ public class MetricsCollectTask {
                     totalConsumerOffset += offset.getConsumerOffset();
                 }
                 metricsService.getCollector().addGroupBrokerTotalOffsetMetric(topic, group, totalBrokerOffset);
-                metricsService.getCollector().addGroupConsumerTotalOffsetMetric(topic, group, totalBrokerOffset);
-
+                metricsService.getCollector().addGroupConsumerTotalOffsetMetric(topic, group, totalConsumerOffset);
             }
         }
         log.info("consumer offset collection task finished...." + (System.currentTimeMillis() - start));
@@ -383,7 +382,6 @@ public class MetricsCollectTask {
                                 bd.getCluster(),
                                 bd.getBrokerName(),
                                 brokerIP,
-                                "",
                                 topic,
                                 Utils.getFixedDouble(bsd.getStatsMinute().getTps())
                         );
@@ -404,7 +402,6 @@ public class MetricsCollectTask {
                                 bd.getCluster(),
                                 bd.getBrokerName(),
                                 brokerIP,
-                                "",
                                 topic,
                                 Utils.getFixedDouble(bsd.getStatsMinute().getTps())
                         );
@@ -441,6 +438,8 @@ public class MetricsCollectTask {
                             //how many messages the consumer has get for the topic
                             bsd = mqAdminExt.viewBrokerStatsData(masterAddr, BrokerStatsManager.GROUP_GET_NUMS, statsKey);
                             metricsService.getCollector().addGroupGetNumsMetric(
+                                    bd.getCluster(),
+                                    bd.getBrokerName(),
                                     topic,
                                     group,
                                     Utils.getFixedDouble(bsd.getStatsMinute().getTps()));
@@ -457,6 +456,8 @@ public class MetricsCollectTask {
                             //how many bytes the consumer has get for the topic
                             bsd = mqAdminExt.viewBrokerStatsData(masterAddr, BrokerStatsManager.GROUP_GET_SIZE, statsKey);
                             metricsService.getCollector().addGroupGetSizeMetric(
+                                    bd.getCluster(),
+                                    bd.getBrokerName(),
                                     topic,
                                     group,
                                     Utils.getFixedDouble(bsd.getStatsMinute().getTps()));
@@ -473,6 +474,8 @@ public class MetricsCollectTask {
                             ////how many re-send times the consumer did for the topic
                             bsd = mqAdminExt.viewBrokerStatsData(masterAddr, BrokerStatsManager.SNDBCK_PUT_NUMS, statsKey);
                             metricsService.getCollector().addSendBackNumsMetric(
+                                    bd.getCluster(),
+                                    bd.getBrokerName(),
                                     topic,
                                     group,
                                     Utils.getFixedDouble(bsd.getStatsMinute().getTps()));
@@ -520,7 +523,7 @@ public class MetricsCollectTask {
                 metricsService.getCollector().addBrokerPutNumsMetric(
                         clusterEntry.getValue().getCluster(),
                         brokerIP,
-                        "",
+                        clusterEntry.getValue().getBrokerName(),
                         Utils.getFixedDouble(bsd.getStatsMinute().getTps()));
             } catch (Exception ex) {
                 log.error(String.format("BROKER_PUT_NUMS-error, master broker=%s", masterAddr), ex);
@@ -531,7 +534,7 @@ public class MetricsCollectTask {
                 metricsService.getCollector().addBrokerGetNumsMetric(
                         clusterEntry.getValue().getCluster(),
                         brokerIP,
-                        "",
+                        clusterEntry.getValue().getBrokerName(),
                         Utils.getFixedDouble(bsd.getStatsMinute().getTps()));
             } catch (Exception ex) {
                 log.error(String.format("BROKER_GET_NUMS-error, master broker=%s", masterAddr), ex);

@@ -17,10 +17,14 @@
 package org.apache.rocketmq.exporter.model.metrics;
 
 public class ConsumerMetric {
+    private String clusterName;
+    private String brokerName;
     private String topicName;
     private String consumerGroupName;
 
-    public ConsumerMetric(String topicName, String consumerGroupName) {
+    public ConsumerMetric(String clusterName, String brokerName, String topicName, String consumerGroupName) {
+        this.clusterName = clusterName;
+        this.brokerName = brokerName;
         this.topicName = topicName;
         this.consumerGroupName = consumerGroupName;
     }
@@ -41,6 +45,22 @@ public class ConsumerMetric {
         this.consumerGroupName = consumerGroupName;
     }
 
+    public String getClusterName() {
+        return clusterName;
+    }
+
+    public void setClusterName(String clusterName) {
+        this.clusterName = clusterName;
+    }
+
+    public String getBrokerName() {
+        return brokerName;
+    }
+
+    public void setBrokerName(String brokerName) {
+        this.brokerName = brokerName;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof ConsumerMetric)) {
@@ -48,13 +68,15 @@ public class ConsumerMetric {
         }
         ConsumerMetric other = (ConsumerMetric) obj;
 
-        return other.topicName.equals(topicName) &&
-                other.consumerGroupName.equals(consumerGroupName);
+        return other.clusterName.equals(clusterName) && other.brokerName.equals(brokerName)
+                && other.topicName.equals(topicName) && other.consumerGroupName.equals(consumerGroupName);
     }
 
     @Override
     public int hashCode() {
         int hash = 1;
+        hash = 37 * hash + clusterName.hashCode();
+        hash = 37 * hash + brokerName.hashCode();
         hash = 37 * hash + topicName.hashCode();
         hash = 37 * hash + consumerGroupName.hashCode();
         return hash;
@@ -62,6 +84,7 @@ public class ConsumerMetric {
 
     @Override
     public String toString() {
-        return "topicName: " + topicName + " ConsumeGroupName: " + consumerGroupName;
+        return "clusterName: " + clusterName + "brokerName: " + brokerName
+                + "topicName: " + topicName + " ConsumeGroupName: " + consumerGroupName;
     }
 }

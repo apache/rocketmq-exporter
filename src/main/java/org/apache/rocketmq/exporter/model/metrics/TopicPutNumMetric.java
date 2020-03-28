@@ -18,16 +18,14 @@ package org.apache.rocketmq.exporter.model.metrics;
 
 public class TopicPutNumMetric {
     private String clusterName;
-    private String brokerNames;
+    private String brokerName;
     private String brokerIP;
-    private String brokerHost;
     private String topicName;
 
-    public TopicPutNumMetric(String clusterName, String brokerNames, String brokerIP, String brokerHost, String topicName) {
+    public TopicPutNumMetric(String clusterName, String brokerName, String brokerIP, String topicName) {
         this.clusterName = clusterName;
-        this.brokerNames = brokerNames;
+        this.brokerName = brokerName;
         this.brokerIP = brokerIP;
-        this.brokerHost = brokerHost;
         this.topicName = topicName;
     }
 
@@ -39,12 +37,12 @@ public class TopicPutNumMetric {
         this.clusterName = clusterName;
     }
 
-    public String getBrokerNames() {
-        return brokerNames;
+    public String getBrokerName() {
+        return brokerName;
     }
 
-    public void setBrokerNames(String brokerNames) {
-        this.brokerNames = brokerNames;
+    public void setBrokerName(String brokerName) {
+        this.brokerName = brokerName;
     }
 
     public String getTopicName() {
@@ -61,14 +59,6 @@ public class TopicPutNumMetric {
 
     public void setBrokerIP(String brokerIP) {
         this.brokerIP = brokerIP;
-    }
-
-    public String getBrokerHost() {
-        return brokerHost;
-    }
-
-    public void setBrokerHost(String brokerHost) {
-        this.brokerHost = brokerHost;
     }
 
     @Override

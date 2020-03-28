@@ -18,13 +18,13 @@ package org.apache.rocketmq.exporter.model.metrics;
 
 public class DLQTopicOffsetMetric {
     private String clusterName;
-    private String brokerNames;
+    private String brokerName;
     private String group;
     private long lastUpdateTimestamp;
 
-    public DLQTopicOffsetMetric(String clusterName, String brokerNames, String group, long lastUpdateTimestamp) {
+    public DLQTopicOffsetMetric(String clusterName, String brokerName, String group, long lastUpdateTimestamp) {
         this.clusterName = clusterName;
-        this.brokerNames = brokerNames;
+        this.brokerName = brokerName;
         this.group = group;
         this.lastUpdateTimestamp = lastUpdateTimestamp;
     }
@@ -37,12 +37,12 @@ public class DLQTopicOffsetMetric {
         this.clusterName = clusterName;
     }
 
-    public String getBrokerNames() {
-        return brokerNames;
+    public String getBrokerName() {
+        return brokerName;
     }
 
-    public void setBrokerNames(String brokerNames) {
-        this.brokerNames = brokerNames;
+    public void setBrokerName(String brokerName) {
+        this.brokerName = brokerName;
     }
 
     public String getGroup() {
@@ -68,7 +68,7 @@ public class DLQTopicOffsetMetric {
         }
         DLQTopicOffsetMetric other = (DLQTopicOffsetMetric) obj;
 
-        return other.clusterName.equals(clusterName) &&
+        return other.clusterName.equals(clusterName) && other.brokerName.equals(brokerName) &&
                 other.group.equals(group);
 
     }
@@ -77,12 +77,13 @@ public class DLQTopicOffsetMetric {
     public int hashCode() {
         int hash = 1;
         hash = 37 * hash + clusterName.hashCode();
+        hash = 37 * hash + brokerName.hashCode();
         hash = 37 * hash + group.hashCode();
         return hash;
     }
 
     @Override
     public String toString() {
-        return "ClusterName: " + clusterName + " BrokerNames: " + brokerNames + " group: " + group;
+        return "ClusterName: " + clusterName + " BrokerNames: " + brokerName + " group: " + group;
     }
 }
