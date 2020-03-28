@@ -346,7 +346,7 @@ public class MetricsCollectTask {
                             }
                         }
                         if (!consumerLatencyMap.containsKey(q.getBrokerName())) {
-                            consumerLatencyMap.put(q.getBrokerName(), lagTime);
+                            consumerLatencyMap.put(q.getBrokerName(), lagTime > 0 ? lagTime : 0);
                         } else if (lagTime > consumerLatencyMap.get(q.getBrokerName())) {
                             consumerLatencyMap.put(q.getBrokerName(), lagTime);
                         }
