@@ -139,9 +139,16 @@ public class BrokerRuntimeStats {
 
     private void loadTps(PutTps putTps, String value) {
         String[] arr = value.split(" ");
-        putTps.ten = Double.parseDouble(arr[0]);
-        putTps.sixty = Double.parseDouble(arr[1]);
-        putTps.sixHundred = Double.parseDouble(arr[2]);
+        if (arr.length >= 1) {
+            putTps.ten = Double.parseDouble(arr[0]);
+        }
+        if (arr.length >= 2) {
+            putTps.sixty = Double.parseDouble(arr[1]);
+        }
+        if (arr.length >= 3) {
+            putTps.sixHundred = Double.parseDouble(arr[2]);
+        }
+
     }
 
     private void loadPutMessageDistributeTime(String str) {
