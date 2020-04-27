@@ -17,7 +17,6 @@
 package org.apache.rocketmq.exporter.service.impl;
 
 import io.prometheus.client.Collector;
-import io.prometheus.client.CollectorRegistry;
 import org.apache.rocketmq.exporter.collector.RMQMetricsCollector;
 import org.apache.rocketmq.exporter.service.RMQCollectorRegistry;
 import org.apache.rocketmq.exporter.service.RMQMetricsService;

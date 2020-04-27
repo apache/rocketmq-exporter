@@ -136,7 +136,7 @@ public class MetricsCollectTask {
         }
         log.info(infoOut.toString());
         if (clusterName == null) {
-            log.error("get cluster info error" );
+            log.error("get cluster info error");
         }
         log.info(String.format("MetricsCollectTask init finished....cost:%d", System.currentTimeMillis() - start));
     }

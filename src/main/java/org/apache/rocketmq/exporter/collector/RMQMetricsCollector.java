@@ -16,7 +16,11 @@
  */
 package org.apache.rocketmq.exporter.collector;
 
-import io.prometheus.client.*;
+import io.prometheus.client.GaugeMetricFamily;
+import io.prometheus.client.Summary;
+import io.prometheus.client.Collector;
+import io.prometheus.client.Histogram;
+import io.prometheus.client.SummaryMetricFamily;
 import org.apache.rocketmq.common.MixAll;
 import org.apache.rocketmq.exporter.model.BrokerRuntimeStats;
 import org.apache.rocketmq.exporter.model.metrics.BrokerMetric;
@@ -34,11 +38,14 @@ import org.apache.rocketmq.exporter.model.metrics.clientrunime.ConsumerRuntimeCo
 import org.apache.rocketmq.exporter.model.metrics.clientrunime.ConsumerRuntimePullRTMetric;
 import org.apache.rocketmq.exporter.model.metrics.clientrunime.ConsumerRuntimePullTPSMetric;
 import org.apache.rocketmq.exporter.service.RMQCollectorRegistry;
-import org.apache.rocketmq.exporter.service.impl.RMQMetricsServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class RMQMetricsCollector extends Collector {
@@ -167,12 +174,13 @@ public class RMQMetricsCollector extends Collector {
     private ConcurrentHashMap<BrokerRuntimeMetric, Long> brokerRuntimeCommitLogMinOffset = new ConcurrentHashMap<>();
     private ConcurrentHashMap<BrokerRuntimeMetric, Double> brokerRuntimeRemainHowManyDataToFlush = new ConcurrentHashMap<>();
 
-    static final Histogram requestLatencyHistogram = Histogram.build()
+
+    static final Histogram REQUEST_LATENCY_HISTOGRAM = Histogram.build()
             .name("requests_latency_seconds_histogram").help("Request latency in seconds.")
             .buckets(0.1, 0.2, 0.4, 0.8)
             .register(RMQCollectorRegistry.getCollectRegistry());
 
-    static final Summary requestLatencySummary = Summary.build()
+    static final Summary REQUEST_LATENCY_SUMMARY = Summary.build()
             .quantile(0.5, 0.05)
             .quantile(0.9, 0.01)
             .quantile(0.99, 0.001)
@@ -1334,7 +1342,7 @@ public class RMQMetricsCollector extends Collector {
 
     private void collectSummaryWithoutParameter() {
         Random random = new Random();
-        requestLatencySummary.observe(random.nextInt());
+        REQUEST_LATENCY_SUMMARY.observe(random.nextInt());
     }
 
     private void collectHistogram(List<MetricFamilySamples> mfs) {
@@ -1366,8 +1374,8 @@ public class RMQMetricsCollector extends Collector {
     private void collectHistogramWithoutParameter() {
         Random random = new Random();
 
-        requestLatencyHistogram.observe(random.nextDouble());
-        requestLatencyHistogram.observe(random.nextDouble());
+        REQUEST_LATENCY_HISTOGRAM.observe(random.nextDouble());
+        REQUEST_LATENCY_HISTOGRAM.observe(random.nextDouble());
     }
 
 
