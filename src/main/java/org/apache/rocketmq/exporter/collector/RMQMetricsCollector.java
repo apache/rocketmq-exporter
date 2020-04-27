@@ -1342,7 +1342,7 @@ public class RMQMetricsCollector extends Collector {
 
     private void collectSummaryWithoutParameter() {
         Random random = new Random();
-        REQUEST_LATENCY_SUMMARY.observe(random.nextInt());
+        REQUEST_LATENCY_SUMMARY.observe(random.nextDouble());
     }
 
     private void collectHistogram(List<MetricFamilySamples> mfs) {
