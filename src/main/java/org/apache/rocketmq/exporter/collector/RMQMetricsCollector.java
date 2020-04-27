@@ -16,8 +16,7 @@
  */
 package org.apache.rocketmq.exporter.collector;
 
-import io.prometheus.client.Collector;
-import io.prometheus.client.GaugeMetricFamily;
+import io.prometheus.client.*;
 import org.apache.rocketmq.common.MixAll;
 import org.apache.rocketmq.exporter.model.BrokerRuntimeStats;
 import org.apache.rocketmq.exporter.model.metrics.BrokerMetric;
@@ -34,13 +33,12 @@ import org.apache.rocketmq.exporter.model.metrics.clientrunime.ConsumerRuntimeCo
 import org.apache.rocketmq.exporter.model.metrics.clientrunime.ConsumerRuntimeConsumeRTMetric;
 import org.apache.rocketmq.exporter.model.metrics.clientrunime.ConsumerRuntimePullRTMetric;
 import org.apache.rocketmq.exporter.model.metrics.clientrunime.ConsumerRuntimePullTPSMetric;
+import org.apache.rocketmq.exporter.service.RMQCollectorRegistry;
+import org.apache.rocketmq.exporter.service.impl.RMQMetricsServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class RMQMetricsCollector extends Collector {
@@ -168,6 +166,18 @@ public class RMQMetricsCollector extends Collector {
     private ConcurrentHashMap<BrokerRuntimeMetric, Long> brokerRuntimeCommitLogMaxOffset = new ConcurrentHashMap<>();
     private ConcurrentHashMap<BrokerRuntimeMetric, Long> brokerRuntimeCommitLogMinOffset = new ConcurrentHashMap<>();
     private ConcurrentHashMap<BrokerRuntimeMetric, Double> brokerRuntimeRemainHowManyDataToFlush = new ConcurrentHashMap<>();
+
+    static final Histogram requestLatencyHistogram = Histogram.build()
+            .name("requests_latency_seconds_histogram").help("Request latency in seconds.")
+            .buckets(0.1, 0.2, 0.4, 0.8)
+            .register(RMQCollectorRegistry.getCollectRegistry());
+
+    static final Summary requestLatencySummary = Summary.build()
+            .quantile(0.5, 0.05)
+            .quantile(0.9, 0.01)
+            .quantile(0.99, 0.001)
+            .name("requests_latency_seconds_summary").help("Request latency in seconds.").register(RMQCollectorRegistry.getCollectRegistry());
+
     private final static Logger log = LoggerFactory.getLogger(RMQMetricsCollector.class);
 
     private static final List<String> GROUP_DIFF_LABEL_NAMES = Arrays.asList("group", "topic", "countOfOnlineConsumers", "msgModel");
@@ -284,6 +294,14 @@ public class RMQMetricsCollector extends Collector {
         collectBrokerNums(mfs);
 
         collectBrokerRuntimeStats(mfs);
+
+        collectSummary(mfs);
+
+        collectSummaryWithoutParameter();
+
+        collectHistogram(mfs);
+
+        collectHistogramWithoutParameter();
 
         return mfs;
     }
@@ -1306,4 +1324,51 @@ public class RMQMetricsCollector extends Collector {
         }
         mfs.add(brokerRuntimeRemainHowManyDataToFlushF);
     }
+
+    private void collectSummary(List<MetricFamilySamples> mfs) {
+        SummaryMetricFamily labeledSummary = new SummaryMetricFamily("my_other_summary", "help",
+                Arrays.asList("labelname"), Arrays.asList(.95, .99));
+        labeledSummary.addMetric(Arrays.asList("foo"), 2, 10, Arrays.asList(3.0, 5.0));
+        mfs.add(labeledSummary);
+    }
+
+    private void collectSummaryWithoutParameter() {
+        Random random = new Random();
+        requestLatencySummary.observe(random.nextInt());
+    }
+
+    private void collectHistogram(List<MetricFamilySamples> mfs) {
+        ArrayList<Collector.MetricFamilySamples.Sample> samples = new ArrayList<Collector.MetricFamilySamples.Sample>();
+        ArrayList<String> labelNames = new ArrayList<String>();
+        labelNames.add("l");
+        ArrayList<String> labelValues = new ArrayList<String>();
+        labelValues.add("a");
+        ArrayList<String> labelNamesLe = new ArrayList<String>(labelNames);
+        labelNamesLe.add("le");
+        for (String bucket: new String[]{"0.005", "0.01", "0.025", "0.05", "0.075", "0.1", "0.25", "0.5", "0.75", "1.0"}) {
+            ArrayList<String> labelValuesLe = new ArrayList<String>(labelValues);
+            labelValuesLe.add(bucket);
+            samples.add(new Collector.MetricFamilySamples.Sample("labels_bucket", labelNamesLe, labelValuesLe, 0.0));
+        }
+        for (String bucket: new String[]{"2.5", "5.0", "7.5", "10.0", "+Inf"}) {
+            ArrayList<String> labelValuesLe = new ArrayList<String>(labelValues);
+            labelValuesLe.add(bucket);
+            samples.add(new Collector.MetricFamilySamples.Sample("labels_bucket", labelNamesLe, labelValuesLe, 1.0));
+        }
+        samples.add(new Collector.MetricFamilySamples.Sample("labels_count", labelNames, labelValues, 1.0));
+        samples.add(new Collector.MetricFamilySamples.Sample("labels_sum", labelNames, labelValues, 2.0));
+        Collector.MetricFamilySamples mfsFixture = new Collector.MetricFamilySamples("labels", Collector.Type.HISTOGRAM, "help", samples);
+        mfs.add(mfsFixture);
+
+
+    }
+
+    private void collectHistogramWithoutParameter() {
+        Random random = new Random();
+
+        requestLatencyHistogram.observe(random.nextDouble());
+        requestLatencyHistogram.observe(random.nextDouble());
+    }
+
+
 }

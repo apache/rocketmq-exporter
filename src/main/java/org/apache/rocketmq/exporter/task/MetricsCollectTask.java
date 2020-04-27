@@ -118,7 +118,12 @@ public class MetricsCollectTask {
     public void init() throws InterruptedException, RemotingConnectException, RemotingTimeoutException, RemotingSendRequestException, MQBrokerException {
         log.info("MetricsCollectTask init starting....");
         long start = System.currentTimeMillis();
-        ClusterInfo clusterInfo = mqAdminExt.examineBrokerClusterInfo();
+        ClusterInfo clusterInfo = new ClusterInfo();
+        try {
+            clusterInfo = mqAdminExt.examineBrokerClusterInfo();
+        } catch (Exception ex) {
+            log.error("get broker cluster info error", ex);
+        }
         StringBuilder infoOut = new StringBuilder();
         for (String clusterName : clusterInfo.getClusterAddrTable().keySet()) {
             infoOut.append(String.format("cluster name= %s, broker name = %s%n", clusterName, clusterInfo.getClusterAddrTable().get(clusterName)));
