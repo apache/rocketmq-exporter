@@ -15,7 +15,7 @@ rocketmq:
   config:
     webTelemetryPath: /metrics
     rocketmqVersion: 4_2_0
-    namesrvAddr: 127.0.0.1:9876
+    namesrvAddr: 172.16.116.51:9876
     enableCollect: true
 
 threadpool:

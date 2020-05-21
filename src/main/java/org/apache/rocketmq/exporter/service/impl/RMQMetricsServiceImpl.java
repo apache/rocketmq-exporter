@@ -17,8 +17,8 @@
 package org.apache.rocketmq.exporter.service.impl;
 
 import io.prometheus.client.Collector;
-import io.prometheus.client.CollectorRegistry;
 import org.apache.rocketmq.exporter.collector.RMQMetricsCollector;
+import org.apache.rocketmq.exporter.service.RMQCollectorRegistry;
 import org.apache.rocketmq.exporter.service.RMQMetricsService;
 import org.springframework.stereotype.Service;
 
@@ -31,7 +31,7 @@ import java.util.Iterator;
 
 @Service
 public class RMQMetricsServiceImpl implements RMQMetricsService {
-    private CollectorRegistry registry = new CollectorRegistry();
+
     private final RMQMetricsCollector rmqMetricsCollector;
 
     public RMQMetricsCollector getCollector() {
@@ -40,11 +40,11 @@ public class RMQMetricsServiceImpl implements RMQMetricsService {
 
     public RMQMetricsServiceImpl() {
         rmqMetricsCollector = new RMQMetricsCollector();
-        rmqMetricsCollector.register(registry);
+        rmqMetricsCollector.register(RMQCollectorRegistry.getCollectRegistry());
     }
 
     public void metrics(StringWriter writer) throws IOException {
-        this.writeEscapedHelp(writer, registry.metricFamilySamples());
+        this.writeEscapedHelp(writer, RMQCollectorRegistry.getCollectRegistry().metricFamilySamples());
     }
 
     public void writeEscapedHelp(Writer writer, Enumeration<Collector.MetricFamilySamples> mfs) throws IOException {

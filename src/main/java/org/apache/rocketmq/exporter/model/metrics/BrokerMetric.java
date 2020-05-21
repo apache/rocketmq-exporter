@@ -19,12 +19,12 @@ package org.apache.rocketmq.exporter.model.metrics;
 public class BrokerMetric {
     private String clusterName;
     private String brokerIP;
-    private String brokerHost;
+    private String brokerName;
 
-    public BrokerMetric(String clusterName, String brokerIP, String brokerHost) {
+    public BrokerMetric(String clusterName, String brokerIP, String brokerName) {
         this.clusterName = clusterName;
         this.brokerIP = brokerIP;
-        this.brokerHost = brokerHost;
+        this.brokerName = brokerName;
     }
 
     public String getClusterName() {
@@ -43,12 +43,12 @@ public class BrokerMetric {
         this.brokerIP = brokerIP;
     }
 
-    public String getBrokerHost() {
-        return brokerHost;
+    public String getBrokerName() {
+        return brokerName;
     }
 
-    public void setBrokerHost(String brokerHost) {
-        this.brokerHost = brokerHost;
+    public void setBrokerName(String brokerName) {
+        this.brokerName = brokerName;
     }
 
     @Override
@@ -72,6 +72,6 @@ public class BrokerMetric {
 
     @Override
     public String toString() {
-        return "ClusterName: " + clusterName + " brokerIP: " + brokerIP + " brokerHost: " + brokerHost;
+        return "ClusterName: " + clusterName + " brokerIP: " + brokerIP + " brokerHost: " + brokerName;
     }
 }

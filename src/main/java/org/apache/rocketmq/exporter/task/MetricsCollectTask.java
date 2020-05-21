@@ -18,6 +18,8 @@ package org.apache.rocketmq.exporter.task;
 
 import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.rocketmq.client.consumer.PullResult;
+import org.apache.rocketmq.client.consumer.PullStatus;
 import org.apache.rocketmq.client.exception.MQBrokerException;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.common.MixAll;
@@ -42,6 +44,7 @@ import org.apache.rocketmq.exporter.config.RMQConfigure;
 import org.apache.rocketmq.exporter.model.BrokerRuntimeStats;
 import org.apache.rocketmq.exporter.model.common.TwoTuple;
 import org.apache.rocketmq.exporter.service.RMQMetricsService;
+import org.apache.rocketmq.exporter.service.client.MQAdminExtImpl;
 import org.apache.rocketmq.exporter.util.Utils;
 import org.apache.rocketmq.remoting.exception.RemotingConnectException;
 import org.apache.rocketmq.remoting.exception.RemotingException;
@@ -60,6 +63,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -83,6 +87,7 @@ public class MetricsCollectTask {
     private ExecutorService collectClientMetricExecutor;
     @Resource
     private RMQMetricsService metricsService;
+    private static String clusterName = null;
     private final static Logger log = LoggerFactory.getLogger(MetricsCollectTask.class);
 
     private BlockingQueue<Runnable> collectClientTaskBlockQueue;
@@ -113,15 +118,26 @@ public class MetricsCollectTask {
     public void init() throws InterruptedException, RemotingConnectException, RemotingTimeoutException, RemotingSendRequestException, MQBrokerException {
         log.info("MetricsCollectTask init starting....");
         long start = System.currentTimeMillis();
-        ClusterInfo clusterInfo = mqAdminExt.examineBrokerClusterInfo();
+        ClusterInfo clusterInfo = new ClusterInfo();
+        try {
+            clusterInfo = mqAdminExt.examineBrokerClusterInfo();
+        } catch (Exception ex) {
+            log.error("get broker cluster info error", ex);
+        }
         StringBuilder infoOut = new StringBuilder();
         for (String clusterName : clusterInfo.getClusterAddrTable().keySet()) {
             infoOut.append(String.format("cluster name= %s, broker name = %s%n", clusterName, clusterInfo.getClusterAddrTable().get(clusterName)));
+            if (clusterName != null && MetricsCollectTask.clusterName == null) {
+                MetricsCollectTask.clusterName = clusterName;
+            }
         }
         for (String brokerName : clusterInfo.getBrokerAddrTable().keySet()) {
-            infoOut.append(String.format("broker name = %s，master broker address= %s%n", brokerName, clusterInfo.getBrokerAddrTable().get(brokerName).getBrokerAddrs().get(MixAll.MASTER_ID)));
+            infoOut.append(String.format("broker name = %s, master broker address= %s%n", brokerName, clusterInfo.getBrokerAddrTable().get(brokerName).getBrokerAddrs().get(MixAll.MASTER_ID)));
         }
         log.info(infoOut.toString());
+        if (clusterName == null) {
+            log.error("get cluster info error");
+        }
         log.info(String.format("MetricsCollectTask init finished....cost:%d", System.currentTimeMillis() - start));
     }
 
@@ -146,6 +162,7 @@ public class MetricsCollectTask {
                     JSON.toJSONString(mqAdminExt.getNameServerAddressList())));
             return;
         }
+
         for (String topic : topicSet) {
             TopicStatsTable topicStats = null;
             try {
@@ -158,21 +175,32 @@ public class MetricsCollectTask {
             }
 
             Set<Map.Entry<MessageQueue, TopicOffset>> topicStatusEntries = topicStats.getOffsetTable().entrySet();
-
-            double totalMaxOffset = 0L;
-            long lastUpdateTimestamp = 0L;
-            StringBuilder sb = new StringBuilder();
+            HashMap<String, Long> brokerOffsetMap = new HashMap<>();
+            HashMap<String, Long> brokerUpdateTimestampMap = new HashMap<>();
 
             for (Map.Entry<MessageQueue, TopicOffset> topicStatusEntry : topicStatusEntries) {
                 MessageQueue q = topicStatusEntry.getKey();
                 TopicOffset offset = topicStatusEntry.getValue();
-                totalMaxOffset += offset.getMaxOffset();
-                if (offset.getLastUpdateTimestamp() > lastUpdateTimestamp) {
-                    lastUpdateTimestamp = offset.getLastUpdateTimestamp();
+
+                if (brokerOffsetMap.containsKey(q.getBrokerName())) {
+                    brokerOffsetMap.put(q.getBrokerName(), brokerOffsetMap.get(q.getBrokerName()) + offset.getMaxOffset());
+                } else {
+                    brokerOffsetMap.put(q.getBrokerName(), offset.getMaxOffset());
                 }
-                sb.append(q.getBrokerName()).append(" ");
+
+                if (brokerUpdateTimestampMap.containsKey(q.getBrokerName())) {
+                    if (offset.getLastUpdateTimestamp() > brokerUpdateTimestampMap.get(q.getBrokerName())) {
+                        brokerUpdateTimestampMap.put(q.getBrokerName(), offset.getLastUpdateTimestamp());
+                    }
+                } else {
+                    brokerUpdateTimestampMap.put(q.getBrokerName(), offset.getLastUpdateTimestamp());
+                }
             }
-            metricsService.getCollector().addTopicOffsetMetric("", sb.toString(), topic, lastUpdateTimestamp, totalMaxOffset);
+            Set<Map.Entry<String, Long>> brokerOffsetEntries = brokerOffsetMap.entrySet();
+            for (Map.Entry<String, Long> brokerOffsetEntry : brokerOffsetEntries) {
+                metricsService.getCollector().addTopicOffsetMetric(clusterName, brokerOffsetEntry.getKey(), topic,
+                        brokerUpdateTimestampMap.get(brokerOffsetEntry.getKey()), brokerOffsetEntry.getValue());
+            }
         }
         log.info("topic offset collection task finished...." + (System.currentTimeMillis() - start));
     }
@@ -281,21 +309,61 @@ public class MetricsCollectTask {
                             String.valueOf(messageModel.ordinal()),
                             diff
                     );
-                    metricsService.getCollector().addGroupConsumeTPSMetric(topic, group, consumeTPS);
+                    //metricsService.getCollector().addGroupConsumeTPSMetric(topic, group, consumeTPS);
                 }
-                Set<Map.Entry<MessageQueue, OffsetWrapper>> consumeStatusEntries = consumeStats.getOffsetTable().entrySet();
-                for (Map.Entry<MessageQueue, OffsetWrapper> consumeStatusEntry : consumeStatusEntries) {
-                    MessageQueue q = consumeStatusEntry.getKey();
-                    OffsetWrapper offset = consumeStatusEntry.getValue();
-
-                    //topic + consumer group
-                    totalBrokerOffset += totalBrokerOffset + offset.getBrokerOffset();
-                    //topic + consumer group
-                    totalConsumerOffset += offset.getConsumerOffset();
+                // get consumer broker offset
+                try {
+                    HashMap<String, Long> consumeOffsetMap = new HashMap<>();
+                    for (Map.Entry<MessageQueue, OffsetWrapper> consumeStatusEntry : consumeStats.getOffsetTable().entrySet()) {
+                        MessageQueue q = consumeStatusEntry.getKey();
+                        OffsetWrapper offset = consumeStatusEntry.getValue();
+                        if (consumeOffsetMap.containsKey(q.getBrokerName())) {
+                            consumeOffsetMap.put(q.getBrokerName(), consumeOffsetMap.get(q.getBrokerName()) + offset.getConsumerOffset());
+                        } else {
+                            consumeOffsetMap.put(q.getBrokerName(), offset.getConsumerOffset());
+                        }
+                    }
+                    for (Map.Entry<String, Long> consumeOffsetEntry : consumeOffsetMap.entrySet()) {
+                        metricsService.getCollector().addGroupBrokerTotalOffsetMetric(clusterName,
+                                consumeOffsetEntry.getKey(), topic, group, consumeOffsetEntry.getValue());
+                    }
+                } catch (Exception ex) {
+                    log.warn("addGroupBrokerTotalOffsetMetric error", ex);
                 }
-                metricsService.getCollector().addGroupBrokerTotalOffsetMetric(topic, group, totalBrokerOffset);
-                metricsService.getCollector().addGroupConsumerTotalOffsetMetric(topic, group, totalBrokerOffset);
 
+                // get consumer latency
+                try {
+                    HashMap<String, Long> consumerLatencyMap = new HashMap<>();
+                    for (Map.Entry<MessageQueue, OffsetWrapper> consumeStatusEntry : consumeStats.getOffsetTable().entrySet()) {
+                        MessageQueue q = consumeStatusEntry.getKey();
+                        OffsetWrapper offset = consumeStatusEntry.getValue();
+                        PullResult consumePullResult = ((MQAdminExtImpl) mqAdminExt).queryMsgByOffset(q, offset.getConsumerOffset());
+                        long lagTime = 0;
+                        if (consumePullResult != null && consumePullResult.getPullStatus() == PullStatus.FOUND) {
+                            lagTime = System.currentTimeMillis() - consumePullResult.getMsgFoundList().get(0).getStoreTimestamp();
+                            if (offset.getBrokerOffset() == offset.getConsumerOffset()) {
+                                lagTime = 0;
+                            }
+                        } else if (consumePullResult.getPullStatus() == PullStatus.OFFSET_ILLEGAL) {
+                            PullResult pullResult = ((MQAdminExtImpl) mqAdminExt).queryMsgByOffset(q, consumePullResult.getMinOffset());
+                            if (pullResult != null && pullResult.getPullStatus() == PullStatus.FOUND) {
+                                lagTime = System.currentTimeMillis() - consumePullResult.getMsgFoundList().get(0).getStoreTimestamp();
+                            }
+                        }
+                        if (!consumerLatencyMap.containsKey(q.getBrokerName())) {
+                            consumerLatencyMap.put(q.getBrokerName(), lagTime > 0 ? lagTime : 0);
+                        } else if (lagTime > consumerLatencyMap.get(q.getBrokerName())) {
+                            consumerLatencyMap.put(q.getBrokerName(), lagTime);
+                        }
+                    }
+                    for (Map.Entry<String, Long> consumeLatencyEntry : consumerLatencyMap.entrySet()) {
+                        metricsService.getCollector().addGroupGetLatencyByStoreTimeMetric(clusterName,
+                                consumeLatencyEntry.getKey(), topic, group, consumeLatencyEntry.getValue());
+                    }
+
+                } catch (Exception ex) {
+                    log.warn("addGroupGetLatencyByStoreTimeMetric error", ex);
+                }
             }
         }
         log.info("consumer offset collection task finished...." + (System.currentTimeMillis() - start));
@@ -353,7 +421,6 @@ public class MetricsCollectTask {
                                 bd.getCluster(),
                                 bd.getBrokerName(),
                                 brokerIP,
-                                "",
                                 topic,
                                 Utils.getFixedDouble(bsd.getStatsMinute().getTps())
                         );
@@ -374,7 +441,6 @@ public class MetricsCollectTask {
                                 bd.getCluster(),
                                 bd.getBrokerName(),
                                 brokerIP,
-                                "",
                                 topic,
                                 Utils.getFixedDouble(bsd.getStatsMinute().getTps())
                         );
@@ -395,13 +461,13 @@ public class MetricsCollectTask {
                 groupList = mqAdminExt.queryTopicConsumeByWho(topic);
             } catch (Exception ex) {
                 log.error(String.format("collectBrokerStatsTopic-fetch consumers for topic(%s) error, ignore this topic", topic), ex);
-                return;
+                continue;
             }
             if (groupList.getGroupList() == null || groupList.getGroupList().isEmpty()) {
                 log.warn(String.format("collectBrokerStatsTopic-topic's consumer is empty, %s", topic));
-                return;
+                continue;
             }
-            for (String group : groupList.getGroupList())
+            for (String group : groupList.getGroupList()) {
                 for (BrokerData bd : topicRouteData.getBrokerDatas()) {
                     String masterAddr = bd.getBrokerAddrs().get(MixAll.MASTER_ID);
                     if (masterAddr != null) {
@@ -411,6 +477,8 @@ public class MetricsCollectTask {
                             //how many messages the consumer has get for the topic
                             bsd = mqAdminExt.viewBrokerStatsData(masterAddr, BrokerStatsManager.GROUP_GET_NUMS, statsKey);
                             metricsService.getCollector().addGroupGetNumsMetric(
+                                    bd.getCluster(),
+                                    bd.getBrokerName(),
                                     topic,
                                     group,
                                     Utils.getFixedDouble(bsd.getStatsMinute().getTps()));
@@ -427,6 +495,8 @@ public class MetricsCollectTask {
                             //how many bytes the consumer has get for the topic
                             bsd = mqAdminExt.viewBrokerStatsData(masterAddr, BrokerStatsManager.GROUP_GET_SIZE, statsKey);
                             metricsService.getCollector().addGroupGetSizeMetric(
+                                    bd.getCluster(),
+                                    bd.getBrokerName(),
                                     topic,
                                     group,
                                     Utils.getFixedDouble(bsd.getStatsMinute().getTps()));
@@ -443,6 +513,8 @@ public class MetricsCollectTask {
                             ////how many re-send times the consumer did for the topic
                             bsd = mqAdminExt.viewBrokerStatsData(masterAddr, BrokerStatsManager.SNDBCK_PUT_NUMS, statsKey);
                             metricsService.getCollector().addSendBackNumsMetric(
+                                    bd.getCluster(),
+                                    bd.getBrokerName(),
                                     topic,
                                     group,
                                     Utils.getFixedDouble(bsd.getStatsMinute().getTps()));
@@ -457,6 +529,7 @@ public class MetricsCollectTask {
                         }
                     }
                 }
+            }
         }
         log.info("broker topic stats collection task finished...." + (System.currentTimeMillis() - start));
     }
@@ -489,7 +562,7 @@ public class MetricsCollectTask {
                 metricsService.getCollector().addBrokerPutNumsMetric(
                         clusterEntry.getValue().getCluster(),
                         brokerIP,
-                        "",
+                        clusterEntry.getValue().getBrokerName(),
                         Utils.getFixedDouble(bsd.getStatsMinute().getTps()));
             } catch (Exception ex) {
                 log.error(String.format("BROKER_PUT_NUMS-error, master broker=%s", masterAddr), ex);
@@ -500,7 +573,7 @@ public class MetricsCollectTask {
                 metricsService.getCollector().addBrokerGetNumsMetric(
                         clusterEntry.getValue().getCluster(),
                         brokerIP,
-                        "",
+                        clusterEntry.getValue().getBrokerName(),
                         Utils.getFixedDouble(bsd.getStatsMinute().getTps()));
             } catch (Exception ex) {
                 log.error(String.format("BROKER_GET_NUMS-error, master broker=%s", masterAddr), ex);
@@ -566,8 +639,8 @@ public class MetricsCollectTask {
         List<String> clientIdAddresses = new ArrayList<>();
 
         for (Connection connection : connectionSet) {
-            clientAddresses.add(connection.getClientAddr());//tcp连接地址
-            clientIdAddresses.add(connection.getClientId());//本地ip组成的id
+            clientAddresses.add(connection.getClientAddr());//tcp connect address
+            clientIdAddresses.add(connection.getClientId());//local ip
         }
         String str1 = String.join(",", clientAddresses);
         String str2 = String.join(",", clientIdAddresses);
