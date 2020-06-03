@@ -204,7 +204,7 @@ rocketmq_group_get_latency_by_storetime{cluster="MQCluster",broker="broker-a",to
 rocketmq_group_get_latency_by_storetime{cluster="MQCluster",broker="broker-b",topic="DEV_TID_tfq",group="DEV_CID_cfq",} 0.0
 ```
 
-###RocketMQ Client
+### RocketMQ Client
 
 **Metrics details**
 
