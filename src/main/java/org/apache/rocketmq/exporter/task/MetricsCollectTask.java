@@ -131,7 +131,7 @@ public class MetricsCollectTask {
         }
         log.info(infoOut.toString());
         if (clusterName == null) {
-            log.error("get cluster info error" );
+            log.error("get cluster info error");
         }
         log.info(String.format("MetricsCollectTask init finished....cost:%d", System.currentTimeMillis() - start));
     }
@@ -408,10 +408,11 @@ public class MetricsCollectTask {
                 String masterAddr = bd.getBrokerAddrs().get(MixAll.MASTER_ID);
                 if (!StringUtils.isBlank(masterAddr)) {
                     BrokerStatsData bsd = null;
+                    String brokerIP = "";
                     try {
                         //how many messages has sent for the topic
                         bsd = mqAdminExt.viewBrokerStatsData(masterAddr, BrokerStatsManager.TOPIC_PUT_NUMS, topic);
-                        String brokerIP = clusterInfo.getBrokerAddrTable().get(bd.getBrokerName()).getBrokerAddrs().get(MixAll.MASTER_ID);
+                        brokerIP = clusterInfo.getBrokerAddrTable().get(bd.getBrokerName()).getBrokerAddrs().get(MixAll.MASTER_ID);
                         metricsService.getCollector().addTopicPutNumsMetric(
                                 bd.getCluster(),
                                 bd.getBrokerName(),
@@ -421,7 +422,13 @@ public class MetricsCollectTask {
                         );
                     } catch (MQClientException ex) {
                         if (ex.getResponseCode() == ResponseCode.SYSTEM_ERROR) {
-                            log.error(String.format("TOPIC_PUT_NUMS-error, topic=%s, master broker=%s, %s", topic, masterAddr, ex.getErrorMessage()));
+                            // if the stats of TOPIC_PUT_NUMS for topic is not exist,just set default value to it
+                            metricsService.getCollector().addTopicPutNumsMetric(
+                                    bd.getCluster(),
+                                    bd.getBrokerName(),
+                                    brokerIP,
+                                    topic,
+                                    0);
                         } else {
                             log.error(String.format("TOPIC_PUT_NUMS-error, topic=%s, master broker=%s", topic, masterAddr), ex);
                         }
@@ -431,7 +438,7 @@ public class MetricsCollectTask {
                     try {
                         //how many bytes has sent for the topic
                         bsd = mqAdminExt.viewBrokerStatsData(masterAddr, BrokerStatsManager.TOPIC_PUT_SIZE, topic);
-                        String brokerIP = clusterInfo.getBrokerAddrTable().get(bd.getBrokerName()).getBrokerAddrs().get(MixAll.MASTER_ID);
+                        brokerIP = clusterInfo.getBrokerAddrTable().get(bd.getBrokerName()).getBrokerAddrs().get(MixAll.MASTER_ID);
                         metricsService.getCollector().addTopicPutSizeMetric(
                                 bd.getCluster(),
                                 bd.getBrokerName(),
@@ -441,7 +448,13 @@ public class MetricsCollectTask {
                         );
                     } catch (MQClientException ex) {
                         if (ex.getResponseCode() == ResponseCode.SYSTEM_ERROR) {
-                            log.error(String.format("TOPIC_PUT_SIZE-error, topic=%s, master broker=%s, %s", topic, masterAddr, ex.getErrorMessage()));
+                            // if the stats of TOPIC_PUT_SIZE for topic is not exist,just set default value to it
+                            metricsService.getCollector().addTopicPutSizeMetric(
+                                    bd.getCluster(),
+                                    bd.getBrokerName(),
+                                    brokerIP,
+                                    topic,
+                                    0);
                         } else {
                             log.error(String.format("TOPIC_PUT_SIZE-error, topic=%s, master broker=%s", topic, masterAddr), ex);
                         }
@@ -479,7 +492,13 @@ public class MetricsCollectTask {
                                     Utils.getFixedDouble(bsd.getStatsMinute().getTps()));
                         } catch (MQClientException ex) {
                             if (ex.getResponseCode() == ResponseCode.SYSTEM_ERROR) {
-                                log.error(String.format("GROUP_GET_NUMS-error, topic=%s, group=%s,master broker=%s, %s", topic, group, masterAddr, ex.getErrorMessage()));
+                                // if the stats of GROUP_GET_NUMS for topic is not exist,just set default value to it
+                                metricsService.getCollector().addGroupGetNumsMetric(
+                                        bd.getCluster(),
+                                        bd.getBrokerName(),
+                                        topic,
+                                        group,
+                                        0);
                             } else {
                                 log.error(String.format("GROUP_GET_NUMS-error, topic=%s, group=%s,master broker=%s", topic, group, masterAddr), ex);
                             }
@@ -497,7 +516,13 @@ public class MetricsCollectTask {
                                     Utils.getFixedDouble(bsd.getStatsMinute().getTps()));
                         } catch (MQClientException ex) {
                             if (ex.getResponseCode() == ResponseCode.SYSTEM_ERROR) {
-                                log.error(String.format("GROUP_GET_SIZE-error, topic=%s, group=%s, master broker=%s, %s", topic, group, masterAddr, ex.getErrorMessage()));
+                                // if the stats of GROUP_GET_NUMS for topic is not exist,just set default value to it
+                                metricsService.getCollector().addGroupGetSizeMetric(
+                                        bd.getCluster(),
+                                        bd.getBrokerName(),
+                                        topic,
+                                        group,
+                                        0);
                             } else {
                                 log.error(String.format("GROUP_GET_SIZE-error, topic=%s, group=%s, master broker=%s", topic, group, masterAddr), ex);
                             }
@@ -515,7 +540,13 @@ public class MetricsCollectTask {
                                     Utils.getFixedDouble(bsd.getStatsMinute().getTps()));
                         } catch (MQClientException ex) {
                             if (ex.getResponseCode() == ResponseCode.SYSTEM_ERROR) {
-                                log.error(String.format("SNDBCK_PUT_NUMS-error, topic=%s, group=%s, master broker=%s, %s", topic, group, masterAddr, ex.getErrorMessage()));
+                                // if the stats of SNDBCK_PUT_NUMS for topic is not exist,just set default value to it
+                                metricsService.getCollector().addSendBackNumsMetric(
+                                        bd.getCluster(),
+                                        bd.getBrokerName(),
+                                        topic,
+                                        group,
+                                        0);
                             } else {
                                 log.error(String.format("SNDBCK_PUT_NUMS-error, topic=%s, group=%s, master broker=%s", topic, group, masterAddr), ex);
                             }
@@ -551,25 +582,48 @@ public class MetricsCollectTask {
                 continue;
             }
             BrokerStatsData bsd = null;
+            String brokerIP = "";
             try {
                 bsd = mqAdminExt.viewBrokerStatsData(masterAddr, BrokerStatsManager.BROKER_PUT_NUMS, clusterEntry.getValue().getCluster());
-                String brokerIP = clusterEntry.getValue().getBrokerAddrs().get(MixAll.MASTER_ID);
+                brokerIP = clusterEntry.getValue().getBrokerAddrs().get(MixAll.MASTER_ID);
                 metricsService.getCollector().addBrokerPutNumsMetric(
                         clusterEntry.getValue().getCluster(),
                         brokerIP,
                         clusterEntry.getValue().getBrokerName(),
                         Utils.getFixedDouble(bsd.getStatsMinute().getTps()));
+            } catch (MQClientException ex) {
+                if (ex.getResponseCode() == ResponseCode.SYSTEM_ERROR) {
+                    // if the stats of BROKER_PUT_NUMS for topic is not exist,just set default value to it
+                    metricsService.getCollector().addBrokerPutNumsMetric(
+                            clusterEntry.getValue().getCluster(),
+                            brokerIP,
+                            clusterEntry.getValue().getBrokerName(),
+                            0);
+                } else {
+                    log.error(String.format("BROKER_PUT_NUMS-error, master broker=%s", masterAddr), ex);
+                }
             } catch (Exception ex) {
                 log.error(String.format("BROKER_PUT_NUMS-error, master broker=%s", masterAddr), ex);
             }
             try {
                 bsd = mqAdminExt.viewBrokerStatsData(masterAddr, BrokerStatsManager.BROKER_GET_NUMS, clusterEntry.getValue().getCluster());
-                String brokerIP = clusterEntry.getValue().getBrokerAddrs().get(MixAll.MASTER_ID);
+                brokerIP = clusterEntry.getValue().getBrokerAddrs().get(MixAll.MASTER_ID);
                 metricsService.getCollector().addBrokerGetNumsMetric(
                         clusterEntry.getValue().getCluster(),
                         brokerIP,
                         clusterEntry.getValue().getBrokerName(),
                         Utils.getFixedDouble(bsd.getStatsMinute().getTps()));
+            } catch (MQClientException ex) {
+                if (ex.getResponseCode() == ResponseCode.SYSTEM_ERROR) {
+                    // if the stats of BROKER_GET_NUMS for topic is not exist,just set default value to it
+                    metricsService.getCollector().addBrokerPutNumsMetric(
+                            clusterEntry.getValue().getCluster(),
+                            brokerIP,
+                            clusterEntry.getValue().getBrokerName(),
+                            0);
+                } else {
+                    log.error(String.format("BROKER_GET_NUMS-error, master broker=%s", masterAddr), ex);
+                }
             } catch (Exception ex) {
                 log.error(String.format("BROKER_GET_NUMS-error, master broker=%s", masterAddr), ex);
             }
