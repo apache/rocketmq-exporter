@@ -19,6 +19,7 @@ Table of Contents
 	-   [Broker](#broker)
 	-   [Topics](#topics)
 	-   [Consumer Groups](#consumer-groups)
+	-   [RocketMQ Client](#RocketMQ Client)
 -   [Grafana Dashboard](#grafana-dashboard)
 -   [Quick Start](#quick-start)
 
@@ -203,8 +204,51 @@ rocketmq_group_get_latency_by_storetime{cluster="MQCluster",broker="broker-a",to
 rocketmq_group_get_latency_by_storetime{cluster="MQCluster",broker="broker-b",topic="DEV_TID_tfq",group="DEV_CID_cfq",} 0.0
 ```
 
+### RocketMQ Client
+
+**Metrics details**
+
+| Name                                     | Exposed information                                |
+| ---------------------------------------- | -------------------------------------------------- |
+| `rocketmq_client_consume_fail_msg_count` | The number of messages consumed fail in one hour   |
+| `rocketmq_client_consume_fail_msg_tps`   | The number of messages consumed fail per second    |
+| `rocketmq_client_consume_ok_msg_tps`     | The number of messages consumed success per second |
+| `rocketmq_client_consume_rt`             | The average time of consuming every message        |
+| `rocketmq_client_consumer_pull_rt `      | The average time of pulling every message          |
+| `rocketmq_client_consumer_pull_tps`      | The number of messages pulled by client per second |
+
+**Metrics output example**
+
+```
+# HELP rocketmq_client_consume_fail_msg_count consumerClientFailedMsgCounts
+# TYPE rocketmq_client_consume_fail_msg_count gauge
+rocketmq_client_consume_fail_msg_count{clientAddr="172.16.116.51:52178",clientId="10.0.4.0@120367",group="consumer_one",topic="topic_one",} 0.0
+rocketmq_client_consume_fail_msg_count{clientAddr="172.16.116.51:52178",clientId="10.0.4.0@120367",group="consumer_one",topic="%RETRY%consumer_one",} 0.0
+# HELP rocketmq_client_consume_fail_msg_tps consumerClientFailedTPS
+# TYPE rocketmq_client_consume_fail_msg_tps gauge
+rocketmq_client_consume_fail_msg_tps{clientAddr="172.16.116.51:52178",clientId="10.0.4.0@120367",group="consumer_one",topic="topic_one",} 0.0
+rocketmq_client_consume_fail_msg_tps{clientAddr="172.16.116.51:52178",clientId="10.0.4.0@120367",group="consumer_one",topic="%RETRY%consumer_one",} 0.0
+# HELP rocketmq_client_consume_ok_msg_tps consumerClientOKTPS
+# TYPE rocketmq_client_consume_ok_msg_tps gauge
+rocketmq_client_consume_ok_msg_tps{clientAddr="172.16.116.51:52178",clientId="10.0.4.0@120367",group="consumer_one",topic="topic_one",} 9.833333333333334
+rocketmq_client_consume_ok_msg_tps{clientAddr="172.16.116.51:52178",clientId="10.0.4.0@120367",group="consumer_one",topic="%RETRY%consumer_one",} 0.0
+# HELP rocketmq_client_consume_rt consumerClientRT
+# TYPE rocketmq_client_consume_rt gauge
+rocketmq_client_consume_rt{clientAddr="172.16.116.51:52178",clientId="10.0.4.0@120367",group="consumer_one",topic="topic_one",} 0.0576271186440678
+rocketmq_client_consume_rt{clientAddr="172.16.116.51:52178",clientId="10.0.4.0@120367",group="consumer_one",topic="%RETRY%consumer_one",} 0.0
+# HELP rocketmq_client_consumer_pull_rt consumerClientPullRT
+# TYPE rocketmq_client_consumer_pull_rt gauge
+rocketmq_client_consumer_pull_rt{clientAddr="172.16.116.51:52178",clientId="10.0.4.0@120367",group="consumer_one",topic="topic_one",} 402.6186440677966
+rocketmq_client_consumer_pull_rt{clientAddr="172.16.116.51:52178",clientId="10.0.4.0@120367",group="consumer_one",topic="%RETRY%consumer_one",} 0.0
+# HELP rocketmq_client_consumer_pull_tps consumerClientPullTPS
+# TYPE rocketmq_client_consumer_pull_tps gauge
+rocketmq_client_consumer_pull_tps{clientAddr="172.16.116.51:52178",clientId="10.0.4.0@120367",group="consumer_one",topic="topic_one",} 9.833333333333334
+rocketmq_client_consumer_pull_tps{clientAddr="172.16.116.51:52178",clientId="10.0.4.0@120367",group="consumer_one",topic="%RETRY%consumer_one",} 0.0
+```
+
 Grafana Dashboard
 -------
+
 Grafana Dashboard ID: 10477, name: RocketMQ Exporter Overview.
 For details of the dashboard please see [RocketMQ Exporter Overview](https://grafana.com/dashboards/10477).
 
