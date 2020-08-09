@@ -17,12 +17,15 @@
 package org.apache.rocketmq.exporter.service.client;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.rocketmq.acl.common.AclClientRPCHook;
+import org.apache.rocketmq.acl.common.SessionCredentials;
 import org.apache.rocketmq.client.consumer.DefaultMQPullConsumer;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.client.impl.MQClientAPIImpl;
 import org.apache.rocketmq.client.impl.factory.MQClientInstance;
 import org.apache.rocketmq.common.MixAll;
 import org.apache.rocketmq.exporter.config.RMQConfigure;
+import org.apache.rocketmq.remoting.RPCHook;
 import org.apache.rocketmq.remoting.RemotingClient;
 import org.apache.rocketmq.tools.admin.DefaultMQAdminExt;
 import org.apache.rocketmq.tools.admin.DefaultMQAdminExtImpl;
@@ -39,12 +42,30 @@ import static org.apache.rocketmq.common.MixAll.TOOLS_CONSUMER_GROUP;
 @Service
 public class MQAdminInstance {
     private final static Logger log = LoggerFactory.getLogger(MQAdminInstance.class);
-    @Autowired
     private RMQConfigure configure;
+    private RPCHook aclHook;
+
+    private MQAdminInstance(RMQConfigure configure) {
+        this.configure = configure;
+        aclHook = getAclRPCHook();
+    }
+
+    private RPCHook getAclRPCHook() {
+        if (configure.enableACL()) {
+            if (StringUtils.isAllBlank(configure.getAccessKey())) {
+                throw new RuntimeException("acl config error: accessKey is empty");
+            }
+            if (StringUtils.isAllBlank(configure.getSecretKey())) {
+                throw new RuntimeException("acl config error: secretKey is empty");
+            }
+            return new AclClientRPCHook(new SessionCredentials(configure.getAccessKey(), configure.getSecretKey()));
+        }
+        return null;
+    }
 
     @Bean(destroyMethod = "shutdown", name = "defaultMQAdminExt")
     private DefaultMQAdminExt buildDefaultMQAdminExt() {
-        DefaultMQAdminExt defaultMQAdminExt = new DefaultMQAdminExt(5000L);
+        DefaultMQAdminExt defaultMQAdminExt = new DefaultMQAdminExt(this.aclHook, 5000L);
         defaultMQAdminExt.setInstanceName("admin-" + System.currentTimeMillis());
         try {
             defaultMQAdminExt.start();
@@ -61,7 +82,7 @@ public class MQAdminInstance {
             log.error("init default pull consumer error, namesrv is null");
             throw new Exception("init default pull consumer error, namesrv is null", null);
         }
-        DefaultMQPullConsumer pullConsumer = new DefaultMQPullConsumer(TOOLS_CONSUMER_GROUP, null);
+        DefaultMQPullConsumer pullConsumer = new DefaultMQPullConsumer(TOOLS_CONSUMER_GROUP, this.aclHook);
         pullConsumer.setInstanceName("consumer-" + System.currentTimeMillis());
         pullConsumer.setNamesrvAddr(namesrvAddress);
         try {
