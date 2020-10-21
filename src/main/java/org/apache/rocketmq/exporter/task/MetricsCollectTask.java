@@ -43,6 +43,7 @@ import org.apache.rocketmq.exporter.config.CollectClientMetricExecutorConfig;
 import org.apache.rocketmq.exporter.config.RMQConfigure;
 import org.apache.rocketmq.exporter.model.BrokerRuntimeStats;
 import org.apache.rocketmq.exporter.model.common.TwoTuple;
+import org.apache.rocketmq.exporter.model.metrics.BrokerMetric;
 import org.apache.rocketmq.exporter.service.RMQMetricsService;
 import org.apache.rocketmq.exporter.service.client.MQAdminExtImpl;
 import org.apache.rocketmq.exporter.util.Utils;
@@ -131,7 +132,7 @@ public class MetricsCollectTask {
         }
         log.info(infoOut.toString());
         if (clusterName == null) {
-            log.error("get cluster info error" );
+            log.error("get cluster info error");
         }
         log.info(String.format("MetricsCollectTask init finished....cost:%d", System.currentTimeMillis() - start));
     }
@@ -544,6 +545,7 @@ public class MetricsCollectTask {
             return;
         }
 
+        Set<BrokerMetric> masterMetricsSet = new HashSet<>();
         Set<Map.Entry<String, BrokerData>> clusterEntries = clusterInfo.getBrokerAddrTable().entrySet();
         for (Map.Entry<String, BrokerData> clusterEntry : clusterEntries) {
             String masterAddr = clusterEntry.getValue().getBrokerAddrs().get(MixAll.MASTER_ID);
@@ -551,29 +553,34 @@ public class MetricsCollectTask {
                 continue;
             }
             BrokerStatsData bsd = null;
+            String clusterName = clusterEntry.getValue().getCluster();
+            String brokerIP = clusterEntry.getValue().getBrokerAddrs().get(MixAll.MASTER_ID);
+            String brokerName = clusterEntry.getValue().getBrokerName();
             try {
-                bsd = mqAdminExt.viewBrokerStatsData(masterAddr, BrokerStatsManager.BROKER_PUT_NUMS, clusterEntry.getValue().getCluster());
-                String brokerIP = clusterEntry.getValue().getBrokerAddrs().get(MixAll.MASTER_ID);
+                bsd = mqAdminExt.viewBrokerStatsData(masterAddr, BrokerStatsManager.BROKER_PUT_NUMS, clusterName);
                 metricsService.getCollector().addBrokerPutNumsMetric(
-                        clusterEntry.getValue().getCluster(),
+                        clusterName,
                         brokerIP,
-                        clusterEntry.getValue().getBrokerName(),
+                        brokerName,
                         Utils.getFixedDouble(bsd.getStatsMinute().getTps()));
             } catch (Exception ex) {
                 log.error(String.format("BROKER_PUT_NUMS-error, master broker=%s", masterAddr), ex);
             }
             try {
-                bsd = mqAdminExt.viewBrokerStatsData(masterAddr, BrokerStatsManager.BROKER_GET_NUMS, clusterEntry.getValue().getCluster());
-                String brokerIP = clusterEntry.getValue().getBrokerAddrs().get(MixAll.MASTER_ID);
+                bsd = mqAdminExt.viewBrokerStatsData(masterAddr, BrokerStatsManager.BROKER_GET_NUMS, clusterName);
                 metricsService.getCollector().addBrokerGetNumsMetric(
-                        clusterEntry.getValue().getCluster(),
+                        clusterName,
                         brokerIP,
-                        clusterEntry.getValue().getBrokerName(),
+                        brokerName,
                         Utils.getFixedDouble(bsd.getStatsMinute().getTps()));
             } catch (Exception ex) {
                 log.error(String.format("BROKER_GET_NUMS-error, master broker=%s", masterAddr), ex);
             }
+            masterMetricsSet.add(new BrokerMetric(clusterName, brokerIP, brokerName));
         }
+
+        metricsService.getCollector().clearBrokerPutNumsMetric(masterMetricsSet);
+        metricsService.getCollector().clearBrokerGetNumsMetric(masterMetricsSet);
         log.info("broker stats collection task finished...." + (System.currentTimeMillis() - start));
     }
 
@@ -620,7 +627,6 @@ public class MetricsCollectTask {
             } catch (Exception ex) {
                 log.error(String.format("collectBrokerRuntimeStats-parse or report broker runtime stats error, %s", JSON.toJSONString(kvTable)), ex);
             }
-
         }
 
         log.info("broker runtime stats collection task finished...." + (System.currentTimeMillis() - start));
