@@ -41,6 +41,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class RMQMetricsCollector extends Collector {
@@ -624,13 +625,28 @@ public class RMQMetricsCollector extends Collector {
         consumerClientPullTPS.put(new ConsumerRuntimePullTPSMetric(group, topic, clientAddr, clientId), value);
     }
 
-
     public void addBrokerPutNumsMetric(String clusterName, String brokerIP, String brokerName, double value) {
         brokerPutNums.put(new BrokerMetric(clusterName, brokerIP, brokerName), value);
     }
 
+    public void clearBrokerPutNumsMetric(Set<BrokerMetric> masterMetricsSet) {
+        for (BrokerMetric brokerMetric : brokerPutNums.keySet()) {
+            if (!masterMetricsSet.contains(brokerMetric)) {
+                brokerPutNums.remove(brokerMetric);
+            }
+        }
+    }
+
     public void addBrokerGetNumsMetric(String clusterName, String brokerIP, String brokerName, double value) {
         brokerGetNums.put(new BrokerMetric(clusterName, brokerIP, brokerName), value);
+    }
+
+    public void clearBrokerGetNumsMetric(Set<BrokerMetric> masterMetricsSet) {
+        for (BrokerMetric brokerMetric : brokerGetNums.keySet()) {
+            if (!masterMetricsSet.contains(brokerMetric)) {
+                brokerGetNums.remove(brokerMetric);
+            }
+        }
     }
 
     public void addBrokerRuntimeStatsMetric(BrokerRuntimeStats stats, String clusterName, String brokerAddress, String brokerHost) {
