@@ -43,15 +43,22 @@ public class RMQConfigure {
     private volatile String webTelemetryPath = System.getProperty(ROCKETMQ_CONFIG_WEB_TELEMETRY_PATH, "/metrics");
 
     private volatile String rocketmqVersion = System.getProperty(ROCKETMQ_CONFIG_ROCKETMQ_VERSION, "V4_3_2");
+    /**
+     * true: accessKey and secretKey would be use
+     * default false
+     */
+    private boolean enableACL = false;
 
     private String accessKey;
 
     private String secretKey;
 
     public boolean enableACL() {
-        return !(StringUtils.isAllBlank(this.accessKey)
-                &&
-                StringUtils.isAllBlank(this.secretKey));
+        return this.enableACL;
+    }
+
+    public void setEnableACL(boolean enableACL) {
+        this.enableACL = enableACL;
     }
 
     public String getNamesrvAddr() {
