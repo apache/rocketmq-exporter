@@ -44,6 +44,24 @@ public class RMQConfigure {
 
     private volatile String rocketmqVersion = System.getProperty(ROCKETMQ_CONFIG_ROCKETMQ_VERSION, "V4_3_2");
 
+    /**
+     * true: accessKey and secretKey would be used
+     * default false
+     */
+    private boolean enableACL = false;
+
+    private String accessKey;
+
+    private String secretKey;
+
+    public boolean enableACL() {
+        return this.enableACL;
+    }
+
+    public void setEnableACL(boolean enableACL) {
+        this.enableACL = enableACL;
+    }
+
     public String getNamesrvAddr() {
         return namesrvAddr;
     }
@@ -98,5 +116,21 @@ public class RMQConfigure {
 
     public String getRocketmqVersion() {
         return rocketmqVersion;
+    }
+
+    public String getAccessKey() {
+        return accessKey;
+    }
+
+    public void setAccessKey(String accessKey) {
+        this.accessKey = accessKey;
+    }
+
+    public String getSecretKey() {
+        return secretKey;
+    }
+
+    public void setSecretKey(String secretKey) {
+        this.secretKey = secretKey;
     }
 }
