@@ -42,6 +42,7 @@ import static org.apache.rocketmq.common.MixAll.TOOLS_CONSUMER_GROUP;
 @Service
 public class MQAdminInstance {
     private final static Logger log = LoggerFactory.getLogger(MQAdminInstance.class);
+    @Autowired
     private RMQConfigure configure;
     private RPCHook aclHook;
 
@@ -64,9 +65,15 @@ public class MQAdminInstance {
     }
 
     @Bean(destroyMethod = "shutdown", name = "defaultMQAdminExt")
-    private DefaultMQAdminExt buildDefaultMQAdminExt() {
-        DefaultMQAdminExt defaultMQAdminExt = new DefaultMQAdminExt(this.aclHook, 5000L);
+    private DefaultMQAdminExt buildDefaultMQAdminExt() throws Exception {
+        String namesrvAddress = configure.getNamesrvAddr();
+        if (StringUtils.isBlank(namesrvAddress)) {
+            log.error("init default pull consumer error, namesrv is null");
+            throw new Exception("init default pull consumer error, namesrv is null", null);
+        }
+        DefaultMQAdminExt defaultMQAdminExt = new DefaultMQAdminExt(this.aclHook,5000L);
         defaultMQAdminExt.setInstanceName("admin-" + System.currentTimeMillis());
+        defaultMQAdminExt.setNamesrvAddr(namesrvAddress);
         try {
             defaultMQAdminExt.start();
         } catch (MQClientException ex) {
