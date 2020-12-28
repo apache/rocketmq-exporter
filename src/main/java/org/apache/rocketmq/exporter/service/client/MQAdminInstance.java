@@ -68,8 +68,8 @@ public class MQAdminInstance {
     private DefaultMQAdminExt buildDefaultMQAdminExt() throws Exception {
         String namesrvAddress = configure.getNamesrvAddr();
         if (StringUtils.isBlank(namesrvAddress)) {
-            log.error("init default pull consumer error, namesrv is null");
-            throw new Exception("init default pull consumer error, namesrv is null", null);
+            log.error("Build DefaultMQAdminExt error, namesrv is null");
+            throw new Exception("Build DefaultMQAdminExt error, namesrv is null", null);
         }
         DefaultMQAdminExt defaultMQAdminExt = new DefaultMQAdminExt(this.aclHook,5000L);
         defaultMQAdminExt.setInstanceName("admin-" + System.currentTimeMillis());
