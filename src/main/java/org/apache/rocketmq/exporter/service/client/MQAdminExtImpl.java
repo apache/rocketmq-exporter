@@ -24,6 +24,8 @@ import org.apache.rocketmq.client.exception.MQBrokerException;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.client.impl.MQAdminImpl;
 import org.apache.rocketmq.client.impl.factory.MQClientInstance;
+import org.apache.rocketmq.common.AclConfig;
+import org.apache.rocketmq.common.PlainAccessConfig;
 import org.apache.rocketmq.common.TopicConfig;
 import org.apache.rocketmq.common.admin.ConsumeStats;
 import org.apache.rocketmq.common.admin.RollbackStats;
@@ -34,6 +36,7 @@ import org.apache.rocketmq.common.message.MessageQueue;
 import org.apache.rocketmq.common.protocol.RequestCode;
 import org.apache.rocketmq.common.protocol.ResponseCode;
 import org.apache.rocketmq.common.protocol.body.BrokerStatsData;
+import org.apache.rocketmq.common.protocol.body.ClusterAclVersionInfo;
 import org.apache.rocketmq.common.protocol.body.ClusterInfo;
 import org.apache.rocketmq.common.protocol.body.ConsumeMessageDirectlyResult;
 import org.apache.rocketmq.common.protocol.body.ConsumeStatsList;
@@ -111,6 +114,33 @@ public class MQAdminExtImpl implements MQAdminExt {
     public void createAndUpdateTopicConfig(String addr, TopicConfig config)
             throws RemotingException, MQBrokerException, InterruptedException, MQClientException {
         defaultMQAdminExt.createAndUpdateTopicConfig(addr, config);
+    }
+
+    @Override public void createAndUpdatePlainAccessConfig(String addr,
+        PlainAccessConfig plainAccessConfig) throws RemotingException, MQBrokerException, InterruptedException, MQClientException {
+        //ignore
+    }
+
+    @Override public void deletePlainAccessConfig(String addr,
+        String accessKey) throws RemotingException, MQBrokerException, InterruptedException, MQClientException {
+        //ignore
+    }
+
+    @Override public void updateGlobalWhiteAddrConfig(String addr,
+        String globalWhiteAddrs) throws RemotingException, MQBrokerException, InterruptedException, MQClientException {
+        //ignore
+    }
+
+    @Override public ClusterAclVersionInfo examineBrokerClusterAclVersionInfo(
+        String addr) throws RemotingException, MQBrokerException, InterruptedException, MQClientException {
+        //ignore
+        return null;
+    }
+
+    @Override public AclConfig examineBrokerClusterAclConfig(
+        String addr) throws RemotingException, MQBrokerException, InterruptedException, MQClientException {
+        //ignore
+        return null;
     }
 
     @Override
@@ -526,5 +556,15 @@ public class MQAdminExtImpl implements MQAdminExt {
                                                            int queueId, long index, int count,
                                                            String consumerGroup) throws InterruptedException, RemotingTimeoutException, RemotingSendRequestException, RemotingConnectException, MQClientException {
         return null;
+    }
+
+    @Override public boolean resumeCheckHalfMessage(
+        String msgId) throws RemotingException, MQClientException, InterruptedException, MQBrokerException {
+        return false;
+    }
+
+    @Override public boolean resumeCheckHalfMessage(String topic,
+        String msgId) throws RemotingException, MQClientException, InterruptedException, MQBrokerException {
+        return false;
     }
 }
