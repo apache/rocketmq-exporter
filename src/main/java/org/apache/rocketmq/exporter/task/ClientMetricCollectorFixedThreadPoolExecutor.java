@@ -16,14 +16,13 @@
  */
 package org.apache.rocketmq.exporter.task;
 
-import org.apache.rocketmq.broker.latency.FutureTaskExt;
-
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.RunnableFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.FutureTask;
 
 public class ClientMetricCollectorFixedThreadPoolExecutor extends ThreadPoolExecutor {
     public ClientMetricCollectorFixedThreadPoolExecutor(int corePoolSize, int maximumPoolSize,
@@ -35,6 +34,6 @@ public class ClientMetricCollectorFixedThreadPoolExecutor extends ThreadPoolExec
 
 
     protected <T> RunnableFuture<T> newTaskFor(Runnable runnable, T value) {
-        return new FutureTaskExt(runnable, value);
+        return new FutureTask(runnable, value);
     }
 }
