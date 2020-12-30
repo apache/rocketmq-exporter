@@ -63,7 +63,7 @@ Run
 ### Run Binary
 
 ```shell
-java -jar rocketmq-exporter-0.0.2-SNAPSHOT.jar
+java -jar target/rocketmq-exporter-0.0.2-SNAPSHOT.jar
 ```
 
 ### Run Docker Image
