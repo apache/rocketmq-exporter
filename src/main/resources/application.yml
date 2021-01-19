@@ -18,8 +18,8 @@ rocketmq:
     namesrvAddr: 127.0.0.1:9876
     enableCollect: true
     enableACL: false # if >=4.4.0
-    accessKey:  # if >=4.4.0
-    secretKey:  # if >=4.4.0
+    accessKey: rocketmq2 # if >=4.4.0, default value
+    secretKey: 12345678 # if >=4.4.0, default value
 
 threadpool:
   collect-client-metric-executor:
