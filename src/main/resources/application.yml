@@ -39,3 +39,8 @@ task:
     cron: 15 0/1 * * * ?
   collectBrokerRuntimeStats:
     cron: 15 0/1 * * * ?
+
+metrics:
+  data:
+    expire:
+      timeoutms: 65000

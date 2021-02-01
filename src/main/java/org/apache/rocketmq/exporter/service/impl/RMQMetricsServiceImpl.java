@@ -20,6 +20,7 @@ import io.prometheus.client.Collector;
 import io.prometheus.client.CollectorRegistry;
 import org.apache.rocketmq.exporter.collector.RMQMetricsCollector;
 import org.apache.rocketmq.exporter.service.RMQMetricsService;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -30,6 +31,7 @@ import java.util.Iterator;
 
 
 @Service
+@DependsOn("metricsExpireConfigUtils")
 public class RMQMetricsServiceImpl implements RMQMetricsService {
     private CollectorRegistry registry = new CollectorRegistry();
     private final RMQMetricsCollector rmqMetricsCollector;
