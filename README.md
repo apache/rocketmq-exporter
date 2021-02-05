@@ -254,4 +254,4 @@ For details of the dashboard please see [RocketMQ Exporter Overview](https://gra
 
 Quick Start
 -------------
-This [guide](./rocketmq_exporter_quickstart.md) will teach you how to build and run rocketmq exporter with Prometheus and Grafana Integration from scratch.
+This [guide](./rocketmq_exporter_quickstart.md) will tell you how to build and run rocketmq exporter with Prometheus and Grafana Integration from scratch.
