@@ -90,7 +90,7 @@ public class RMQMetricsCollector extends Collector {
     //consumed message size(byte) for consumer-topic
     private ConcurrentHashMap<ConsumerMetric, Double> groupGetSize = new ConcurrentHashMap<>();
     //re-consumed message count for consumer-topic
-    private ConcurrentHashMap<ConsumerMetric, Double> sendBackNums = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<ConsumerMetric, Long> sendBackNums = new ConcurrentHashMap<>();
     // group latency time
     private ConcurrentHashMap<ConsumerMetric, Long> groupLatencyByTime = new ConcurrentHashMap<>();
 
@@ -500,7 +500,7 @@ public class RMQMetricsCollector extends Collector {
         mfs.add(groupGetSizeGauge);
 
         GaugeMetricFamily sendBackNumsGauge = new GaugeMetricFamily("rocketmq_send_back_nums", "SendBackNums", GROUP_NUMS_LABEL_NAMES);
-        for (Map.Entry<ConsumerMetric, Double> entry : sendBackNums.entrySet()) {
+        for (Map.Entry<ConsumerMetric, Long> entry : sendBackNums.entrySet()) {
             loadGroupNumsMetric(sendBackNumsGauge, entry);
         }
         mfs.add(sendBackNumsGauge);
@@ -597,7 +597,7 @@ public class RMQMetricsCollector extends Collector {
         groupGetSize.put(new ConsumerMetric(clusterName, brokerName, topic, group), value);
     }
 
-    public void addSendBackNumsMetric(String clusterName, String brokerName, String topic, String group, double value) {
+    public void addSendBackNumsMetric(String clusterName, String brokerName, String topic, String group, long value) {
         sendBackNums.put(new ConsumerMetric(clusterName, brokerName, topic, group), value);
     }
 

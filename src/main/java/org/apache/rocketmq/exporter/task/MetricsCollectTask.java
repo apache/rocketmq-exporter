@@ -512,7 +512,7 @@ public class MetricsCollectTask {
                                 bd.getBrokerName(),
                                 topic,
                                 group,
-                                Utils.getFixedDouble(bsd.getStatsMinute().getTps()));
+                                bsd.getStatsMinute().getSum());
                         } catch (MQClientException ex) {
                             if (ex.getResponseCode() == ResponseCode.SYSTEM_ERROR) {
                                 log.error(String.format("SNDBCK_PUT_NUMS-error, topic=%s, group=%s, master broker=%s, %s", topic, group, masterAddr, ex.getErrorMessage()));
