@@ -248,7 +248,9 @@ public class MetricsCollectTask {
                 MessageModel messageModel = MessageModel.CLUSTERING;
                 try {
                     onlineConsumers = mqAdminExt.examineConsumerConnectionInfo(group);
-                    messageModel = onlineConsumers.getMessageModel();
+                    if (onlineConsumers.getMessageModel() != null) {
+                        messageModel = onlineConsumers.getMessageModel();
+                    }
                 } catch (InterruptedException | RemotingException ex) {
                     log.error(String.format("get topic's(%s) online consumers(%s) exception", topic, group), ex);
                 } catch (MQClientException ex) {
