@@ -812,7 +812,7 @@ public class RMQMetricsCollector extends Collector {
                 clusterName, brokerAddress, brokerHost,
                 stats.getBrokerVersionDesc(),
                 stats.getBootTimestamp(),
-                stats.getBrokerVersion()), stats.getQueryThreadPoolQueueCapacity());
+                stats.getBrokerVersion()), stats.getPutMessageSizeTotal());
         brokerRuntimeDispatchBehindBytes.put(new BrokerRuntimeMetric(
                 clusterName, brokerAddress, brokerHost,
                 stats.getBrokerVersionDesc(),
