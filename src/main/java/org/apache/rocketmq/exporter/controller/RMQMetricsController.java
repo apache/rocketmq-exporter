@@ -40,6 +40,6 @@ public class RMQMetricsController {
         StringWriter writer = new StringWriter();
         metricsService.metrics(writer);
         response.setHeader("Content-Type", "text/plain; version=0.0.4; charset=utf-8");
-        response.getOutputStream().print(writer.toString());
+        response.getWriter().print(writer);
     }
 }
