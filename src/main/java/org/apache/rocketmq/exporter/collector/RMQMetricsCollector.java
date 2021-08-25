@@ -54,8 +54,10 @@ public class RMQMetricsCollector extends Collector {
 
     //total put numbers for topics
     private ConcurrentHashMap<TopicPutNumMetric, Double> topicPutNums = new ConcurrentHashMap<>();
-    //total get numbers for topics
+    //total put size(byte) for topics
     private ConcurrentHashMap<TopicPutNumMetric, Double> topicPutSize = new ConcurrentHashMap<>();
+    //total put avg size for topics
+    private ConcurrentHashMap<TopicPutNumMetric, Double> topicPutAvgSize = new ConcurrentHashMap<>();
 
     //diff for consumer group
     private ConcurrentHashMap<ConsumerTopicDiffMetric, Long> consumerDiff = new ConcurrentHashMap<>();
@@ -179,8 +181,8 @@ public class RMQMetricsCollector extends Collector {
                         entry.getKey().getGroup(),
                         entry.getKey().getTopic(),
                         entry.getKey().getCountOfOnlineConsumers(),
-                        entry.getKey().getMsgModel()                
-                        ),
+                        entry.getKey().getMsgModel()
+                ),
                 entry.getValue().doubleValue());
     }
 
@@ -209,9 +211,9 @@ public class RMQMetricsCollector extends Collector {
         for (Map.Entry<ConsumerCountMetric, Integer> entry : consumerCounts.entrySet()) {
             consumerCountsF.addMetric(
                     Arrays.asList(
-                        entry.getKey().getCaddrs(),
-                        entry.getKey().getLocaladdrs(),
-                        entry.getKey().getGroup()
+                            entry.getKey().getCaddrs(),
+                            entry.getKey().getLocaladdrs(),
+                            entry.getKey().getGroup()
                     ),
                     entry.getValue().doubleValue());
         }
@@ -526,6 +528,11 @@ public class RMQMetricsCollector extends Collector {
             loadTopicNumsMetric(topicPutSizeGauge, entry);
         }
         mfs.add(topicPutSizeGauge);
+        GaugeMetricFamily topicPutAvgSizeGauge = new GaugeMetricFamily("rocketmq_producer_message_avg_size", "TopicPutMessageSize", TOPIC_NUMS_LABEL_NAMES);
+        for (Map.Entry<TopicPutNumMetric, Double> entry : topicPutAvgSize.entrySet()) {
+            loadTopicNumsMetric(topicPutSizeGauge, entry);
+        }
+        mfs.add(topicPutAvgSizeGauge);
     }
 
     private static final List<String> TOPIC_NUMS_LABEL_NAMES = Arrays.asList("cluster", "broker", "topic");
@@ -572,8 +579,11 @@ public class RMQMetricsCollector extends Collector {
     public void addTopicPutSizeMetric(String cluster, String brokerName, String brokerIP, String topic, double value) {
         topicPutSize.put(new TopicPutNumMetric(cluster, brokerName, brokerIP, topic), value);
     }
+    public void addTopicPutAvgSizMetric(String cluster, String brokerName, String brokerIP, String topic, double value) {
+        topicPutAvgSize.put(new TopicPutNumMetric(cluster, brokerName, brokerIP, topic), value);
+    }
 
-    public void addGroupBrokerTotalOffsetMetric(String clusterName, String brokerName,String topic, String group, long value) {
+    public void addGroupBrokerTotalOffsetMetric(String clusterName, String brokerName, String topic, String group, long value) {
         groupBrokerTotalOffset.put(new ConsumerMetric(clusterName, brokerName, topic, group), value);
     }
 
