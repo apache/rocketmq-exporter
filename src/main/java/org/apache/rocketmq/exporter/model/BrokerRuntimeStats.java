@@ -93,8 +93,11 @@ public class BrokerRuntimeStats {
 
         this.sendThreadPoolQueueHeadWaitTimeMills = Long.parseLong(kvTable.getTable().get("sendThreadPoolQueueHeadWaitTimeMills"));
         this.queryThreadPoolQueueHeadWaitTimeMills = Long.parseLong(kvTable.getTable().get("queryThreadPoolQueueHeadWaitTimeMills"));
+        String[] split = kvTable.getTable().get("remainHowManyDataToFlush").split(" ");
+        int index = "KMGTPE".indexOf(split[1]) + 1;
+        double unit = Math.pow(1024L, index);
+        this.remainHowManyDataToFlush = Double.parseDouble(split[0]) * unit;//byte
 
-        this.remainHowManyDataToFlush = Double.parseDouble(kvTable.getTable().get("remainHowManyDataToFlush").split(" ")[0]);//byte
         this.msgGetTotalTodayNow = Long.parseLong(kvTable.getTable().get("msgGetTotalTodayNow"));
         this.queryThreadPoolQueueSize = Long.parseLong(kvTable.getTable().get("queryThreadPoolQueueSize"));
         this.bootTimestamp = Long.parseLong(kvTable.getTable().get("bootTimestamp"));
