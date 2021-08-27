@@ -528,9 +528,9 @@ public class RMQMetricsCollector extends Collector {
             loadTopicNumsMetric(topicPutSizeGauge, entry);
         }
         mfs.add(topicPutSizeGauge);
-        GaugeMetricFamily topicPutAvgSizeGauge = new GaugeMetricFamily("rocketmq_producer_message_avg_size", "TopicPutMessageSize", TOPIC_NUMS_LABEL_NAMES);
+        GaugeMetricFamily topicPutAvgSizeGauge = new GaugeMetricFamily("rocketmq_producer_message_avg_size", "TopicPutMessageAvgSize", TOPIC_NUMS_LABEL_NAMES);
         for (Map.Entry<TopicPutNumMetric, Double> entry : topicPutAvgSize.entrySet()) {
-            loadTopicNumsMetric(topicPutSizeGauge, entry);
+            loadTopicNumsMetric(topicPutAvgSizeGauge, entry);
         }
         mfs.add(topicPutAvgSizeGauge);
     }
