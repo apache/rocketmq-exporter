@@ -546,7 +546,6 @@ public class MetricsCollectTask {
             return;
         }
 
-        Set<BrokerMetric> masterMetricsSet = new HashSet<>();
         Set<Map.Entry<String, BrokerData>> clusterEntries = clusterInfo.getBrokerAddrTable().entrySet();
         for (Map.Entry<String, BrokerData> clusterEntry : clusterEntries) {
             String masterAddr = clusterEntry.getValue().getBrokerAddrs().get(MixAll.MASTER_ID);
@@ -577,11 +576,8 @@ public class MetricsCollectTask {
             } catch (Exception ex) {
                 log.error(String.format("BROKER_GET_NUMS-error, master broker=%s", masterAddr), ex);
             }
-            masterMetricsSet.add(new BrokerMetric(clusterName, brokerIP, brokerName));
         }
 
-        metricsService.getCollector().clearBrokerPutNumsMetric(masterMetricsSet);
-        metricsService.getCollector().clearBrokerGetNumsMetric(masterMetricsSet);
         log.info("broker stats collection task finished...." + (System.currentTimeMillis() - start));
     }
 
