@@ -20,7 +20,7 @@ rocketmq:
     enableACL: false # if >=4.4.0
     accessKey:  # if >=4.4.0
     secretKey:  # if >=4.4.0
-    outOfTimeSeconds:  # Cache clear time with no update
+    outOfTimeSeconds: 60 # Cache clear time with no update
 
 threadpool:
   collect-client-metric-executor:
