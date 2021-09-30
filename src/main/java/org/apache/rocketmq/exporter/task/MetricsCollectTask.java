@@ -43,7 +43,6 @@ import org.apache.rocketmq.exporter.config.CollectClientMetricExecutorConfig;
 import org.apache.rocketmq.exporter.config.RMQConfigure;
 import org.apache.rocketmq.exporter.model.BrokerRuntimeStats;
 import org.apache.rocketmq.exporter.model.common.TwoTuple;
-import org.apache.rocketmq.exporter.model.metrics.BrokerMetric;
 import org.apache.rocketmq.exporter.service.RMQMetricsService;
 import org.apache.rocketmq.exporter.service.client.MQAdminExtImpl;
 import org.apache.rocketmq.exporter.util.Utils;
