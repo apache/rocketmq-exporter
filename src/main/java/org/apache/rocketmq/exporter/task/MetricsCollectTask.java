@@ -430,26 +430,6 @@ public class MetricsCollectTask {
                     } catch (RemotingTimeoutException | InterruptedException | RemotingSendRequestException | RemotingConnectException ex1) {
                         log.error(String.format("TOPIC_PUT_NUMS-error, topic=%s, master broker=%s", topic, masterAddr), ex1);
                     }
-                    try {
-                        //how many bytes has sent for the topic
-                        bsd = mqAdminExt.viewBrokerStatsData(masterAddr, BrokerStatsManager.TOPIC_PUT_SIZE, topic);
-                        String brokerIP = clusterInfo.getBrokerAddrTable().get(bd.getBrokerName()).getBrokerAddrs().get(MixAll.MASTER_ID);
-                        metricsService.getCollector().addTopicPutSizeMetric(
-                            bd.getCluster(),
-                            bd.getBrokerName(),
-                            brokerIP,
-                            topic,
-                            Utils.getFixedDouble(bsd.getStatsMinute().getTps())
-                        );
-                    } catch (MQClientException ex) {
-                        if (ex.getResponseCode() == ResponseCode.SYSTEM_ERROR) {
-                            log.error(String.format("TOPIC_PUT_SIZE-error, topic=%s, master broker=%s, %s", topic, masterAddr, ex.getErrorMessage()));
-                        } else {
-                            log.error(String.format("TOPIC_PUT_SIZE-error, topic=%s, master broker=%s", topic, masterAddr), ex);
-                        }
-                    } catch (InterruptedException | RemotingConnectException | RemotingTimeoutException | RemotingSendRequestException ex) {
-                        log.error(String.format("TOPIC_PUT_SIZE-error, topic=%s, master broker=%s", topic, masterAddr), ex);
-                    }
                 }
             }
 
