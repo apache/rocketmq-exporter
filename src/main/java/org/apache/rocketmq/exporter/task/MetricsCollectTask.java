@@ -295,6 +295,7 @@ public class MetricsCollectTask {
                     log.warn(String.format("no any offset for consumer(%s), topic(%s), ignore this", group, topic));
                     continue;
                 }
+                if (messageModel == MessageModel.CLUSTERING)
                 {
                     diff = consumeStats.computeTotalDiff();
                     consumeTPS = consumeStats.getConsumeTps();
