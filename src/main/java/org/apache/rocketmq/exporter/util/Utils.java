@@ -24,4 +24,16 @@ public class Utils {
         DecimalFormat df = new DecimalFormat("#.##");
         return new Double(df.format(value));
     }
+
+    public static double machineReadableByteCount(String humanReadableValue) {
+        int unitSize = 1024;
+        String[] valueArray = humanReadableValue.split(" ");
+        double base = Double.parseDouble(valueArray[0]);
+        String unit = valueArray[1];
+        if ("B".equals(unit)) {
+            return base;
+        }
+        int exp = "KMGTPE".indexOf(unit.charAt(0)) + 1;
+        return  base * Math.pow(unitSize, exp);
+    }
 }
