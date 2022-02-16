@@ -18,3 +18,5 @@ before_install:
 
 script:
   - travis_retry mvn clean install
+after_success:
+  - bash <(curl -s https://codecov.io/bash) -t 11a6acce-59a1-4586-9bf6-164878d045cf || echo 'Codecov failed to upload'
