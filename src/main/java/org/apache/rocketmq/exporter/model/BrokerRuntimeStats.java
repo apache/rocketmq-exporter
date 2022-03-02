@@ -129,8 +129,8 @@ public class BrokerRuntimeStats {
         this.putMessageSizeTotal = Long.parseLong(kvTable.getTable().get("putMessageSizeTotal"));
         this.sendThreadPoolQueueCapacity = Long.parseLong(kvTable.getTable().get("sendThreadPoolQueueCapacity"));
         this.pullThreadPoolQueueCapacity = Long.parseLong(kvTable.getTable().get("pullThreadPoolQueueCapacity"));
-        this.putLatency99 = Double.parseDouble(kvTable.getTable().get("putLatency99"));
-        this.putLatency999 = Double.parseDouble(kvTable.getTable().get("putLatency999"));
+        this.putLatency99 = Double.parseDouble(kvTable.getTable().getOrDefault("putLatency99", "-1"));
+        this.putLatency999 = Double.parseDouble(kvTable.getTable().getOrDefault("putLatency999", "-1"));
 
     }
 
