@@ -248,10 +248,23 @@ rocketmq_client_consumer_pull_tps{clientAddr="172.16.116.51:52178",clientId="10.
 
 Grafana Dashboard
 -------
-
+There are two dashboard to choose from:  
+### The First
 Grafana Dashboard ID: 10477, name: RocketMQ Exporter Overview.
 For details of the dashboard please see [RocketMQ Exporter Overview](https://grafana.com/dashboards/10477).
 
+### The Second
+[rocketmq_exporter.json](./rocketmq_exporter.json)  
+
+**Note**: It must be configured with two additional labels(Env and Cluster), when configured on the prometheus, as shown bellow:
+```yaml
+  - job_name: 'rocketmq-exporter'
+    static_configs:
+    - targets: ['localhost:5557']
+      labels:
+        Env: 'develop'
+        Cluster: 'local'
+```
 Quick Start
 -------------
 This [guide](./rocketmq_exporter_quickstart.md) will tell you how to build and run rocketmq exporter with Prometheus and Grafana Integration from scratch.
