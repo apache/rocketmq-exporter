@@ -69,7 +69,9 @@ public class ConsumerTopicDiffMetric {
         ConsumerTopicDiffMetric other = (ConsumerTopicDiffMetric) obj;
 
         return other.group.equals(group) &&
-                other.topic.equals(topic);
+                other.topic.equals(topic) &&
+                other.countOfOnlineConsumers.equals(countOfOnlineConsumers) &&
+                other.msgModel.equals(msgModel);
     }
 
     @Override
@@ -77,11 +79,14 @@ public class ConsumerTopicDiffMetric {
         int hash = 1;
         hash = 37 * hash + group.hashCode();
         hash = 37 * hash + topic.hashCode();
+        hash = 37 * hash + countOfOnlineConsumers.hashCode();
+        hash = 37 * hash + msgModel.hashCode();
         return hash;
     }
 
     @Override
     public String toString() {
-        return "ConsumerGroup: " + group + " Topic: " + topic;
+        return "ConsumerGroup: " + group + " Topic: " + topic + " countOfOnlineConsumers: " + countOfOnlineConsumers
+                + "msgModel: " + msgModel;
     }
 }
