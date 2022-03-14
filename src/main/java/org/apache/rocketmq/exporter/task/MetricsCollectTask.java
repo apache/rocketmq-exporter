@@ -295,8 +295,7 @@ public class MetricsCollectTask {
                     //log.warn(String.format("no any offset for consumer(%s), topic(%s), ignore this", group, topic));
                     continue;
                 }
-                if (messageModel == MessageModel.CLUSTERING)
-                {
+                if (messageModel == MessageModel.CLUSTERING) {
                     diff = consumeStats.computeTotalDiff();
                     consumeTPS = consumeStats.getConsumeTps();
                     metricsService.getCollector().addGroupDiffMetric(
@@ -499,7 +498,7 @@ public class MetricsCollectTask {
                                 Utils.getFixedDouble(bsd.getStatsMinute().getTps()));
                         } catch (MQClientException ex) {
                             if (ex.getResponseCode() == ResponseCode.SYSTEM_ERROR) {
-                               // log.error(String.format("GROUP_GET_SIZE-error, topic=%s, group=%s, master broker=%s, %s", topic, group, masterAddr, ex.getErrorMessage()));
+                                // log.error(String.format("GROUP_GET_SIZE-error, topic=%s, group=%s, master broker=%s, %s", topic, group, masterAddr, ex.getErrorMessage()));
                             } else {
                                 log.error(String.format("GROUP_GET_SIZE-error, topic=%s, group=%s, master broker=%s", topic, group, masterAddr), ex);
                             }
@@ -563,14 +562,13 @@ public class MetricsCollectTask {
                     brokerIP,
                     brokerName,
                     Utils.getFixedDouble(bsd.getStatsMinute().getTps()));
-            } catch (MQClientException ex){
+            } catch (MQClientException ex) {
                 if (ex.getResponseCode() == ResponseCode.SYSTEM_ERROR) {
                     // log.error(String.format("GROUP_GET_SIZE-error, topic=%s, group=%s, master broker=%s, %s", topic, group, masterAddr, ex.getErrorMessage()));
                 } else {
-                    log.error(String.format("BROKER_PUT_NUMS-error,  master broker=%s",  masterAddr), ex);
+                    log.error(String.format("BROKER_PUT_NUMS-error,  master broker=%s", masterAddr), ex);
                 }
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 log.error(String.format("BROKER_PUT_NUMS-error, master broker=%s", masterAddr), ex);
             }
             try {
@@ -580,14 +578,13 @@ public class MetricsCollectTask {
                     brokerIP,
                     brokerName,
                     Utils.getFixedDouble(bsd.getStatsMinute().getTps()));
-            }   catch (MQClientException ex){
-            if (ex.getResponseCode() == ResponseCode.SYSTEM_ERROR) {
-                // log.error(String.format("GROUP_GET_SIZE-error, topic=%s, group=%s, master broker=%s, %s", topic, group, masterAddr, ex.getErrorMessage()));
-            } else {
-                log.error(String.format("BROKER_GET_NUMS-error,  master broker=%s",  masterAddr), ex);
-            }
-        }
-            catch (Exception ex) {
+            } catch (MQClientException ex) {
+                if (ex.getResponseCode() == ResponseCode.SYSTEM_ERROR) {
+                    // log.error(String.format("GROUP_GET_SIZE-error, topic=%s, group=%s, master broker=%s, %s", topic, group, masterAddr, ex.getErrorMessage()));
+                } else {
+                    log.error(String.format("BROKER_GET_NUMS-error,  master broker=%s", masterAddr), ex);
+                }
+            } catch (Exception ex) {
                 log.error(String.format("BROKER_GET_NUMS-error, master broker=%s", masterAddr), ex);
             }
         }
@@ -661,7 +658,7 @@ public class MetricsCollectTask {
 
     private void handleTopicNotExistException(int responseCode, Exception ex, String topic, String group) {
         if (responseCode == ResponseCode.TOPIC_NOT_EXIST || responseCode == ResponseCode.CONSUMER_NOT_ONLINE) {
-           // log.error(String.format("get topic's(%s) consumer-stats(%s) exception, detail: %s", topic, group, ex.getMessage()));
+            // log.error(String.format("get topic's(%s) consumer-stats(%s) exception, detail: %s", topic, group, ex.getMessage()));
         } else {
             log.error(String.format("get topic's(%s) consumer-stats(%s) exception", topic, group), ex);
         }

@@ -1,5 +1,7 @@
 # Apache RocketMQ Exporter for Prometheus.
 [![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
+[![Build Status](https://api.travis-ci.com/apache/rocketmq-exporter.svg?branch=master)](https://travis-ci.com/github/apache/rocketmq-exporter)
+[![codecov](https://codecov.io/gh/apache/rocketmq-exporter/branch/master/graph/badge.svg?token=jS7OXwJW5Q)](https://codecov.io/gh/apache/rocketmq-exporter)
 [![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/apache/rocketmq-exporter.svg)](http://isitmaintained.com/project/apache/rocketmq-exporter "Average time to resolve an issue")
 [![Percentage of issues still open](http://isitmaintained.com/badge/open/apache/rocketmq-exporter.svg)](http://isitmaintained.com/project/apache/rocketmq-exporter "Percentage of issues still open")
 ![Twitter Follow](https://img.shields.io/twitter/follow/ApacheRocketMQ?style=social)
