@@ -16,8 +16,6 @@
  */
 package org.apache.rocketmq.exporter;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -29,14 +27,13 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 public class RocketMQExporterApplication implements CommandLineRunner {
 
-    private final static Logger log = LoggerFactory.getLogger(RocketMQExporterApplication.class);
 
     public static void main(String[] args) {
         SpringApplication.run(RocketMQExporterApplication.class, args);
     }
 
     @Override public void run(String... args) throws Exception {
-        log.info("Start RocketMQExporterApplication: " + args[0] + " And " + args[1]);
+        return;
     }
 }
 
