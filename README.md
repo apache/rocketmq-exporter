@@ -1,5 +1,7 @@
 # Apache RocketMQ Exporter for Prometheus.
 [![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
+[![Build Status](https://api.travis-ci.com/apache/rocketmq-exporter.svg?branch=master)](https://travis-ci.com/github/apache/rocketmq-exporter)
+[![codecov](https://codecov.io/gh/apache/rocketmq-exporter/branch/master/graph/badge.svg?token=jS7OXwJW5Q)](https://codecov.io/gh/apache/rocketmq-exporter)
 [![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/apache/rocketmq-exporter.svg)](http://isitmaintained.com/project/apache/rocketmq-exporter "Average time to resolve an issue")
 [![Percentage of issues still open](http://isitmaintained.com/badge/open/apache/rocketmq-exporter.svg)](http://isitmaintained.com/project/apache/rocketmq-exporter "Percentage of issues still open")
 ![Twitter Follow](https://img.shields.io/twitter/follow/ApacheRocketMQ?style=social)
@@ -63,7 +65,7 @@ Run
 ### Run Binary
 
 ```shell
-java -jar rocketmq-exporter-0.0.1-SNAPSHOT.jar
+java -jar target/rocketmq-exporter-0.0.2-SNAPSHOT.jar
 ```
 
 ### Run Docker Image
@@ -254,4 +256,4 @@ For details of the dashboard please see [RocketMQ Exporter Overview](https://gra
 
 Quick Start
 -------------
-This [guide](./rocketmq_exporter_quickstart.md) will teach you how to build and run rocketmq exporter with Prometheus and Grafana Integration from scratch.
+This [guide](./rocketmq_exporter_quickstart.md) will tell you how to build and run rocketmq exporter with Prometheus and Grafana Integration from scratch.

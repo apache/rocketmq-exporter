@@ -16,6 +16,7 @@
  */
 package org.apache.rocketmq.exporter;
 
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.ServletComponentScan;
@@ -24,9 +25,15 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 @ServletComponentScan
 @EnableScheduling
-public class RocketMQExporterApplication {
+public class RocketMQExporterApplication implements CommandLineRunner {
+
+
     public static void main(String[] args) {
         SpringApplication.run(RocketMQExporterApplication.class, args);
+    }
+
+    @Override public void run(String... args) throws Exception {
+        return;
     }
 }
 

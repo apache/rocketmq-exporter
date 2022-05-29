@@ -19,7 +19,9 @@ package org.apache.rocketmq.exporter.service.impl;
 import io.prometheus.client.Collector;
 import io.prometheus.client.CollectorRegistry;
 import org.apache.rocketmq.exporter.collector.RMQMetricsCollector;
+import org.apache.rocketmq.exporter.config.RMQConfigure;
 import org.apache.rocketmq.exporter.service.RMQMetricsService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -31,6 +33,9 @@ import java.util.Iterator;
 
 @Service
 public class RMQMetricsServiceImpl implements RMQMetricsService {
+    @Autowired
+    private RMQConfigure configure;
+
     private CollectorRegistry registry = new CollectorRegistry();
     private final RMQMetricsCollector rmqMetricsCollector;
 
@@ -38,8 +43,9 @@ public class RMQMetricsServiceImpl implements RMQMetricsService {
         return rmqMetricsCollector;
     }
 
-    public RMQMetricsServiceImpl() {
-        rmqMetricsCollector = new RMQMetricsCollector();
+    public RMQMetricsServiceImpl(RMQConfigure configure) {
+        this.configure = configure;
+        rmqMetricsCollector = new RMQMetricsCollector(configure.getOutOfTimeSeconds());
         rmqMetricsCollector.register(registry);
     }
 

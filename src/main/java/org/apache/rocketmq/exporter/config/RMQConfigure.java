@@ -33,7 +33,7 @@ public class RMQConfigure {
     public static final String ROCKETMQ_CONFIG_ROCKETMQ_VERSION = "rocketmq.config.rocketmqVersion";
 
     private Logger logger = LoggerFactory.getLogger(RMQConfigure.class);
-    //use rocketmq.namesrv.addr first,if it is empty,than use system proerty or system env
+    //use rocketmq.namesrv.addr first,if it is empty,than use system property or system env
     private volatile String namesrvAddr = System.getProperty(MixAll.NAMESRV_ADDR_PROPERTY, System.getenv(MixAll.NAMESRV_ADDR_ENV));
 
     private volatile String isVIPChannel = System.getProperty(SEND_MESSAGE_WITH_VIP_CHANNEL_PROPERTY, "true");
@@ -43,6 +43,26 @@ public class RMQConfigure {
     private volatile String webTelemetryPath = System.getProperty(ROCKETMQ_CONFIG_WEB_TELEMETRY_PATH, "/metrics");
 
     private volatile String rocketmqVersion = System.getProperty(ROCKETMQ_CONFIG_ROCKETMQ_VERSION, "V4_3_2");
+
+    /**
+     * true: accessKey and secretKey would be used
+     * default false
+     */
+    private boolean enableACL = false;
+
+    private String accessKey;
+
+    private String secretKey;
+
+    private long outOfTimeSeconds;
+
+    public boolean enableACL() {
+        return this.enableACL;
+    }
+
+    public void setEnableACL(boolean enableACL) {
+        this.enableACL = enableACL;
+    }
 
     public String getNamesrvAddr() {
         return namesrvAddr;
@@ -98,5 +118,29 @@ public class RMQConfigure {
 
     public String getRocketmqVersion() {
         return rocketmqVersion;
+    }
+
+    public String getAccessKey() {
+        return accessKey;
+    }
+
+    public void setAccessKey(String accessKey) {
+        this.accessKey = accessKey;
+    }
+
+    public String getSecretKey() {
+        return secretKey;
+    }
+
+    public void setSecretKey(String secretKey) {
+        this.secretKey = secretKey;
+    }
+
+    public long getOutOfTimeSeconds() {
+        return outOfTimeSeconds;
+    }
+
+    public void setOutOfTimeSeconds(long outOfTimeSeconds) {
+        this.outOfTimeSeconds = outOfTimeSeconds;
     }
 }

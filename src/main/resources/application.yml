@@ -14,9 +14,13 @@ logging:
 rocketmq:
   config:
     webTelemetryPath: /metrics
-    rocketmqVersion: 4_2_0
+    rocketmqVersion: 4_8_0
     namesrvAddr: 127.0.0.1:9876
     enableCollect: true
+    enableACL: false # if >=4.4.0
+    accessKey:  # if >=4.4.0
+    secretKey:  # if >=4.4.0
+    outOfTimeSeconds: 60 # Cache clear time with no update
 
 threadpool:
   collect-client-metric-executor:

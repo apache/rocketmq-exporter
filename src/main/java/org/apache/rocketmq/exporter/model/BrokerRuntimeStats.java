@@ -17,6 +17,7 @@
 package org.apache.rocketmq.exporter.model;
 
 import org.apache.rocketmq.common.protocol.body.KVTable;
+import org.apache.rocketmq.exporter.util.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -131,10 +132,10 @@ public class BrokerRuntimeStats {
 
     private void loadCommitLogDirCapacity(String commitLogDirCapacity) {
         String[] arr = commitLogDirCapacity.split(" ");
-        double total = Double.parseDouble(arr[2]);
-        double free = Double.parseDouble(arr[6]);
-        this.commitLogDirCapacityTotal = total;
-        this.commitLogDirCapacityFree = free;
+        String total = String.format("%s %s", arr[2], arr[3].substring(0, arr[3].length() - 1));
+        String free = String.format("%s %s", arr[6], arr[7].substring(0, arr[7].length() - 1));
+        this.commitLogDirCapacityTotal = Utils.machineReadableByteCount(total);
+        this.commitLogDirCapacityFree = Utils.machineReadableByteCount(free);
     }
 
     private void loadTps(PutTps putTps, String value) {
