@@ -35,6 +35,8 @@ import org.apache.rocketmq.common.protocol.body.Connection;
 import org.apache.rocketmq.common.protocol.body.ConsumerConnection;
 import org.apache.rocketmq.common.protocol.body.GroupList;
 import org.apache.rocketmq.common.protocol.body.KVTable;
+import org.apache.rocketmq.common.protocol.body.ProducerInfo;
+import org.apache.rocketmq.common.protocol.body.ProducerTableInfo;
 import org.apache.rocketmq.common.protocol.body.TopicList;
 import org.apache.rocketmq.common.protocol.heartbeat.MessageModel;
 import org.apache.rocketmq.common.protocol.route.BrokerData;
@@ -62,8 +64,8 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -199,6 +201,54 @@ public class MetricsCollectTask {
             }
         }
         log.info("topic offset collection task finished...." + (System.currentTimeMillis() - start));
+    }
+
+    @Scheduled(cron = "${task.collectProducer.cron}")
+    public void collectProducer() {
+        if (!rmqConfigure.isEnableCollect()) {
+            return;
+        }
+        log.info("producer metric collection task starting....");
+        long start = System.currentTimeMillis();
+        ClusterInfo clusterInfo = null;
+        try {
+            clusterInfo = mqAdminExt.examineBrokerClusterInfo();
+        } catch (Exception ex) {
+            log.error(String.format("collectProducer exception namesrv is %s",
+                    JSON.toJSONString(mqAdminExt.getNameServerAddressList())), ex);
+            return;
+        }
+
+        if (clusterInfo == null || clusterInfo.getClusterAddrTable() == null || clusterInfo.getBrokerAddrTable() == null) {
+            log.warn(String.format("collectProducer get empty cluster, namesrv is: %s", JSON.toJSONString(mqAdminExt.getNameServerAddressList())));
+            return;
+        }
+        for (String clusterName : clusterInfo.getClusterAddrTable().keySet()) {
+            Set<String> brokerNames = clusterInfo.getClusterAddrTable().get(clusterName);
+            if (brokerNames == null || brokerNames.isEmpty()) {
+                log.warn(String.format("collectProducer cluster's brokers are empty, cluster=%s, name srv= %s", clusterName, JSON.toJSONString(mqAdminExt.getNameServerAddressList())));
+                continue;
+            }
+            for (String brokerName : brokerNames) {
+                BrokerData bd = clusterInfo.getBrokerAddrTable().get(brokerName);
+                ProducerTableInfo pt = null;
+                try {
+                    pt = mqAdminExt.getAllProducerInfo(bd.getBrokerAddrs().get(MixAll.MASTER_ID));
+                } catch (Exception e) {
+                    log.error(String.format("collectProducer. should not be here. cluster=%s, brokerName=%s, name srv= %s", clusterName, brokerName, JSON.toJSONString(mqAdminExt.getNameServerAddressList())));
+                }
+                if (pt == null || pt.getData() == null || pt.getData().isEmpty()) {
+                    log.warn(String.format("collectProducer. there are no producers in cluster=%s, brokerName=%s, name srv= %s", clusterName, brokerName, JSON.toJSONString(mqAdminExt.getNameServerAddressList())));
+                    continue;
+                }
+                for (String producerGroup : pt.getData().keySet()) {
+                    List<ProducerInfo> list = pt.getData().get(producerGroup);
+                    metricsService.getCollector().addProducerCountMetric(clusterName, brokerName, producerGroup, list == null ? -1 : list.size());
+                }
+            }
+        }
+
+        log.info("producer metric collection task ended....");
     }
 
     @Scheduled(cron = "${task.collectConsumerOffset.cron}")
