@@ -102,6 +102,7 @@ public class RMQMetricsCollector extends Collector {
     private Cache<BrokerMetric, Double> brokerPutNums;
     //total get message count for one broker
     private Cache<BrokerMetric, Double> brokerGetNums;
+    private Cache<BrokerMetric, Double> brokerCommitLogDiff;
 
     private Cache<BrokerRuntimeMetric, Long> brokerRuntimeMsgPutTotalTodayNow;
     private Cache<BrokerRuntimeMetric, Long> brokerRuntimeMsgGetTotalTodayNow;
@@ -203,6 +204,7 @@ public class RMQMetricsCollector extends Collector {
         this.groupLatencyByTime = initCache(outOfTimeSeconds);
         this.brokerPutNums = initCache(outOfTimeSeconds);
         this.brokerGetNums = initCache(outOfTimeSeconds);
+        this.brokerCommitLogDiff = initCache(outOfTimeSeconds);
         this.brokerRuntimeMsgPutTotalTodayNow = initCache(outOfTimeSeconds);
         this.brokerRuntimeMsgGetTotalTodayNow = initCache(outOfTimeSeconds);
         this.brokerRuntimeMsgGetTotalYesterdayMorning = initCache(outOfTimeSeconds);
@@ -492,6 +494,12 @@ public class RMQMetricsCollector extends Collector {
             loadBrokerNums(brokerGetNumsGauge, entry);
         }
         mfs.add(brokerGetNumsGauge);
+
+        GaugeMetricFamily brokerCommitLogDiffGauge = new GaugeMetricFamily("rocketmq_broker_commitlog_diff", "brokerCommitLogDiffGauge", BROKER_NUMS_LABEL_NAMES);
+        for (Map.Entry<BrokerMetric, Double> entry : brokerCommitLogDiff.asMap().entrySet()) {
+            loadBrokerNums(brokerCommitLogDiffGauge, entry);
+        }
+        mfs.add(brokerCommitLogDiffGauge);
     }
 
 
@@ -756,6 +764,10 @@ public class RMQMetricsCollector extends Collector {
 
     public void addBrokerGetNumsMetric(String clusterName, String brokerIP, String brokerName, double value) {
         brokerGetNums.put(new BrokerMetric(clusterName, brokerIP, brokerName), value);
+    }
+
+    public void addBrokerCommitLogDiffMetric(String clusterName, String brokerIP, String brokerName, double value) {
+        brokerCommitLogDiff.put(new BrokerMetric(clusterName, brokerIP, brokerName), value);
     }
 
     public void addBrokerRuntimeStatsMetric(BrokerRuntimeStats stats, String clusterName, String brokerAddress, String brokerHost) {
