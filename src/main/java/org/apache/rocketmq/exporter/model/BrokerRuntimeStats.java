@@ -17,7 +17,10 @@
 package org.apache.rocketmq.exporter.model;
 
 import org.apache.rocketmq.common.protocol.body.KVTable;
+import org.apache.rocketmq.exporter.task.MetricsCollectTask;
 import org.apache.rocketmq.exporter.util.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -80,6 +83,7 @@ public class BrokerRuntimeStats {
     private double putLatency999;
 
 
+    private final static Logger log = LoggerFactory.getLogger(BrokerRuntimeStats.class);
     public BrokerRuntimeStats(KVTable kvTable) {
         this.msgPutTotalTodayNow = Long.parseLong(kvTable.getTable().get("msgPutTotalTodayNow"));
 
@@ -157,10 +161,18 @@ public class BrokerRuntimeStats {
     }
 
     private void loadPutMessageDistributeTime(String str) {
+        if ("null".equalsIgnoreCase(str)) {
+            log.warn("loadPutMessageDistributeTime WARN, value is null");
+            return;
+        }
         String[] arr = str.split(" ");
         String key = "", value = "";
         for (String ar : arr) {
             String[] tarr = ar.split(":");
+            if (tarr.length < 2) {
+                log.warn("loadPutMessageDistributeTime WARN, wrong value is {}, {}", ar, str);
+                continue;
+            }
             key = tarr[0].replace("[", "").replace("]", "");
             value = tarr[1];
             this.putMessageDistributeTimeMap.put(key, Integer.parseInt(value));

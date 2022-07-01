@@ -136,6 +136,12 @@ public class MQAdminExtImpl implements MQAdminExt {
     }
 
     @Override
+    public void updateGlobalWhiteAddrConfig(final String addr, final String globalWhiteAddrs, String aclFileFullPath)throws RemotingException, MQBrokerException,
+            InterruptedException, MQClientException{
+        //ignore
+    }
+
+    @Override
     public ClusterAclVersionInfo examineBrokerClusterAclVersionInfo(
             String addr) throws RemotingException, MQBrokerException, InterruptedException, MQClientException {
         //ignore
@@ -306,9 +312,9 @@ public class MQAdminExtImpl implements MQAdminExt {
     }
 
     @Override
-    public void deleteTopicInNameServer(Set<String> addrs, String topic)
+    public void deleteTopicInNameServer(Set<String> addrs, String topic, String clusterName)
             throws RemotingException, MQBrokerException, InterruptedException, MQClientException {
-        defaultMQAdminExt.deleteTopicInNameServer(addrs, topic);
+        defaultMQAdminExt.deleteTopicInNameServer(addrs, topic, clusterName);
     }
 
     @Override
@@ -383,6 +389,16 @@ public class MQAdminExtImpl implements MQAdminExt {
             throws RemotingConnectException, RemotingSendRequestException, RemotingTimeoutException, MQClientException,
             InterruptedException {
         return defaultMQAdminExt.cleanExpiredConsumerQueueByAddr(addr);
+    }
+
+    @Override
+    public boolean deleteExpiredCommitLog(String cluster) throws RemotingConnectException, RemotingSendRequestException, RemotingTimeoutException, MQClientException, InterruptedException {
+        return false;
+    }
+
+    @Override
+    public boolean deleteExpiredCommitLogByAddr(String addr) throws RemotingConnectException, RemotingSendRequestException, RemotingTimeoutException, MQClientException, InterruptedException {
+        return false;
     }
 
     @Override
