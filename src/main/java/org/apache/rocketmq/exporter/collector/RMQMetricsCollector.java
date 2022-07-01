@@ -142,6 +142,8 @@ public class RMQMetricsCollector extends Collector {
     private Cache<BrokerRuntimeMetric, Double> brokerRuntimePutTps600;
     private Cache<BrokerRuntimeMetric, Double> brokerRuntimePutTps60;
     private Cache<BrokerRuntimeMetric, Double> brokerRuntimePutTps10;
+    private Cache<BrokerRuntimeMetric, Double> brokerRuntimePutLatency99;
+    private Cache<BrokerRuntimeMetric, Double> brokerRuntimePutLatency999;
 
     private Cache<BrokerRuntimeMetric, Long> brokerRuntimeDispatchMaxBuffer;
 
@@ -236,6 +238,8 @@ public class RMQMetricsCollector extends Collector {
         this.brokerRuntimePutTps600 = initCache(outOfTimeSeconds);
         this.brokerRuntimePutTps60 = initCache(outOfTimeSeconds);
         this.brokerRuntimePutTps10 = initCache(outOfTimeSeconds);
+        this.brokerRuntimePutLatency99 = initCache(outOfTimeSeconds);
+        this.brokerRuntimePutLatency999 = initCache(outOfTimeSeconds);
         this.brokerRuntimeDispatchMaxBuffer = initCache(outOfTimeSeconds);
         this.brokerRuntimePutMessageDistributeTimeMap10toMore = initCache(outOfTimeSeconds);
         this.brokerRuntimePutMessageDistributeTimeMap5to10s = initCache(outOfTimeSeconds);
@@ -764,6 +768,18 @@ public class RMQMetricsCollector extends Collector {
             stats.getBrokerVersion(), stats);
         addCommitLogDirCapacity(clusterName, brokerAddress, brokerHost, stats);
         addAllKindOfTps(clusterName, brokerAddress, brokerHost, stats);
+
+        brokerRuntimePutLatency99.put(new BrokerRuntimeMetric(
+                clusterName, brokerAddress, brokerHost,
+                stats.getBrokerVersionDesc(),
+                stats.getBootTimestamp(),
+                stats.getBrokerVersion()), stats.getPutLatency99());
+
+        brokerRuntimePutLatency999.put(new BrokerRuntimeMetric(
+                clusterName, brokerAddress, brokerHost,
+                stats.getBrokerVersionDesc(),
+                stats.getBootTimestamp(),
+                stats.getBrokerVersion()), stats.getPutLatency999());
 
         brokerRuntimeMsgPutTotalTodayNow.put(new BrokerRuntimeMetric(
             clusterName, brokerAddress, brokerHost,
@@ -1428,5 +1444,17 @@ public class RMQMetricsCollector extends Collector {
             loadBrokerRuntimeStatsMetric(brokerRuntimeRemainHowManyDataToFlushF, entry);
         }
         mfs.add(brokerRuntimeRemainHowManyDataToFlushF);
+
+        GaugeMetricFamily brokerRuntimePutLatency99F = new GaugeMetricFamily("rocketmq_brokeruntime_put_latency_99", "brokerRuntimePutLatency99", BROKER_RUNTIME_METRIC_LABEL_NAMES);
+        for (Map.Entry<BrokerRuntimeMetric, Double> entry : brokerRuntimePutLatency99.asMap().entrySet()) {
+            loadBrokerRuntimeStatsMetric(brokerRuntimePutLatency99F, entry);
+        }
+        mfs.add(brokerRuntimePutLatency99F);
+
+        GaugeMetricFamily brokerRuntimePutLatency999F = new GaugeMetricFamily("rocketmq_brokeruntime_put_latency_999", "brokerRuntimePutLatency999", BROKER_RUNTIME_METRIC_LABEL_NAMES);
+        for (Map.Entry<BrokerRuntimeMetric, Double> entry : brokerRuntimePutLatency999.asMap().entrySet()) {
+            loadBrokerRuntimeStatsMetric(brokerRuntimePutLatency999F, entry);
+        }
+        mfs.add(brokerRuntimePutLatency999F);
     }
 }
