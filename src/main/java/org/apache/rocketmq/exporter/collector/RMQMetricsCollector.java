@@ -1061,7 +1061,7 @@ public class RMQMetricsCollector extends Collector {
         String clusterName, String brokerAddress, String brokerHost,
         String brokerDes, long bootTimestamp, int brokerVersion,
         BrokerRuntimeStats stats) {
-        if (stats.getPutMessageDistributeTimeMap()==null || stats.getPutMessageDistributeTimeMap().isEmpty()){
+        if (stats.getPutMessageDistributeTimeMap() == null || stats.getPutMessageDistributeTimeMap().isEmpty()) {
             log.warn("WARN putMessageDistributeTime is null or empty");
             return;
         }

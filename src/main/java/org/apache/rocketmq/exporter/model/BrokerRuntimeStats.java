@@ -17,7 +17,6 @@
 package org.apache.rocketmq.exporter.model;
 
 import org.apache.rocketmq.common.protocol.body.KVTable;
-import org.apache.rocketmq.exporter.task.MetricsCollectTask;
 import org.apache.rocketmq.exporter.util.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
