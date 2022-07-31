@@ -319,11 +319,11 @@ public class RMQMetricsCollector extends Collector {
 
 
     private static final List<String> TOPIC_OFFSET_LABEL_NAMES = Arrays.asList(
-        "cluster", "broker", "topic", "lastUpdateTimestamp"
+        "cluster", "broker", "topic"
     );
 
     private static final List<String> DLQ_TOPIC_OFFSET_LABEL_NAMES = Arrays.asList(
-        "cluster", "broker", "group", "lastUpdateTimestamp"
+        "cluster", "broker", "group"
     );
 
     private void loadTopicOffsetMetric(GaugeMetricFamily family, Map.Entry<ProducerMetric, Double> entry) {
@@ -331,8 +331,7 @@ public class RMQMetricsCollector extends Collector {
             Arrays.asList(
                 entry.getKey().getClusterName(),
                 entry.getKey().getBrokerName(),
-                entry.getKey().getTopicName(),
-                String.valueOf(entry.getKey().getLastUpdateTimestamp())
+                entry.getKey().getTopicName()
             ),
             entry.getValue());
     }
@@ -356,8 +355,7 @@ public class RMQMetricsCollector extends Collector {
                 Arrays.asList(
                     entry.getKey().getClusterName(),
                     entry.getKey().getBrokerName(),
-                    entry.getKey().getGroup(),
-                    String.valueOf(entry.getKey().getLastUpdateTimestamp())
+                    entry.getKey().getGroup()
                 ),
                 entry.getValue());
         }
