@@ -54,6 +54,8 @@ public class RMQConfigure {
 
     private String secretKey;
 
+    private long outOfTimeSeconds;
+
     public boolean enableACL() {
         return this.enableACL;
     }
@@ -132,5 +134,13 @@ public class RMQConfigure {
 
     public void setSecretKey(String secretKey) {
         this.secretKey = secretKey;
+    }
+
+    public long getOutOfTimeSeconds() {
+        return outOfTimeSeconds;
+    }
+
+    public void setOutOfTimeSeconds(long outOfTimeSeconds) {
+        this.outOfTimeSeconds = outOfTimeSeconds;
     }
 }

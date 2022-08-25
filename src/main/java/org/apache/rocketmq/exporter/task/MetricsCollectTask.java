@@ -43,7 +43,6 @@ import org.apache.rocketmq.exporter.config.CollectClientMetricExecutorConfig;
 import org.apache.rocketmq.exporter.config.RMQConfigure;
 import org.apache.rocketmq.exporter.model.BrokerRuntimeStats;
 import org.apache.rocketmq.exporter.model.common.TwoTuple;
-import org.apache.rocketmq.exporter.model.metrics.BrokerMetric;
 import org.apache.rocketmq.exporter.service.RMQMetricsService;
 import org.apache.rocketmq.exporter.service.client.MQAdminExtImpl;
 import org.apache.rocketmq.exporter.util.Utils;
@@ -229,12 +228,12 @@ public class MetricsCollectTask {
             try {
                 groupList = mqAdminExt.queryTopicConsumeByWho(topic);
             } catch (Exception ex) {
-                log.warn(String.format("collectConsumerOffset-topic's consumer is empty, %s", topic));
+                //log.warn(String.format("collectConsumerOffset-topic's consumer is empty, %s", topic));
                 continue;
             }
 
             if (groupList == null || groupList.getGroupList() == null || groupList.getGroupList().isEmpty()) {
-                log.warn(String.format("no any consumer for topic(%s), ignore this topic", topic));
+                //log.warn(String.format("no any consumer for topic(%s), ignore this topic", topic));
                 continue;
             }
 
@@ -259,7 +258,7 @@ public class MetricsCollectTask {
                     handleTopicNotExistException(ex.getResponseCode(), ex, topic, group);
                 }
                 if (onlineConsumers == null || onlineConsumers.getConnectionSet() == null || onlineConsumers.getConnectionSet().isEmpty()) {
-                    log.warn(String.format("no any consumer online. topic=%s, consumer group=%s. ignore this", topic, group));
+                    //log.warn(String.format("no any consumer online. topic=%s, consumer group=%s. ignore this", topic, group));
                     countOfOnlineConsumers = 0;
                 } else {
                     countOfOnlineConsumers = onlineConsumers.getConnectionSet().size();
@@ -293,10 +292,10 @@ public class MetricsCollectTask {
                     handleTopicNotExistException(ex.getResponseCode(), ex, topic, group);
                 }
                 if (consumeStats == null || consumeStats.getOffsetTable() == null || consumeStats.getOffsetTable().isEmpty()) {
-                    log.warn(String.format("no any offset for consumer(%s), topic(%s), ignore this", group, topic));
+                    //log.warn(String.format("no any offset for consumer(%s), topic(%s), ignore this", group, topic));
                     continue;
                 }
-                {
+                if (messageModel == MessageModel.CLUSTERING) {
                     diff = consumeStats.computeTotalDiff();
                     consumeTPS = consumeStats.getConsumeTps();
                     metricsService.getCollector().addGroupDiffMetric(
@@ -415,15 +414,15 @@ public class MetricsCollectTask {
                         bsd = mqAdminExt.viewBrokerStatsData(masterAddr, BrokerStatsManager.TOPIC_PUT_NUMS, topic);
                         String brokerIP = clusterInfo.getBrokerAddrTable().get(bd.getBrokerName()).getBrokerAddrs().get(MixAll.MASTER_ID);
                         metricsService.getCollector().addTopicPutNumsMetric(
-                                bd.getCluster(),
-                                bd.getBrokerName(),
-                                brokerIP,
-                                topic,
-                                Utils.getFixedDouble(bsd.getStatsMinute().getTps())
+                            bd.getCluster(),
+                            bd.getBrokerName(),
+                            brokerIP,
+                            topic,
+                            Utils.getFixedDouble(bsd.getStatsMinute().getSum())
                         );
                     } catch (MQClientException ex) {
                         if (ex.getResponseCode() == ResponseCode.SYSTEM_ERROR) {
-                            log.error(String.format("TOPIC_PUT_NUMS-error, topic=%s, master broker=%s, %s", topic, masterAddr, ex.getErrorMessage()));
+                            //log.error(String.format("TOPIC_PUT_NUMS-error, topic=%s, master broker=%s, %s", topic, masterAddr, ex.getErrorMessage()));
                         } else {
                             log.error(String.format("TOPIC_PUT_NUMS-error, topic=%s, master broker=%s", topic, masterAddr), ex);
                         }
@@ -439,7 +438,7 @@ public class MetricsCollectTask {
                                 bd.getBrokerName(),
                                 brokerIP,
                                 topic,
-                                Utils.getFixedDouble(bsd.getStatsMinute().getTps())
+                                Utils.getFixedDouble(bsd.getStatsMinute().getSum())
                         );
                         metricsService.getCollector().addTopicPutAvgSizMetric(
                                 bd.getCluster(),
@@ -450,7 +449,7 @@ public class MetricsCollectTask {
                         );
                     } catch (MQClientException ex) {
                         if (ex.getResponseCode() == ResponseCode.SYSTEM_ERROR) {
-                            log.error(String.format("TOPIC_PUT_SIZE-error, topic=%s, master broker=%s, %s", topic, masterAddr, ex.getErrorMessage()));
+                            //log.error(String.format("TOPIC_PUT_SIZE-error, topic=%s, master broker=%s, %s", topic, masterAddr, ex.getErrorMessage()));
                         } else {
                             log.error(String.format("TOPIC_PUT_SIZE-error, topic=%s, master broker=%s", topic, masterAddr), ex);
                         }
@@ -464,11 +463,11 @@ public class MetricsCollectTask {
             try {
                 groupList = mqAdminExt.queryTopicConsumeByWho(topic);
             } catch (Exception ex) {
-                log.error(String.format("collectBrokerStatsTopic-fetch consumers for topic(%s) error, ignore this topic", topic), ex);
+                //log.error(String.format("collectBrokerStatsTopic-fetch consumers for topic(%s) error, ignore this topic", topic), ex);
                 continue;
             }
             if (groupList.getGroupList() == null || groupList.getGroupList().isEmpty()) {
-                log.warn(String.format("collectBrokerStatsTopic-topic's consumer is empty, %s", topic));
+                //log.warn(String.format("collectBrokerStatsTopic-topic's consumer is empty, %s", topic));
                 continue;
             }
             for (String group : groupList.getGroupList()) {
@@ -485,10 +484,10 @@ public class MetricsCollectTask {
                                     bd.getBrokerName(),
                                     topic,
                                     group,
-                                    Utils.getFixedDouble(bsd.getStatsMinute().getTps()));
+                                    Utils.getFixedDouble(bsd.getStatsMinute().getSum()));
                         } catch (MQClientException ex) {
                             if (ex.getResponseCode() == ResponseCode.SYSTEM_ERROR) {
-                                log.error(String.format("GROUP_GET_NUMS-error, topic=%s, group=%s,master broker=%s, %s", topic, group, masterAddr, ex.getErrorMessage()));
+                                //log.error(String.format("GROUP_GET_NUMS-error, topic=%s, group=%s,master broker=%s, %s", topic, group, masterAddr, ex.getErrorMessage()));
                             } else {
                                 log.error(String.format("GROUP_GET_NUMS-error, topic=%s, group=%s,master broker=%s", topic, group, masterAddr), ex);
                             }
@@ -503,10 +502,10 @@ public class MetricsCollectTask {
                                     bd.getBrokerName(),
                                     topic,
                                     group,
-                                    Utils.getFixedDouble(bsd.getStatsMinute().getTps()));
+                                    Utils.getFixedDouble(bsd.getStatsMinute().getSum()));
                         } catch (MQClientException ex) {
                             if (ex.getResponseCode() == ResponseCode.SYSTEM_ERROR) {
-                                log.error(String.format("GROUP_GET_SIZE-error, topic=%s, group=%s, master broker=%s, %s", topic, group, masterAddr, ex.getErrorMessage()));
+                                // log.error(String.format("GROUP_GET_SIZE-error, topic=%s, group=%s, master broker=%s, %s", topic, group, masterAddr, ex.getErrorMessage()));
                             } else {
                                 log.error(String.format("GROUP_GET_SIZE-error, topic=%s, group=%s, master broker=%s", topic, group, masterAddr), ex);
                             }
@@ -524,7 +523,7 @@ public class MetricsCollectTask {
                                     bsd.getStatsMinute().getSum());
                         } catch (MQClientException ex) {
                             if (ex.getResponseCode() == ResponseCode.SYSTEM_ERROR) {
-                                log.error(String.format("SNDBCK_PUT_NUMS-error, topic=%s, group=%s, master broker=%s, %s", topic, group, masterAddr, ex.getErrorMessage()));
+                                //log.error(String.format("SNDBCK_PUT_NUMS-error, topic=%s, group=%s, master broker=%s, %s", topic, group, masterAddr, ex.getErrorMessage()));
                             } else {
                                 log.error(String.format("SNDBCK_PUT_NUMS-error, topic=%s, group=%s, master broker=%s", topic, group, masterAddr), ex);
                             }
@@ -553,7 +552,6 @@ public class MetricsCollectTask {
             return;
         }
 
-        Set<BrokerMetric> masterMetricsSet = new HashSet<>();
         Set<Map.Entry<String, BrokerData>> clusterEntries = clusterInfo.getBrokerAddrTable().entrySet();
         for (Map.Entry<String, BrokerData> clusterEntry : clusterEntries) {
             String masterAddr = clusterEntry.getValue().getBrokerAddrs().get(MixAll.MASTER_ID);
@@ -567,28 +565,37 @@ public class MetricsCollectTask {
             try {
                 bsd = mqAdminExt.viewBrokerStatsData(masterAddr, BrokerStatsManager.BROKER_PUT_NUMS, clusterName);
                 metricsService.getCollector().addBrokerPutNumsMetric(
-                        clusterName,
-                        brokerIP,
-                        brokerName,
-                        Utils.getFixedDouble(bsd.getStatsMinute().getTps()));
+                    clusterName,
+                    brokerIP,
+                    brokerName,
+                    Utils.getFixedDouble(bsd.getStatsMinute().getSum()));
+            } catch (MQClientException ex) {
+                if (ex.getResponseCode() == ResponseCode.SYSTEM_ERROR) {
+                    // log.error(String.format("GROUP_GET_SIZE-error, topic=%s, group=%s, master broker=%s, %s", topic, group, masterAddr, ex.getErrorMessage()));
+                } else {
+                    log.error(String.format("BROKER_PUT_NUMS-error,  master broker=%s", masterAddr), ex);
+                }
             } catch (Exception ex) {
                 log.error(String.format("BROKER_PUT_NUMS-error, master broker=%s", masterAddr), ex);
             }
             try {
                 bsd = mqAdminExt.viewBrokerStatsData(masterAddr, BrokerStatsManager.BROKER_GET_NUMS, clusterName);
                 metricsService.getCollector().addBrokerGetNumsMetric(
-                        clusterName,
-                        brokerIP,
-                        brokerName,
-                        Utils.getFixedDouble(bsd.getStatsMinute().getTps()));
+                    clusterName,
+                    brokerIP,
+                    brokerName,
+                    Utils.getFixedDouble(bsd.getStatsMinute().getTps()));
+            } catch (MQClientException ex) {
+                if (ex.getResponseCode() == ResponseCode.SYSTEM_ERROR) {
+                    // log.error(String.format("GROUP_GET_SIZE-error, topic=%s, group=%s, master broker=%s, %s", topic, group, masterAddr, ex.getErrorMessage()));
+                } else {
+                    log.error(String.format("BROKER_GET_NUMS-error,  master broker=%s", masterAddr), ex);
+                }
             } catch (Exception ex) {
                 log.error(String.format("BROKER_GET_NUMS-error, master broker=%s", masterAddr), ex);
             }
-            masterMetricsSet.add(new BrokerMetric(clusterName, brokerIP, brokerName));
         }
 
-        metricsService.getCollector().clearBrokerPutNumsMetric(masterMetricsSet);
-        metricsService.getCollector().clearBrokerGetNumsMetric(masterMetricsSet);
         log.info("broker stats collection task finished...." + (System.currentTimeMillis() - start));
     }
 
@@ -658,7 +665,7 @@ public class MetricsCollectTask {
 
     private void handleTopicNotExistException(int responseCode, Exception ex, String topic, String group) {
         if (responseCode == ResponseCode.TOPIC_NOT_EXIST || responseCode == ResponseCode.CONSUMER_NOT_ONLINE) {
-            log.error(String.format("get topic's(%s) consumer-stats(%s) exception, detail: %s", topic, group, ex.getMessage()));
+            // log.error(String.format("get topic's(%s) consumer-stats(%s) exception, detail: %s", topic, group, ex.getMessage()));
         } else {
             log.error(String.format("get topic's(%s) consumer-stats(%s) exception", topic, group), ex);
         }

@@ -17,4 +17,7 @@ before_install:
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then jdk_switcher use "$CUSTOM_JDK"; fi
 
 script:
-  - travis_retry mvn clean install
+  - travis_retry mvn -B clean apache-rat:check
+  - travis_retry mvn -B clean install
+after_success:
+  - bash <(curl -s https://codecov.io/bash) || echo 'Codecov failed to upload'

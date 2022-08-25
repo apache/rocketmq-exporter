@@ -55,6 +55,25 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.7</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
@@ -101,6 +120,42 @@
                             <include>${project.build.finalName}.jar</include>
                         </resource>
                     </resources>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.rat</groupId>
+                <artifactId>apache-rat-plugin</artifactId>
+                <version>0.12</version>
+                <configuration>
+                    <excludes>
+                        <exclude>.travis.yml</exclude>
+                        <exclude>.asf.yaml</exclude>
+                        <exclude>CONTRIBUTING.md</exclude>
+                        <exclude>.github/*</exclude>
+                        <exclude>.github/*/*</exclude>
+                        <exclude>pom.xml</exclude>
+                        <exclude>style/**</exclude>
+                        <exclude>README.md</exclude>
+                        <exclude>BUILDING</exclude>
+                        <exclude>LICENSE</exclude>
+                        <exclude>NOTICE</exclude>
+                        <exclude>example.rules</exclude>
+                        <exclude>rocketmq_exporter_quickstart.md</exclude>
+                        <exclude>rocketmq_exporter_overview.json</exclude>
+                        <exclude>src/main/resources/application.yml</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>cobertura-maven-plugin</artifactId>
+                <version>2.7</version>
+                <configuration>
+                    <formats>
+                        <format>html</format>
+                        <format>xml</format>
+                    </formats>
+                    <check/>
                 </configuration>
             </plugin>
         </plugins>

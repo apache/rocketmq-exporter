@@ -17,6 +17,7 @@
 package org.apache.rocketmq.exporter.model;
 
 import org.apache.rocketmq.common.protocol.body.KVTable;
+import org.apache.rocketmq.exporter.util.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -75,6 +76,8 @@ public class BrokerRuntimeStats {
     private double putMessageAverageSize;
     private long putMessageSizeTotal;
     private long dispatchBehindBytes;
+    private double putLatency99;
+    private double putLatency999;
 
 
     public BrokerRuntimeStats(KVTable kvTable) {
@@ -129,15 +132,17 @@ public class BrokerRuntimeStats {
         this.putMessageSizeTotal = Long.parseLong(kvTable.getTable().get("putMessageSizeTotal"));
         this.sendThreadPoolQueueCapacity = Long.parseLong(kvTable.getTable().get("sendThreadPoolQueueCapacity"));
         this.pullThreadPoolQueueCapacity = Long.parseLong(kvTable.getTable().get("pullThreadPoolQueueCapacity"));
+        this.putLatency99 = Double.parseDouble(kvTable.getTable().getOrDefault("putLatency99", "-1"));
+        this.putLatency999 = Double.parseDouble(kvTable.getTable().getOrDefault("putLatency999", "-1"));
 
     }
 
     private void loadCommitLogDirCapacity(String commitLogDirCapacity) {
         String[] arr = commitLogDirCapacity.split(" ");
-        double total = Double.parseDouble(arr[2]);
-        double free = Double.parseDouble(arr[6]);
-        this.commitLogDirCapacityTotal = total;
-        this.commitLogDirCapacityFree = free;
+        String total = String.format("%s %s", arr[2], arr[3].substring(0, arr[3].length() - 1));
+        String free = String.format("%s %s", arr[6], arr[7].substring(0, arr[7].length() - 1));
+        this.commitLogDirCapacityTotal = Utils.machineReadableByteCount(total);
+        this.commitLogDirCapacityFree = Utils.machineReadableByteCount(free);
     }
 
     private void loadTps(PutTps putTps, String value) {
@@ -596,5 +601,21 @@ public class BrokerRuntimeStats {
 
     public void setDispatchBehindBytes(long dispatchBehindBytes) {
         this.dispatchBehindBytes = dispatchBehindBytes;
+    }
+
+    public double getPutLatency99() {
+        return putLatency99;
+    }
+
+    public void setPutLatency99(double putLatency99) {
+        this.putLatency99 = putLatency99;
+    }
+
+    public double getPutLatency999() {
+        return putLatency999;
+    }
+
+    public void setPutLatency999(double putLatency999) {
+        this.putLatency999 = putLatency999;
     }
 }
