@@ -88,7 +88,7 @@ public class BrokerRuntimeStats {
 
         loadTps(this.putTps, kvTable.getTable().get("putTps"));
         loadTps(this.getMissTps, kvTable.getTable().get("getMissTps"));
-        loadTps(this.getTransferedTps, kvTable.getTable().get("getTransferedTps"));
+        loadTps(this.getTransferedTps, kvTable.getTable().get("getTransferredTps"));
         loadTps(this.getTotalTps, kvTable.getTable().get("getTotalTps"));
         loadTps(this.getFoundTps, kvTable.getTable().get("getFoundTps"));
 
