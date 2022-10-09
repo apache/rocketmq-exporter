@@ -14,8 +14,8 @@ logging:
 rocketmq:
   config:
     webTelemetryPath: /metrics
-    rocketmqVersion: 4_8_0
     namesrvAddr: 127.0.0.1:9876
+    rocketmqVersion: 4_9_4
     enableCollect: true
     enableACL: false # if >=4.4.0
     accessKey:  # if >=4.4.0
@@ -31,6 +31,8 @@ threadpool:
 task:
   count: 5 # num of scheduled-tasks
   collectTopicOffset:
+    cron: 15 0/1 * * * ?
+  collectProducer:
     cron: 15 0/1 * * * ?
   collectConsumerOffset:
     cron: 15 0/1 * * * ?

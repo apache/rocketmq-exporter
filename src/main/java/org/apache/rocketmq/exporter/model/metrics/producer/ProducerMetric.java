@@ -14,7 +14,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.apache.rocketmq.exporter.model.metrics;
+package org.apache.rocketmq.exporter.model.metrics.producer;
 
 //max offset of topic
 public class ProducerMetric {
