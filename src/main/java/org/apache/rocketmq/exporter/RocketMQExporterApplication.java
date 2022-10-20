@@ -32,7 +32,8 @@ public class RocketMQExporterApplication implements CommandLineRunner {
         SpringApplication.run(RocketMQExporterApplication.class, args);
     }
 
-    @Override public void run(String... args) throws Exception {
+    @Override
+    public void run(String... args) throws Exception {
         return;
     }
 }

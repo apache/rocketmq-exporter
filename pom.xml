@@ -10,7 +10,7 @@
     </parent>
     <groupId>org.apache</groupId>
     <artifactId>rocketmq-exporter</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>0.0.3-SNAPSHOT</version>
     <name>rocketmq-exporter</name>
 
     <description>Apache RocketMQ Prometheus Exporter</description>
@@ -18,13 +18,14 @@
     <properties>
         <rocketmq.version>4.8.0</rocketmq.version>
         <docker.image.prefix>docker.io</docker.image.prefix>
+        <opentelemetry-proto.version>0.18.0-alpha</opentelemetry-proto.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>19.0</version>
+            <version>31.0.1-jre</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -48,7 +49,22 @@
         <dependency>
             <groupId>io.prometheus</groupId>
             <artifactId>simpleclient</artifactId>
-            <version>0.6.0</version>
+            <version>0.15.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.opentelemetry.proto</groupId>
+            <artifactId>opentelemetry-proto</artifactId>
+            <version>${opentelemetry-proto.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-services</artifactId>
+            <version>1.45.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-netty-shaded</artifactId>
+            <version>1.45.0</version>
         </dependency>
     </dependencies>
 
