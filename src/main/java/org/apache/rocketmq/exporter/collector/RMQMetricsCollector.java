@@ -20,7 +20,6 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import io.prometheus.client.Collector;
 import io.prometheus.client.GaugeMetricFamily;
-import java.util.concurrent.TimeUnit;
 import org.apache.rocketmq.common.MixAll;
 import org.apache.rocketmq.exporter.model.BrokerRuntimeStats;
 import org.apache.rocketmq.exporter.model.metrics.BrokerMetric;
@@ -28,7 +27,6 @@ import org.apache.rocketmq.exporter.model.metrics.ConsumerCountMetric;
 import org.apache.rocketmq.exporter.model.metrics.ConsumerMetric;
 import org.apache.rocketmq.exporter.model.metrics.ConsumerTopicDiffMetric;
 import org.apache.rocketmq.exporter.model.metrics.DLQTopicOffsetMetric;
-import org.apache.rocketmq.exporter.model.metrics.ProducerMetric;
 import org.apache.rocketmq.exporter.model.metrics.TopicPutNumMetric;
 import org.apache.rocketmq.exporter.model.metrics.brokerruntime.BrokerRuntimeMetric;
 import org.apache.rocketmq.exporter.model.metrics.clientrunime.ConsumerRuntimeConsumeFailedMsgsMetric;
@@ -37,6 +35,8 @@ import org.apache.rocketmq.exporter.model.metrics.clientrunime.ConsumerRuntimeCo
 import org.apache.rocketmq.exporter.model.metrics.clientrunime.ConsumerRuntimeConsumeRTMetric;
 import org.apache.rocketmq.exporter.model.metrics.clientrunime.ConsumerRuntimePullRTMetric;
 import org.apache.rocketmq.exporter.model.metrics.clientrunime.ConsumerRuntimePullTPSMetric;
+import org.apache.rocketmq.exporter.model.metrics.producer.ProducerCountMetric;
+import org.apache.rocketmq.exporter.model.metrics.producer.ProducerMetric;
 import org.apache.rocketmq.exporter.otlp.OtlpMetricsCollectorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +45,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class RMQMetricsCollector extends Collector {
 
@@ -53,6 +54,8 @@ public class RMQMetricsCollector extends Collector {
     private Cache<ProducerMetric, Double> topicRetryOffset;
     //max offset of dlq consume queue
     private Cache<DLQTopicOffsetMetric, Double> topicDLQOffset;
+    // producer instance count
+    private Cache<ProducerCountMetric, Integer> producerCounts;
 
     //total put numbers for topics
     private Cache<TopicPutNumMetric, Double> topicPutNums;
@@ -178,8 +181,10 @@ public class RMQMetricsCollector extends Collector {
         this.topicOffset = initCache(outOfTimeSeconds);
         this.topicRetryOffset = initCache(outOfTimeSeconds);
         this.topicDLQOffset = initCache(outOfTimeSeconds);
+        this.producerCounts = initCache(outOfTimeSeconds);
         this.topicPutNums = initCache(outOfTimeSeconds);
         this.topicPutSize = initCache(outOfTimeSeconds);
+
         this.consumerDiff = initCache(outOfTimeSeconds);
         this.consumerRetryDiff = initCache(outOfTimeSeconds);
         this.consumerDLQDiff = initCache(outOfTimeSeconds);
@@ -337,6 +342,24 @@ public class RMQMetricsCollector extends Collector {
             entry.getValue());
     }
 
+    private static final List<String> PRODUCER_GROUP_CLIENT_METRIC_LABEL_NAMES = Arrays.asList(
+            "cluster", "broker", "group"
+    );
+
+    private void collectProducerMetric(List<MetricFamilySamples> mfs) {
+        GaugeMetricFamily producerCount = new GaugeMetricFamily("rocketmq_producer_count", "producer instance counter", PRODUCER_GROUP_CLIENT_METRIC_LABEL_NAMES);
+        for (Map.Entry<ProducerCountMetric, Integer> entry : producerCounts.asMap().entrySet()) {
+            producerCount.addMetric(
+                    Arrays.asList(
+                            entry.getKey().getClusterName(),
+                            entry.getKey().getBrokerName(),
+                            entry.getKey().getGroup()
+                    ),
+                    entry.getValue().doubleValue());
+        }
+        mfs.add(producerCount);
+    }
+
     private void collectTopicOffsetMetric(List<MetricFamilySamples> mfs) {
         GaugeMetricFamily topicOffsetF = new GaugeMetricFamily("rocketmq_producer_offset", "TopicOffset", TOPIC_OFFSET_LABEL_NAMES);
         for (Map.Entry<ProducerMetric, Double> entry : topicOffset.asMap().entrySet()) {
@@ -378,6 +401,8 @@ public class RMQMetricsCollector extends Collector {
         List<MetricFamilySamples> mfs = new ArrayList<MetricFamilySamples>();
 
         collectConsumerMetric(mfs);
+
+        collectProducerMetric(mfs);
 
         collectTopicOffsetMetric(mfs);
 
@@ -657,6 +682,10 @@ public class RMQMetricsCollector extends Collector {
         } else {
             topicOffset.put(new ProducerMetric(clusterName, brokerName, topic, lastUpdateTimestamp), value);
         }
+    }
+
+    public void addProducerCountMetric(String clusterName, String brokerName, String groupName, int value) {
+        producerCounts.put(new ProducerCountMetric(clusterName, brokerName, groupName), value);
     }
 
     public void addGroupCountMetric(String group, String caddrs, String localaddrs, int count) {
@@ -1042,6 +1071,10 @@ public class RMQMetricsCollector extends Collector {
         String clusterName, String brokerAddress, String brokerHost,
         String brokerDes, long bootTimestamp, int brokerVersion,
         BrokerRuntimeStats stats) {
+        if (stats.getPutMessageDistributeTimeMap() == null || stats.getPutMessageDistributeTimeMap().isEmpty()) {
+            log.warn("WARN putMessageDistributeTime is null or empty");
+            return;
+        }
         brokerRuntimePutMessageDistributeTimeMap0ms.put(new BrokerRuntimeMetric(
             clusterName,
             brokerAddress, brokerHost,
