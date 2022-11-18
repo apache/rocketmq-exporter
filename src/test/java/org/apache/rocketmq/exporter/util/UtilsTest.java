@@ -17,7 +17,7 @@
 package org.apache.rocketmq.exporter.util;
 
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class UtilsTest {
 

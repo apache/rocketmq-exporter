@@ -41,7 +41,6 @@ import org.apache.rocketmq.common.protocol.body.TopicList;
 import org.apache.rocketmq.common.protocol.heartbeat.MessageModel;
 import org.apache.rocketmq.common.protocol.route.BrokerData;
 import org.apache.rocketmq.common.protocol.route.TopicRouteData;
-import org.apache.rocketmq.exporter.config.CollectClientMetricExecutorConfig;
 import org.apache.rocketmq.exporter.config.RMQConfigure;
 import org.apache.rocketmq.exporter.model.BrokerRuntimeStats;
 import org.apache.rocketmq.exporter.model.common.TwoTuple;
@@ -57,7 +56,6 @@ import org.apache.rocketmq.tools.admin.MQAdminExt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -69,13 +67,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
 
 @Component
 public class MetricsCollectTask {
@@ -91,31 +83,6 @@ public class MetricsCollectTask {
     private RMQMetricsService metricsService;
     private static String clusterName = null;
     private final static Logger log = LoggerFactory.getLogger(MetricsCollectTask.class);
-
-    private BlockingQueue<Runnable> collectClientTaskBlockQueue;
-
-    @Bean(name = "collectClientMetricExecutor")
-    private ExecutorService collectClientMetricExecutor(
-        CollectClientMetricExecutorConfig collectClientMetricExecutorConfig) {
-        collectClientTaskBlockQueue = new LinkedBlockingDeque<Runnable>(collectClientMetricExecutorConfig.getQueueSize());
-        ExecutorService executorService = new ClientMetricCollectorFixedThreadPoolExecutor(
-            collectClientMetricExecutorConfig.getCorePoolSize(),
-            collectClientMetricExecutorConfig.getMaximumPoolSize(),
-            collectClientMetricExecutorConfig.getKeepAliveTime(),
-            TimeUnit.MILLISECONDS,
-            this.collectClientTaskBlockQueue,
-            new ThreadFactory() {
-                private final AtomicLong threadIndex = new AtomicLong(0);
-
-                @Override
-                public Thread newThread(Runnable r) {
-                    return new Thread(r, "collectClientMetricThread_" + this.threadIndex.incrementAndGet());
-                }
-            },
-            new ThreadPoolExecutor.DiscardOldestPolicy()
-        );
-        return executorService;
-    }
 
     @PostConstruct
     public void init() throws InterruptedException, RemotingConnectException, RemotingTimeoutException, RemotingSendRequestException, MQBrokerException {

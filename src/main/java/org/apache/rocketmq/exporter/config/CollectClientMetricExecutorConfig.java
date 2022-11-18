@@ -16,9 +16,17 @@
  */
 package org.apache.rocketmq.exporter.config;
 
-
+import org.apache.rocketmq.exporter.task.ClientMetricCollectorFixedThreadPoolExecutor;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Configuration
 @ConfigurationProperties(prefix = "threadpool.collect-client-metric-executor")
@@ -27,36 +35,27 @@ public class CollectClientMetricExecutorConfig {
     private int maximumPoolSize = 20;
     private long keepAliveTime = 4000L;
     private int queueSize = 1000;
+    private BlockingQueue<Runnable> collectClientTaskBlockQueue;
 
-    public int getCorePoolSize() {
-        return corePoolSize;
-    }
+    @Bean(name = "collectClientMetricExecutor")
+    public ExecutorService collectClientMetricExecutor() {
+        collectClientTaskBlockQueue = new LinkedBlockingDeque<Runnable>(queueSize);
+        ExecutorService executorService = new ClientMetricCollectorFixedThreadPoolExecutor(
+            corePoolSize,
+            maximumPoolSize,
+            keepAliveTime,
+            TimeUnit.MILLISECONDS,
+            this.collectClientTaskBlockQueue,
+            new ThreadFactory() {
+                private final AtomicLong threadIndex = new AtomicLong(0);
 
-    public void setCorePoolSize(int corePoolSize) {
-        this.corePoolSize = corePoolSize;
-    }
-
-    public int getMaximumPoolSize() {
-        return maximumPoolSize;
-    }
-
-    public void setMaximumPoolSize(int maximumPoolSize) {
-        this.maximumPoolSize = maximumPoolSize;
-    }
-
-    public long getKeepAliveTime() {
-        return keepAliveTime;
-    }
-
-    public void setKeepAliveTime(long keepAliveTime) {
-        this.keepAliveTime = keepAliveTime;
-    }
-
-    public int getQueueSize() {
-        return queueSize;
-    }
-
-    public void setQueueSize(int queueSize) {
-        this.queueSize = queueSize;
+                @Override
+                public Thread newThread(Runnable r) {
+                    return new Thread(r, "collectClientMetricThread_" + this.threadIndex.incrementAndGet());
+                }
+            },
+            new ThreadPoolExecutor.DiscardOldestPolicy()
+        );
+        return executorService;
     }
 }
