@@ -31,6 +31,7 @@ import java.io.Writer;
 import java.util.Enumeration;
 import java.util.Iterator;
 
+import javax.annotation.PostConstruct;
 
 @Service
 public class RMQMetricsServiceImpl implements RMQMetricsService {
@@ -52,6 +53,10 @@ public class RMQMetricsServiceImpl implements RMQMetricsService {
         this.configure = configure;
         rmqMetricsCollector = new RMQMetricsCollector(configure.getOutOfTimeSeconds());
         rmqMetricsCollector.register(registry);
+    }
+
+    @PostConstruct
+    public void init() {
         rmqMetricsCollector.setOtlpMetricsCollectorService(otlpMetricsCollectorService);
     }
 
