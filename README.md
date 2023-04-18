@@ -65,7 +65,7 @@ Run
 ### Run Binary
 
 ```shell
-java -jar target/rocketmq-exporter-0.0.2-SNAPSHOT.jar
+java -jar target/rocketmq-exporter-0.0.2-SNAPSHOT-exec.jar
 ```
 
 ### Run Docker Image
@@ -252,7 +252,7 @@ Grafana Dashboard
 -------
 
 Grafana Dashboard ID: 10477, name: RocketMQ Exporter Overview.
-For details of the dashboard please see [RocketMQ Exporter Overview](https://grafana.com/dashboards/10477).
+For details of the dashboard please see [RocketMQ Exporter Overview](https://grafana.com/grafana/dashboards/10477-rocketmq-dashboard/).
 
 Quick Start
 -------------
