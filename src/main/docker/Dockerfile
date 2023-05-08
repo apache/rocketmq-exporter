@@ -15,8 +15,8 @@
 # limitations under the License.
 #
 
-FROM java:8
+FROM konajdk/konajdk:8
 MAINTAINER breeze
-ADD rocketmq-exporter-0.0.2-SNAPSHOT.jar quickstart.jar
+ADD rocketmq-exporter-0.0.2-SNAPSHOT-exec.jar /
 EXPOSE 5557
-ENTRYPOINT ["java","-jar","quickstart.jar"]
+ENTRYPOINT ["java","-jar","/rocketmq-exporter-0.0.2-SNAPSHOT-exec.jar"]

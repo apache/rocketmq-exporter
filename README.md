@@ -71,7 +71,12 @@ java -jar target/rocketmq-exporter-0.0.2-SNAPSHOT-exec.jar
 ### Run Docker Image
 
 ```
-docker container run -itd --rm  -p 5557:5557  docker.io/rocketmq-exporter
+docker run \
+	-td \
+	--rm \
+	--name=rmq-exporter \
+  	-p 5557:5557 \
+	flashcatcloud/rocketmq-exporter:latest --rocketmq.config.namesrvAddr={MQ_NAMESVR_ADDR}
 ```
 
 
