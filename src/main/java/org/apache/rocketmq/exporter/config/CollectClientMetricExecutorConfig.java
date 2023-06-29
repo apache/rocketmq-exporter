@@ -21,7 +21,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConfigurationProperties(prefix = "threadpool.collect-client-metric-executor")
+@ConfigurationProperties(prefix = "thread-pool.collect-client-metric-executor")
 public class CollectClientMetricExecutorConfig {
     private int corePoolSize = 20;
     private int maximumPoolSize = 20;

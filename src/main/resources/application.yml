@@ -24,12 +24,18 @@ rocketmq:
     secretKey:  # if >=4.4.0
     outOfTimeSeconds: 60 # Cache clear time with no update
 
-threadpool:
+thread-pool:
   collect-client-metric-executor:
     core-pool-size: 10
     maximum-pool-size: 10
     keep-alive-time: 3000
     queueSize: 5000
+  collect-topic-metric-executor:
+    core-poll-size: 10
+    maximum-pool-size: 10
+    keep-alive-time: 3000
+    queueSize: 5000
+
 task:
   count: 5 # num of scheduled-tasks
   collectTopicOffset:
