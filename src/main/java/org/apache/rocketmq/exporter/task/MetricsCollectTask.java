@@ -268,6 +268,7 @@ public class MetricsCollectTask {
         }
 
         Set<String> topicSet = topicList.getTopicList();
+        Set<String> groupCollected = new HashSet<String>();
         for (String topic : topicSet) {
             GroupList groupList = null;
 
@@ -322,7 +323,7 @@ public class MetricsCollectTask {
                     }
                     metricsService.getCollector().addGroupCountMetric(group, cAddrs, localAddrs, countOfOnlineConsumers);
                 }
-                if (countOfOnlineConsumers > 0) {
+                if (countOfOnlineConsumers > 0 && !groupCollected.contains(group)) {
                     collectClientMetricExecutor.submit(new ClientMetricTaskRunnable(
                         group,
                         onlineConsumers,
@@ -331,6 +332,7 @@ public class MetricsCollectTask {
                         log,
                         this.metricsService
                     ));
+                    groupCollected.add(group);
                 }
                 try {
                     consumeStats = mqAdminExt.examineConsumeStats(group, topic);
