@@ -470,7 +470,7 @@ public class MetricsCollectTask {
                             bd.getBrokerName(),
                             brokerIP,
                             topic,
-                            Utils.getFixedDouble(bsd.getStatsMinute().getSum())
+                            Utils.getFixedDouble(bsd.getStatsMinute().getTps())
                         );
                     } catch (MQClientException ex) {
                         if (ex.getResponseCode() == ResponseCode.SYSTEM_ERROR) {
@@ -490,7 +490,7 @@ public class MetricsCollectTask {
                             bd.getBrokerName(),
                             brokerIP,
                             topic,
-                            Utils.getFixedDouble(bsd.getStatsMinute().getSum())
+                            Utils.getFixedDouble(bsd.getStatsMinute().getTps())
                         );
                     } catch (MQClientException ex) {
                         if (ex.getResponseCode() == ResponseCode.SYSTEM_ERROR) {
@@ -529,7 +529,7 @@ public class MetricsCollectTask {
                                 bd.getBrokerName(),
                                 topic,
                                 group,
-                                Utils.getFixedDouble(bsd.getStatsMinute().getSum()));
+                                Utils.getFixedDouble(bsd.getStatsMinute().getTps()));
                         } catch (MQClientException ex) {
                             if (ex.getResponseCode() == ResponseCode.SYSTEM_ERROR) {
                                 //log.error(String.format("GROUP_GET_NUMS-error, topic=%s, group=%s,master broker=%s, %s", topic, group, masterAddr, ex.getErrorMessage()));
@@ -547,7 +547,7 @@ public class MetricsCollectTask {
                                 bd.getBrokerName(),
                                 topic,
                                 group,
-                                Utils.getFixedDouble(bsd.getStatsMinute().getSum()));
+                                Utils.getFixedDouble(bsd.getStatsMinute().getTps()));
                         } catch (MQClientException ex) {
                             if (ex.getResponseCode() == ResponseCode.SYSTEM_ERROR) {
                                 // log.error(String.format("GROUP_GET_SIZE-error, topic=%s, group=%s, master broker=%s, %s", topic, group, masterAddr, ex.getErrorMessage()));
@@ -613,7 +613,7 @@ public class MetricsCollectTask {
                     clusterName,
                     brokerIP,
                     brokerName,
-                    Utils.getFixedDouble(bsd.getStatsMinute().getSum()));
+                    Utils.getFixedDouble(bsd.getStatsMinute().getTps()));
             } catch (MQClientException ex) {
                 if (ex.getResponseCode() == ResponseCode.SYSTEM_ERROR) {
                     // log.error(String.format("GROUP_GET_SIZE-error, topic=%s, group=%s, master broker=%s, %s", topic, group, masterAddr, ex.getErrorMessage()));
