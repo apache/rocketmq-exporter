@@ -27,7 +27,7 @@ under the License.
     </parent>
     <groupId>org.apache.rocketmq</groupId>
     <artifactId>rocketmq-exporter</artifactId>
-    <version>0.0.2</version>
+    <version>0.0.3-SNAPSHOT</version>
     <name>rocketmq-exporter</name>
 
     <description>Apache RocketMQ Prometheus Exporter</description>
@@ -69,7 +69,7 @@ under the License.
         <url>git@github.com:apache/rocketmq-exporter.git</url>
         <connection>scm:git:git@github.com:apache/rocketmq-exporter.git</connection>
         <developerConnection>scm:git:git@github.com:apache/rocketmq-exporter.git</developerConnection>
-        <tag>rocketmq-exporter-0.0.2</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <distributionManagement>
