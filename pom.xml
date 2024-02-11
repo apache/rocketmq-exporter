@@ -17,18 +17,17 @@ KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>2.7.11</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <relativePath /> <!-- lookup parent from repository -->
     </parent>
     <groupId>org.apache.rocketmq</groupId>
     <artifactId>rocketmq-exporter</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>0.0.2</version>
     <name>rocketmq-exporter</name>
 
     <description>Apache RocketMQ Prometheus Exporter</description>
@@ -70,7 +69,7 @@ under the License.
         <url>git@github.com:apache/rocketmq-exporter.git</url>
         <connection>scm:git:git@github.com:apache/rocketmq-exporter.git</connection>
         <developerConnection>scm:git:git@github.com:apache/rocketmq-exporter.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>rocketmq-exporter-0.0.2</tag>
     </scm>
 
     <distributionManagement>
@@ -527,7 +526,7 @@ under the License.
                         <format>html</format>
                         <format>xml</format>
                     </formats>
-                    <check/>
+                    <check />
                 </configuration>
             </plugin>
         </plugins>
