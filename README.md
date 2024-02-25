@@ -23,6 +23,7 @@ Table of Contents
 	-   [Consumer Groups](#consumer-groups)
 	-   [Consumer](#consumer)
 -   [Grafana Dashboard](#grafana-dashboard)
+-   [SkyWalking Dashboard](#skywalking-dashboard)
 -   [Quick Start](#quick-start)
 
 Compatibility
@@ -65,7 +66,7 @@ Run
 ### Run Binary
 
 ```shell
-java -jar target/rocketmq-exporter-0.0.2-SNAPSHOT.jar
+java -jar target/rocketmq-exporter-0.0.2-SNAPSHOT-exec.jar
 ```
 
 ### Run Docker Image
@@ -252,7 +253,13 @@ Grafana Dashboard
 -------
 
 Grafana Dashboard ID: 10477, name: RocketMQ Exporter Overview.
-For details of the dashboard please see [RocketMQ Exporter Overview](https://grafana.com/dashboards/10477).
+For details of the dashboard please see [RocketMQ Exporter Overview](https://grafana.com/grafana/dashboards/10477-rocketmq-dashboard/).
+
+SkyWalking Dashboard
+-------
+
+Since 10.0, SkyWalking has provided bundled native monitoring dashboards for RocketMQ through this exporter and OpenTelemetry collector.
+For settings details, please read [RocketMQ monitoring doc](https://skywalking.apache.org/docs/main/next/en/setup/backend/backend-rocketmq-monitoring/). 
 
 Quick Start
 -------------

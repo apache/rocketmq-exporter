@@ -268,6 +268,7 @@ public class MetricsCollectTask {
         }
 
         Set<String> topicSet = topicList.getTopicList();
+        Set<String> groupCollected = new HashSet<String>();
         for (String topic : topicSet) {
             GroupList groupList = null;
 
@@ -322,7 +323,7 @@ public class MetricsCollectTask {
                     }
                     metricsService.getCollector().addGroupCountMetric(group, cAddrs, localAddrs, countOfOnlineConsumers);
                 }
-                if (countOfOnlineConsumers > 0) {
+                if (countOfOnlineConsumers > 0 && !groupCollected.contains(group)) {
                     collectClientMetricExecutor.submit(new ClientMetricTaskRunnable(
                         group,
                         onlineConsumers,
@@ -331,6 +332,7 @@ public class MetricsCollectTask {
                         log,
                         this.metricsService
                     ));
+                    groupCollected.add(group);
                 }
                 try {
                     consumeStats = mqAdminExt.examineConsumeStats(group, topic);
@@ -378,37 +380,39 @@ public class MetricsCollectTask {
                 }
 
                 // get consumer latency
-                try {
-                    HashMap<String, Long> consumerLatencyMap = new HashMap<>();
-                    for (Map.Entry<MessageQueue, OffsetWrapper> consumeStatusEntry : consumeStats.getOffsetTable().entrySet()) {
-                        MessageQueue q = consumeStatusEntry.getKey();
-                        OffsetWrapper offset = consumeStatusEntry.getValue();
-                        PullResult consumePullResult = ((MQAdminExtImpl) mqAdminExt).queryMsgByOffset(q, offset.getConsumerOffset());
-                        long lagTime = 0;
-                        if (consumePullResult != null && consumePullResult.getPullStatus() == PullStatus.FOUND) {
-                            lagTime = System.currentTimeMillis() - consumePullResult.getMsgFoundList().get(0).getStoreTimestamp();
-                            if (offset.getBrokerOffset() == offset.getConsumerOffset()) {
-                                lagTime = 0;
+                if (MessageModel.CLUSTERING == messageModel) {
+                    try {
+                        HashMap<String, Long> consumerLatencyMap = new HashMap<>();
+                        for (Map.Entry<MessageQueue, OffsetWrapper> consumeStatusEntry : consumeStats.getOffsetTable().entrySet()) {
+                            MessageQueue q = consumeStatusEntry.getKey();
+                            OffsetWrapper offset = consumeStatusEntry.getValue();
+                            PullResult consumePullResult = ((MQAdminExtImpl) mqAdminExt).queryMsgByOffset(q, offset.getConsumerOffset());
+                            long lagTime = 0;
+                            if (consumePullResult != null && consumePullResult.getPullStatus() == PullStatus.FOUND) {
+                                lagTime = System.currentTimeMillis() - consumePullResult.getMsgFoundList().get(0).getStoreTimestamp();
+                                if (offset.getBrokerOffset() == offset.getConsumerOffset()) {
+                                    lagTime = 0;
+                                }
+                            } else if (consumePullResult.getPullStatus() == PullStatus.OFFSET_ILLEGAL) {
+                                PullResult pullResult = ((MQAdminExtImpl) mqAdminExt).queryMsgByOffset(q, consumePullResult.getMinOffset());
+                                if (pullResult != null && pullResult.getPullStatus() == PullStatus.FOUND) {
+                                    lagTime = System.currentTimeMillis() - pullResult.getMsgFoundList().get(0).getStoreTimestamp();
+                                }
                             }
-                        } else if (consumePullResult.getPullStatus() == PullStatus.OFFSET_ILLEGAL) {
-                            PullResult pullResult = ((MQAdminExtImpl) mqAdminExt).queryMsgByOffset(q, consumePullResult.getMinOffset());
-                            if (pullResult != null && pullResult.getPullStatus() == PullStatus.FOUND) {
-                                lagTime = System.currentTimeMillis() - pullResult.getMsgFoundList().get(0).getStoreTimestamp();
+                            if (!consumerLatencyMap.containsKey(q.getBrokerName())) {
+                                consumerLatencyMap.put(q.getBrokerName(), lagTime > 0 ? lagTime : 0);
+                            } else if (lagTime > consumerLatencyMap.get(q.getBrokerName())) {
+                                consumerLatencyMap.put(q.getBrokerName(), lagTime);
                             }
                         }
-                        if (!consumerLatencyMap.containsKey(q.getBrokerName())) {
-                            consumerLatencyMap.put(q.getBrokerName(), lagTime > 0 ? lagTime : 0);
-                        } else if (lagTime > consumerLatencyMap.get(q.getBrokerName())) {
-                            consumerLatencyMap.put(q.getBrokerName(), lagTime);
+                        for (Map.Entry<String, Long> consumeLatencyEntry : consumerLatencyMap.entrySet()) {
+                            metricsService.getCollector().addGroupGetLatencyByStoreTimeMetric(clusterName,
+                                    consumeLatencyEntry.getKey(), topic, group, consumeLatencyEntry.getValue());
                         }
-                    }
-                    for (Map.Entry<String, Long> consumeLatencyEntry : consumerLatencyMap.entrySet()) {
-                        metricsService.getCollector().addGroupGetLatencyByStoreTimeMetric(clusterName,
-                            consumeLatencyEntry.getKey(), topic, group, consumeLatencyEntry.getValue());
-                    }
 
-                } catch (Exception ex) {
-                    log.warn("addGroupGetLatencyByStoreTimeMetric error", ex);
+                    } catch (Exception ex) {
+                        log.warn("addGroupGetLatencyByStoreTimeMetric error", ex);
+                    }
                 }
             }
         }
@@ -468,7 +472,7 @@ public class MetricsCollectTask {
                             bd.getBrokerName(),
                             brokerIP,
                             topic,
-                            Utils.getFixedDouble(bsd.getStatsMinute().getSum())
+                            Utils.getFixedDouble(bsd.getStatsMinute().getTps())
                         );
                     } catch (MQClientException ex) {
                         if (ex.getResponseCode() == ResponseCode.SYSTEM_ERROR) {
@@ -488,7 +492,7 @@ public class MetricsCollectTask {
                             bd.getBrokerName(),
                             brokerIP,
                             topic,
-                            Utils.getFixedDouble(bsd.getStatsMinute().getSum())
+                            Utils.getFixedDouble(bsd.getStatsMinute().getTps())
                         );
                     } catch (MQClientException ex) {
                         if (ex.getResponseCode() == ResponseCode.SYSTEM_ERROR) {
@@ -527,7 +531,7 @@ public class MetricsCollectTask {
                                 bd.getBrokerName(),
                                 topic,
                                 group,
-                                Utils.getFixedDouble(bsd.getStatsMinute().getSum()));
+                                Utils.getFixedDouble(bsd.getStatsMinute().getTps()));
                         } catch (MQClientException ex) {
                             if (ex.getResponseCode() == ResponseCode.SYSTEM_ERROR) {
                                 //log.error(String.format("GROUP_GET_NUMS-error, topic=%s, group=%s,master broker=%s, %s", topic, group, masterAddr, ex.getErrorMessage()));
@@ -545,7 +549,7 @@ public class MetricsCollectTask {
                                 bd.getBrokerName(),
                                 topic,
                                 group,
-                                Utils.getFixedDouble(bsd.getStatsMinute().getSum()));
+                                Utils.getFixedDouble(bsd.getStatsMinute().getTps()));
                         } catch (MQClientException ex) {
                             if (ex.getResponseCode() == ResponseCode.SYSTEM_ERROR) {
                                 // log.error(String.format("GROUP_GET_SIZE-error, topic=%s, group=%s, master broker=%s, %s", topic, group, masterAddr, ex.getErrorMessage()));
@@ -611,7 +615,7 @@ public class MetricsCollectTask {
                     clusterName,
                     brokerIP,
                     brokerName,
-                    Utils.getFixedDouble(bsd.getStatsMinute().getSum()));
+                    Utils.getFixedDouble(bsd.getStatsMinute().getTps()));
             } catch (MQClientException ex) {
                 if (ex.getResponseCode() == ResponseCode.SYSTEM_ERROR) {
                     // log.error(String.format("GROUP_GET_SIZE-error, topic=%s, group=%s, master broker=%s, %s", topic, group, masterAddr, ex.getErrorMessage()));
@@ -688,6 +692,62 @@ public class MetricsCollectTask {
         }
 
         log.info("broker runtime stats collection task finished...." + (System.currentTimeMillis() - start));
+    }
+
+    @Scheduled(cron = "${task.collectBrokerStats.cron}")
+    public void collectBrokerGroupStats() {
+        if (!rmqConfigure.isEnableCollect()) {
+            return;
+        }
+        log.info("broker group stats collection task starting....");
+        long start = System.currentTimeMillis();
+        ClusterInfo clusterInfo = null;
+        try {
+            clusterInfo = mqAdminExt.examineBrokerClusterInfo();
+        } catch (Exception ex) {
+            log.error("collectBrokerGroupStats-get cluster info from namesrv error. address is {}",
+                JSON.toJSONString(mqAdminExt.getNameServerAddressList()), ex);
+            return;
+        }
+
+        Set<Map.Entry<String, BrokerData>> clusterEntries = clusterInfo.getBrokerAddrTable().entrySet();
+        for (Map.Entry<String, BrokerData> clusterEntry : clusterEntries) {
+            String clusterName = clusterEntry.getValue().getCluster();
+            String brokerName = clusterEntry.getValue().getBrokerName();
+            String masterAddr = clusterEntry.getValue().getBrokerAddrs().get(MixAll.MASTER_ID);
+            for (Map.Entry<Long, String> broker : clusterEntry.getValue().getBrokerAddrs().entrySet()) {
+                if(broker.getKey() == MixAll.MASTER_ID) {
+                    continue;
+                }
+                BrokerRuntimeStats slaveRuntimeStats = getBrokerRuntimeStats(broker.getValue());
+                BrokerRuntimeStats masterRuntimeStats = getBrokerRuntimeStats(masterAddr);
+                double masterAndSlaveCommitlogDiff = masterRuntimeStats.getCommitLogMaxOffset() - slaveRuntimeStats.getCommitLogMaxOffset();
+                metricsService.getCollector().addBrokerCommitLogDiffMetric(clusterName, broker.getValue(), brokerName, masterAndSlaveCommitlogDiff);
+            }
+        }
+        log.info("broker runtime stats collection task finished...." + (System.currentTimeMillis() - start));
+    }
+
+    private BrokerRuntimeStats getBrokerRuntimeStats(String brokerAddr) {
+        KVTable kvTable = null;
+        if (!StringUtils.isBlank(brokerAddr)) {
+            try {
+                kvTable = mqAdminExt.fetchBrokerRuntimeStats(brokerAddr);
+            } catch (RemotingConnectException | RemotingSendRequestException | RemotingTimeoutException
+                    | InterruptedException ex) {
+                log.error("collectBrokerRuntimeStats-get fetch broker runtime stats error, address={}", brokerAddr, ex);
+            } catch (MQBrokerException ex) {
+                if (ex.getResponseCode() == ResponseCode.SYSTEM_ERROR) {
+                    log.error("collectBrokerRuntimeStats-get fetch broker runtime stats error, address={}, error={}", brokerAddr, ex.getErrorMessage());
+                } else {
+                    log.error("collectBrokerRuntimeStats-get fetch broker runtime stats error, address={}", brokerAddr, ex);
+                }
+            }
+        }
+        if (kvTable == null || kvTable.getTable() == null || kvTable.getTable().isEmpty()) {
+            return null;
+        }
+        return new BrokerRuntimeStats(kvTable);
     }
 
     private static TwoTuple<String, String> buildClientAddresses(HashSet<Connection> connectionSet) {

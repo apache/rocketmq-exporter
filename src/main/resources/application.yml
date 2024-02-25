@@ -1,6 +1,8 @@
 server:
   port: 5557
 spring:
+  main:
+    allow-circular-references: true
   application:
     name: rocketmq-exporter
   http:
