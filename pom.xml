@@ -89,7 +89,7 @@ under the License.
         <rocketmq.version>4.9.4</rocketmq.version>
         <docker.image.prefix>docker.io</docker.image.prefix>
         <opentelemetry-proto.version>0.18.0-alpha</opentelemetry-proto.version>
-        <prometheus.verion>0.15.0</prometheus.verion>
+        <prometheus.version>0.15.0</prometheus.version>
         <distMgmtReleasesName>Apache Release Distribution Repository</distMgmtReleasesName>
         <distMgmtReleasesUrl>https://repository.apache.org/service/local/staging/deploy/maven2</distMgmtReleasesUrl>
         <distMgmtSnapshotsName>Apache Development Snapshot Repository</distMgmtSnapshotsName>
