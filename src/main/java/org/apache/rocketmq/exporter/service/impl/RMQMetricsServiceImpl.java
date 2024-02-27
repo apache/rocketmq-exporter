@@ -20,6 +20,7 @@ import io.prometheus.client.Collector;
 import io.prometheus.client.CollectorRegistry;
 import org.apache.rocketmq.exporter.collector.RMQMetricsCollector;
 import org.apache.rocketmq.exporter.config.RMQConfigure;
+import org.apache.rocketmq.exporter.otlp.OtlpMetricsCollectorService;
 import org.apache.rocketmq.exporter.service.RMQMetricsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,7 @@ import java.io.Writer;
 import java.util.Enumeration;
 import java.util.Iterator;
 
+import javax.annotation.PostConstruct;
 
 @Service
 public class RMQMetricsServiceImpl implements RMQMetricsService {
@@ -39,6 +41,10 @@ public class RMQMetricsServiceImpl implements RMQMetricsService {
     private CollectorRegistry registry = new CollectorRegistry();
     private final RMQMetricsCollector rmqMetricsCollector;
 
+    @Autowired
+    private OtlpMetricsCollectorService otlpMetricsCollectorService;
+
+    @Override
     public RMQMetricsCollector getCollector() {
         return rmqMetricsCollector;
     }
@@ -49,6 +55,12 @@ public class RMQMetricsServiceImpl implements RMQMetricsService {
         rmqMetricsCollector.register(registry);
     }
 
+    @PostConstruct
+    public void init() {
+        rmqMetricsCollector.setOtlpMetricsCollectorService(otlpMetricsCollectorService);
+    }
+
+    @Override
     public void metrics(StringWriter writer) throws IOException {
         this.writeEscapedHelp(writer, registry.metricFamilySamples());
     }

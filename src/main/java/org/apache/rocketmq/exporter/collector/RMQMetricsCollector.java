@@ -37,6 +37,7 @@ import org.apache.rocketmq.exporter.model.metrics.clientrunime.ConsumerRuntimePu
 import org.apache.rocketmq.exporter.model.metrics.clientrunime.ConsumerRuntimePullTPSMetric;
 import org.apache.rocketmq.exporter.model.metrics.producer.ProducerCountMetric;
 import org.apache.rocketmq.exporter.model.metrics.producer.ProducerMetric;
+import org.apache.rocketmq.exporter.otlp.OtlpMetricsCollectorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -388,6 +389,14 @@ public class RMQMetricsCollector extends Collector {
 
     }
 
+    private OtlpMetricsCollectorService otlpMetricsCollectorService;
+
+    public void setOtlpMetricsCollectorService(
+        OtlpMetricsCollectorService otlpMetricsCollectorService) {
+        log.info("init RMQMetricsService add opentelemetry collector...");
+        this.otlpMetricsCollectorService = otlpMetricsCollectorService;
+    }
+
     @Override
     public List<MetricFamilySamples> collect() {
 
@@ -408,6 +417,9 @@ public class RMQMetricsCollector extends Collector {
         collectBrokerNums(mfs);
 
         collectBrokerRuntimeStats(mfs);
+
+        // v2 opentelemetry metrics
+        otlpMetricsCollectorService.collectOtlpMetrics(mfs);
 
         return mfs;
     }

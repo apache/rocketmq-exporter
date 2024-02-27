@@ -24,6 +24,10 @@ rocketmq:
     secretKey:  # if >=4.4.0
     outOfTimeSeconds: 60 # Cache clear time with no update
 
+grpc:
+  server:
+    port: 5559
+
 threadpool:
   collect-client-metric-executor:
     core-pool-size: 10

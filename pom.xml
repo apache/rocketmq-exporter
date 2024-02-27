@@ -88,6 +88,8 @@ under the License.
     <properties>
         <rocketmq.version>4.9.4</rocketmq.version>
         <docker.image.prefix>docker.io</docker.image.prefix>
+        <opentelemetry-proto.version>0.18.0-alpha</opentelemetry-proto.version>
+        <prometheus.version>0.15.0</prometheus.version>
         <distMgmtReleasesName>Apache Release Distribution Repository</distMgmtReleasesName>
         <distMgmtReleasesUrl>https://repository.apache.org/service/local/staging/deploy/maven2</distMgmtReleasesUrl>
         <distMgmtSnapshotsName>Apache Development Snapshot Repository</distMgmtSnapshotsName>
@@ -150,7 +152,7 @@ under the License.
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>19.0</version>
+            <version>31.0.1-jre</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -179,12 +181,27 @@ under the License.
         <dependency>
             <groupId>io.prometheus</groupId>
             <artifactId>simpleclient</artifactId>
-            <version>0.6.0</version>
+            <version>${prometheus.version}</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.13.1</version>
+        </dependency>
+        <dependency>
+            <groupId>io.opentelemetry.proto</groupId>
+            <artifactId>opentelemetry-proto</artifactId>
+            <version>${opentelemetry-proto.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-services</artifactId>
+            <version>1.45.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-netty-shaded</artifactId>
+            <version>1.45.0</version>
         </dependency>
     </dependencies>
 
@@ -526,7 +543,7 @@ under the License.
                         <format>html</format>
                         <format>xml</format>
                     </formats>
-                    <check />
+                    <check/>
                 </configuration>
             </plugin>
         </plugins>
