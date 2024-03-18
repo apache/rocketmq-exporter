@@ -15,8 +15,8 @@
 # limitations under the License.
 #
 
-FROM java:8
+FROM openjdk:8-alpine
 MAINTAINER breeze
-ADD rocketmq-exporter-0.0.2-SNAPSHOT-exec.jar rocketmq-exporter.jar
+ADD rocketmq-exporter-0.0.3-SNAPSHOT-exec.jar rocketmq-exporter.jar
 EXPOSE 5557
 ENTRYPOINT ["java","-jar","rocketmq-exporter.jar"]
