@@ -72,7 +72,7 @@ java -jar target/rocketmq-exporter-0.0.2-SNAPSHOT-exec.jar
 ### Run Docker Image
 
 ```
-docker container run -itd --rm  -p 5557:5557  docker.io/rocketmq-exporter
+docker container run -itd --rm  -p 5557:5557   apache/rocketmq-exporter
 ```
 
 
