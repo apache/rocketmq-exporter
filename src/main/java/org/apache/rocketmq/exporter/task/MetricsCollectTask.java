@@ -393,7 +393,7 @@ public class MetricsCollectTask {
                                 if (offset.getBrokerOffset() == offset.getConsumerOffset()) {
                                     lagTime = 0;
                                 }
-                            } else if (consumePullResult.getPullStatus() == PullStatus.OFFSET_ILLEGAL) {
+                            } else if (consumePullResult != null && consumePullResult.getPullStatus() == PullStatus.OFFSET_ILLEGAL) {
                                 PullResult pullResult = ((MQAdminExtImpl) mqAdminExt).queryMsgByOffset(q, consumePullResult.getMinOffset());
                                 if (pullResult != null && pullResult.getPullStatus() == PullStatus.FOUND) {
                                     lagTime = System.currentTimeMillis() - pullResult.getMsgFoundList().get(0).getStoreTimestamp();
