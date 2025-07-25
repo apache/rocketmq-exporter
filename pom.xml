@@ -227,6 +227,7 @@ under the License.
     </pluginRepositories>
 
     <build>
+        <finalName>${project.artifactId}-${project.version}</finalName>
         <pluginManagement>
             <plugins>
                 <!-- set versions of common plugins for reproducibility, ordered alphabetically -->
@@ -485,7 +486,7 @@ under the License.
             <plugin>
                 <groupId>com.spotify</groupId>
                 <artifactId>docker-maven-plugin</artifactId>
-                <version>0.4.11</version>
+                <version>1.2.2</version>
                 <dependencies>
                     <dependency>
                         <groupId>javax.activation</groupId>
@@ -496,11 +497,13 @@ under the License.
                 </dependencies>
                 <configuration>
                     <imageName>${docker.image.prefix}/${project.artifactId}</imageName>
+                    <baseImage>openjdk:8-alpine</baseImage>
+                    <workdir>/</workdir>
                     <imageTags>
                         <imageTag>${project.version}</imageTag>
                         <imageTag>latest</imageTag>
                     </imageTags>
-                    <dockerDirectory>src/main/docker</dockerDirectory>
+                    <entryPoint>["java", "-jar", "${project.build.finalName}-exec.jar"]</entryPoint>
                     <resources>
                         <resource>
                             <targetPath>/</targetPath>

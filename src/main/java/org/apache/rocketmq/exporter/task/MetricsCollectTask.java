@@ -716,7 +716,7 @@ public class MetricsCollectTask {
             String brokerName = clusterEntry.getValue().getBrokerName();
             String masterAddr = clusterEntry.getValue().getBrokerAddrs().get(MixAll.MASTER_ID);
             for (Map.Entry<Long, String> broker : clusterEntry.getValue().getBrokerAddrs().entrySet()) {
-                if(broker.getKey() == MixAll.MASTER_ID) {
+                if (broker.getKey() == MixAll.MASTER_ID) {
                     continue;
                 }
                 BrokerRuntimeStats slaveRuntimeStats = getBrokerRuntimeStats(broker.getValue());
