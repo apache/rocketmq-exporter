@@ -115,7 +115,7 @@ public class BrokerRuntimeStats {
         this.pullThreadPoolQueueHeadWaitTimeMills = Long.parseLong(kvTable.getTable().get("pullThreadPoolQueueHeadWaitTimeMills"));
         this.runtime = kvTable.getTable().get("runtime");
         this.dispatchMaxBuffer = Long.parseLong(kvTable.getTable().get("dispatchMaxBuffer"));
-        this.brokerVersion = Integer.parseInt(kvTable.getTable().get("brokerVersion"));
+        this.brokerVersion = kvTable.getTable().get("brokerVersion") == null ? -1 : Integer.parseInt(kvTable.getTable().get("brokerVersion"));
         this.consumeQueueDiskRatio = Double.parseDouble(kvTable.getTable().get("consumeQueueDiskRatio"));
         this.pageCacheLockTimeMills = Long.parseLong(kvTable.getTable().get("pageCacheLockTimeMills"));
         this.commitLogDiskRatio = Double.parseDouble(kvTable.getTable().get("commitLogDiskRatio"));
