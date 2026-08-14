@@ -23,6 +23,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 import static org.apache.rocketmq.client.ClientConfig.SEND_MESSAGE_WITH_VIP_CHANNEL_PROPERTY;
 
 @Configuration
@@ -55,6 +59,18 @@ public class RMQConfigure {
     private String secretKey;
 
     private long outOfTimeSeconds;
+
+    /**
+     * Comma separated topic list for which queue-level metrics are collected.
+     * Empty (default) disables queue-level metrics completely; "*" enables them for every topic.
+     * Queue-level metrics multiply the series count by the queue number per broker,
+     * so keep this list as small as possible.
+     */
+    private String queueLevelTopics = "";
+
+    private volatile Set<String> queueLevelTopicSet = Collections.emptySet();
+
+    private volatile boolean queueLevelAllTopics = false;
 
     public boolean enableACL() {
         return this.enableACL;
@@ -142,5 +158,41 @@ public class RMQConfigure {
 
     public void setOutOfTimeSeconds(long outOfTimeSeconds) {
         this.outOfTimeSeconds = outOfTimeSeconds;
+    }
+
+    public String getQueueLevelTopics() {
+        return queueLevelTopics;
+    }
+
+    public void setQueueLevelTopics(String queueLevelTopics) {
+        this.queueLevelTopics = queueLevelTopics;
+        Set<String> topics = new HashSet<String>();
+        boolean allTopics = false;
+        if (StringUtils.isNotBlank(queueLevelTopics)) {
+            for (String topic : queueLevelTopics.split(",")) {
+                String trimmed = topic.trim();
+                if (trimmed.isEmpty()) {
+                    continue;
+                }
+                if ("*".equals(trimmed)) {
+                    allTopics = true;
+                } else {
+                    topics.add(trimmed);
+                }
+            }
+        }
+        this.queueLevelTopicSet = topics;
+        this.queueLevelAllTopics = allTopics;
+        logger.info("queue-level metrics enabled for topics={}, allTopics={}", topics, allTopics);
+    }
+
+    /**
+     * @return whether queue-level metrics should be collected for the given topic
+     */
+    public boolean isQueueLevelTopic(String topic) {
+        if (queueLevelAllTopics) {
+            return true;
+        }
+        return topic != null && queueLevelTopicSet.contains(topic);
     }
 }

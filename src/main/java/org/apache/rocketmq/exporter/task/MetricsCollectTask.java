@@ -362,6 +362,7 @@ public class MetricsCollectTask {
                 // get consumer broker offset
                 try {
                     HashMap<String, Long> consumeOffsetMap = new HashMap<>();
+                    boolean queueLevelEnabled = rmqConfigure.isQueueLevelTopic(topic);
                     for (Map.Entry<MessageQueue, OffsetWrapper> consumeStatusEntry : consumeStats.getOffsetTable().entrySet()) {
                         MessageQueue q = consumeStatusEntry.getKey();
                         OffsetWrapper offset = consumeStatusEntry.getValue();
@@ -369,6 +370,14 @@ public class MetricsCollectTask {
                             consumeOffsetMap.put(q.getBrokerName(), consumeOffsetMap.get(q.getBrokerName()) + offset.getConsumerOffset());
                         } else {
                             consumeOffsetMap.put(q.getBrokerName(), offset.getConsumerOffset());
+                        }
+                        if (queueLevelEnabled) {
+                            String queueId = String.valueOf(q.getQueueId());
+                            metricsService.getCollector().addQueueConsumerOffsetMetric(clusterName,
+                                q.getBrokerName(), topic, group, queueId, offset.getConsumerOffset());
+                            metricsService.getCollector().addQueueGroupDiffMetric(clusterName,
+                                q.getBrokerName(), topic, group, queueId,
+                                offset.getBrokerOffset() - offset.getConsumerOffset());
                         }
                     }
                     for (Map.Entry<String, Long> consumeOffsetEntry : consumeOffsetMap.entrySet()) {
@@ -383,6 +392,7 @@ public class MetricsCollectTask {
                 if (MessageModel.CLUSTERING == messageModel) {
                     try {
                         HashMap<String, Long> consumerLatencyMap = new HashMap<>();
+                        boolean queueLevelEnabled = rmqConfigure.isQueueLevelTopic(topic);
                         for (Map.Entry<MessageQueue, OffsetWrapper> consumeStatusEntry : consumeStats.getOffsetTable().entrySet()) {
                             MessageQueue q = consumeStatusEntry.getKey();
                             OffsetWrapper offset = consumeStatusEntry.getValue();
@@ -403,6 +413,11 @@ public class MetricsCollectTask {
                                 consumerLatencyMap.put(q.getBrokerName(), lagTime > 0 ? lagTime : 0);
                             } else if (lagTime > consumerLatencyMap.get(q.getBrokerName())) {
                                 consumerLatencyMap.put(q.getBrokerName(), lagTime);
+                            }
+                            if (queueLevelEnabled) {
+                                metricsService.getCollector().addQueueGroupGetLatencyByStoreTimeMetric(clusterName,
+                                    q.getBrokerName(), topic, group, String.valueOf(q.getQueueId()),
+                                    lagTime > 0 ? lagTime : 0);
                             }
                         }
                         for (Map.Entry<String, Long> consumeLatencyEntry : consumerLatencyMap.entrySet()) {
@@ -716,7 +731,7 @@ public class MetricsCollectTask {
             String brokerName = clusterEntry.getValue().getBrokerName();
             String masterAddr = clusterEntry.getValue().getBrokerAddrs().get(MixAll.MASTER_ID);
             for (Map.Entry<Long, String> broker : clusterEntry.getValue().getBrokerAddrs().entrySet()) {
-                if(broker.getKey() == MixAll.MASTER_ID) {
+                if (broker.getKey() == MixAll.MASTER_ID) {
                     continue;
                 }
                 BrokerRuntimeStats slaveRuntimeStats = getBrokerRuntimeStats(broker.getValue());

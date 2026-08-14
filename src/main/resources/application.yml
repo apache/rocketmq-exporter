@@ -23,6 +23,10 @@ rocketmq:
     accessKey:  # if >=4.4.0
     secretKey:  # if >=4.4.0
     outOfTimeSeconds: 60 # Cache clear time with no update
+    # Comma separated topics for which queue-level metrics (rocketmq_queue_*) are collected.
+    # Empty means disabled; "*" means all topics. Each enabled topic multiplies its series
+    # count by the number of queues per broker, so keep the list small.
+    queueLevelTopics: ""
 
 grpc:
   server:

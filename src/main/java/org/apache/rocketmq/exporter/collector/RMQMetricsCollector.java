@@ -25,6 +25,7 @@ import org.apache.rocketmq.exporter.model.BrokerRuntimeStats;
 import org.apache.rocketmq.exporter.model.metrics.BrokerMetric;
 import org.apache.rocketmq.exporter.model.metrics.ConsumerCountMetric;
 import org.apache.rocketmq.exporter.model.metrics.ConsumerMetric;
+import org.apache.rocketmq.exporter.model.metrics.ConsumerQueueMetric;
 import org.apache.rocketmq.exporter.model.metrics.ConsumerTopicDiffMetric;
 import org.apache.rocketmq.exporter.model.metrics.DLQTopicOffsetMetric;
 import org.apache.rocketmq.exporter.model.metrics.TopicPutNumMetric;
@@ -98,6 +99,13 @@ public class RMQMetricsCollector extends Collector {
     private Cache<ConsumerMetric, Double> sendBackNums;
     // group latency time
     private Cache<ConsumerMetric, Long> groupLatencyByTime;
+
+    //queue-level diff for consumer group, only collected for topics enabled by rocketmq.config.queueLevelTopics
+    private Cache<ConsumerQueueMetric, Long> queueGroupDiff;
+    //queue-level consumer offset, only collected for topics enabled by rocketmq.config.queueLevelTopics
+    private Cache<ConsumerQueueMetric, Long> queueConsumerOffset;
+    //queue-level latency time, only collected for topics enabled by rocketmq.config.queueLevelTopics
+    private Cache<ConsumerQueueMetric, Long> queueLatencyByTime;
 
     //total put message count for one broker
     private Cache<BrokerMetric, Double> brokerPutNums;
@@ -203,6 +211,9 @@ public class RMQMetricsCollector extends Collector {
         this.groupGetSize = initCache(outOfTimeSeconds);
         this.sendBackNums = initCache(outOfTimeSeconds);
         this.groupLatencyByTime = initCache(outOfTimeSeconds);
+        this.queueGroupDiff = initCache(outOfTimeSeconds);
+        this.queueConsumerOffset = initCache(outOfTimeSeconds);
+        this.queueLatencyByTime = initCache(outOfTimeSeconds);
         this.brokerPutNums = initCache(outOfTimeSeconds);
         this.brokerGetNums = initCache(outOfTimeSeconds);
         this.brokerCommitLogDiff = initCache(outOfTimeSeconds);
@@ -411,6 +422,8 @@ public class RMQMetricsCollector extends Collector {
         collectTopicNums(mfs);
 
         collectGroupNums(mfs);
+
+        collectQueueGroupNums(mfs);
 
         collectClientGroupMetric(mfs);
 
@@ -655,6 +668,45 @@ public class RMQMetricsCollector extends Collector {
 
     }
 
+    private static final List<String> QUEUE_GROUP_NUMS_LABEL_NAMES = Arrays.asList(
+        "cluster", "broker", "topic", "group", "queueid"
+    );
+
+    private static <T extends Number> void loadQueueGroupNumsMetric(GaugeMetricFamily family,
+        Map.Entry<ConsumerQueueMetric, T> entry) {
+        family.addMetric(Arrays.asList(
+            entry.getKey().getClusterName(),
+            entry.getKey().getBrokerName(),
+            entry.getKey().getTopicName(),
+            entry.getKey().getConsumerGroupName(),
+            entry.getKey().getQueueId()),
+            entry.getValue().doubleValue()
+        );
+    }
+
+    private void collectQueueGroupNums(List<MetricFamilySamples> mfs) {
+        GaugeMetricFamily queueGroupDiffF = new GaugeMetricFamily("rocketmq_queue_group_diff",
+            "QueueGroupDiff", QUEUE_GROUP_NUMS_LABEL_NAMES);
+        for (Map.Entry<ConsumerQueueMetric, Long> entry : queueGroupDiff.asMap().entrySet()) {
+            loadQueueGroupNumsMetric(queueGroupDiffF, entry);
+        }
+        mfs.add(queueGroupDiffF);
+
+        GaugeMetricFamily queueConsumerOffsetF = new GaugeMetricFamily("rocketmq_queue_consumer_offset",
+            "QueueConsumerOffset", QUEUE_GROUP_NUMS_LABEL_NAMES);
+        for (Map.Entry<ConsumerQueueMetric, Long> entry : queueConsumerOffset.asMap().entrySet()) {
+            loadQueueGroupNumsMetric(queueConsumerOffsetF, entry);
+        }
+        mfs.add(queueConsumerOffsetF);
+
+        GaugeMetricFamily queueLatencyByTimeF = new GaugeMetricFamily("rocketmq_queue_group_get_latency_by_storetime",
+            "QueueGroupGetLatencyByStoreTime", QUEUE_GROUP_NUMS_LABEL_NAMES);
+        for (Map.Entry<ConsumerQueueMetric, Long> entry : queueLatencyByTime.asMap().entrySet()) {
+            loadQueueGroupNumsMetric(queueLatencyByTimeF, entry);
+        }
+        mfs.add(queueLatencyByTimeF);
+    }
+
     private void collectTopicNums(List<MetricFamilySamples> mfs) {
         GaugeMetricFamily topicPutNumsGauge = new GaugeMetricFamily("rocketmq_producer_tps", "TopicPutNums", TOPIC_NUMS_LABEL_NAMES);
         for (Map.Entry<TopicPutNumMetric, Double> entry : topicPutNums.asMap().entrySet()) {
@@ -724,6 +776,21 @@ public class RMQMetricsCollector extends Collector {
 
     public void addGroupGetLatencyByStoreTimeMetric(String clusterName, String brokerName, String topic, String group, long value) {
         groupLatencyByTime.put(new ConsumerMetric(clusterName, brokerName, topic, group), value);
+    }
+
+    public void addQueueGroupDiffMetric(String clusterName, String brokerName, String topic, String group,
+        String queueId, long value) {
+        queueGroupDiff.put(new ConsumerQueueMetric(clusterName, brokerName, topic, group, queueId), value);
+    }
+
+    public void addQueueConsumerOffsetMetric(String clusterName, String brokerName, String topic, String group,
+        String queueId, long value) {
+        queueConsumerOffset.put(new ConsumerQueueMetric(clusterName, brokerName, topic, group, queueId), value);
+    }
+
+    public void addQueueGroupGetLatencyByStoreTimeMetric(String clusterName, String brokerName, String topic,
+        String group, String queueId, long value) {
+        queueLatencyByTime.put(new ConsumerQueueMetric(clusterName, brokerName, topic, group, queueId), value);
     }
 
     public void addGroupConsumerTotalOffsetMetric(String topic, String group, long value) {
